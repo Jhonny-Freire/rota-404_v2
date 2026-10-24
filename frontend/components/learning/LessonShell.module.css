@@ -161,6 +161,10 @@
   filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.5));
 }
 
+.todoListen {
+  margin-left: auto;
+}
+
 .todoBody {
   display: flex;
   flex-direction: column;
@@ -209,6 +213,9 @@
 @media (min-width: 1180px) {
   .workspace {
     grid-template-columns: minmax(0, 1fr) minmax(290px, 330px);
+    /* telas baixas: a coluna lateral fica com a largura que o palco (limitado pela altura) não usa, até 440px;
+       com menos linhas, ela não passa da altura da janela (mesma conta do LabShell) */
+    grid-template-columns: minmax(0, 1fr) clamp(330px, calc(100% - (100svh - 290px - var(--stage-bottom, 66px)) * 16 / 9 - 24px), 440px);
     align-items: start;
     gap: 20px 24px;
   }

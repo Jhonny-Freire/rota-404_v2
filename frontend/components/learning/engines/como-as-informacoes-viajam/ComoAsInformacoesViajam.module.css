@@ -1,0 +1,352 @@
+/* Aula 4.1 — Como as informações viajam? (palco conferido a ~320, ~680 e ~900 px de largura) */
+
+.canvas {
+  --u: var(--kit-u, 1cqw);
+  background:
+    radial-gradient(ellipse 70% 45% at 50% 92%, rgba(107, 63, 160, 0.22), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 20% 35%, rgba(58, 214, 255, 0.06), transparent 70%);
+}
+
+.starfield {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-repeat: repeat;
+  background-size: 512px 512px;
+  image-rendering: pixelated;
+  opacity: 0.45;
+}
+
+.pop {
+  animation: info-pop 360ms steps(4) both;
+}
+
+/* Navegador com a página de login */
+
+.windowFit {
+  transform-origin: 0 0;
+}
+
+.window {
+  position: relative;
+  display: flex;
+}
+
+.browser {
+  flex: 1;
+  min-width: 0;
+}
+
+.ringLit::after,
+.ringDone::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  z-index: 1;
+  pointer-events: none;
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+.ringLit {
+  --ring: var(--cyan);
+}
+
+.ringDone {
+  --ring: var(--green);
+}
+
+.doneMark {
+  position: absolute;
+  top: calc(-1.2 * var(--u));
+  right: calc(-1.2 * var(--u));
+  z-index: 2;
+  width: max(18px, calc(3 * var(--u)));
+  max-width: none;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.tapArea {
+  position: absolute;
+  inset: -4px;
+  z-index: 3;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.tapArea:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 4px;
+}
+
+.login {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: max(5px, calc(0.8 * var(--u))) max(6px, calc(1 * var(--u)));
+  padding: max(8px, calc(1.2 * var(--u)));
+  background: #fbfaff;
+  color: #1b1640;
+  transition: opacity 200ms;
+}
+
+.sending {
+  opacity: 0.6;
+}
+
+.fieldLabel {
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(11px, calc(1.35 * var(--u)));
+  font-weight: 700;
+}
+
+.field {
+  min-width: 0;
+  padding: max(3px, calc(0.4 * var(--u))) max(5px, calc(0.7 * var(--u)));
+  background: #fff;
+  box-shadow: inset 0 0 0 2px #8f87b8;
+  font-family: "Courier New", monospace;
+  font-size: max(11px, calc(1.35 * var(--u)));
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.fieldWrong {
+  box-shadow: inset 0 0 0 2px var(--red);
+}
+
+.enter {
+  grid-column: 1 / -1;
+  justify-self: start;
+  min-height: 32px;
+  padding: max(4px, calc(0.5 * var(--u))) max(12px, calc(1.6 * var(--u)));
+  border: 0;
+  background: var(--blue);
+  color: #fff;
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: max(9px, calc(1.1 * var(--u)));
+  cursor: pointer;
+  box-shadow: inset -3px -3px 0 0 rgba(0, 0, 0, 0.35);
+}
+
+.enter:disabled {
+  cursor: default;
+}
+
+.enter:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+/* o botão Entrar pulsa até o toque (só transform) */
+.enterPulse {
+  animation: info-cue 1.2s ease-in-out infinite;
+}
+
+.result {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: max(6px, calc(1 * var(--u)));
+  min-height: max(80px, calc(13 * var(--u)));
+  padding: max(8px, calc(1.2 * var(--u)));
+  background: #fbfaff;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(13px, calc(1.8 * var(--u)));
+  font-weight: 700;
+  animation: info-pop 360ms steps(4) both;
+}
+
+.result img {
+  width: max(20px, calc(3.2 * var(--u)));
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.resultOk {
+  color: #146b37;
+}
+
+.resultFail {
+  color: #a3121b;
+}
+
+/* Mensagens viajando */
+
+.traveler {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: max(2px, calc(0.3 * var(--u)));
+}
+
+.travelerImg {
+  width: max(22px, calc(4.4 * var(--u)));
+  max-width: none;
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.5));
+}
+
+/* nome da mensagem em caixa alta na fonte do corpo (a display deforma "Ç" e "Ã" maiúsculos) */
+.messageName {
+  padding: 0.15em 0.5em 0.2em;
+  background: var(--space-900);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(10px, calc(1.3 * var(--u)));
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.nameRequest {
+  color: #bff3ff;
+  box-shadow: 0 0 0 2px var(--cyan);
+}
+
+.nameResponse {
+  color: #ffe9a8;
+  box-shadow: 0 0 0 2px var(--yellow);
+}
+
+/* Servidor verificando */
+
+.checkFit {
+  transform-origin: 50% 100%;
+}
+
+.check {
+  display: flex;
+  flex-direction: column;
+  gap: max(3px, calc(0.5 * var(--u)));
+  padding: max(5px, calc(0.8 * var(--u))) max(8px, calc(1.1 * var(--u)));
+  background: rgba(13, 11, 43, 0.94);
+  box-shadow: 0 0 0 3px var(--cyan);
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(10px, calc(1.3 * var(--u)));
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.checkTitle,
+.checkRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.checkTitle {
+  color: var(--cyan);
+}
+
+.check img {
+  width: max(14px, calc(2 * var(--u)));
+  height: auto;
+  image-rendering: pixelated;
+}
+
+/* Microinteração */
+
+.explainName {
+  color: var(--cyan);
+}
+
+.order {
+  width: 100%;
+  transform-origin: 50% 0;
+}
+
+/* Fechamento */
+
+.chainFit {
+  display: flex;
+  justify-content: center;
+  transform-origin: 50% 50%;
+}
+
+.chain {
+  flex-wrap: nowrap;
+}
+
+.chainEnter {
+  padding: 2px 8px;
+  background: var(--blue);
+  color: #fff;
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: 9px;
+}
+
+.replayFit {
+  display: flex;
+  transform-origin: 50% 0;
+}
+
+@container (max-width: 700px) {
+  .chainFit {
+    transform: scale(0.86);
+  }
+}
+
+/* celular (~320 px de palco): desenha mais largo e encolhe por transform */
+@container (max-width: 480px) {
+  .windowFit {
+    width: 140%;
+    transform: scale(0.7);
+  }
+
+  .checkFit {
+    transform: scale(0.75);
+  }
+
+  /* a mensagem e o nome dela menores: no palco de celular o nome cobria a internet e o servidor */
+  .messageName {
+    font-size: 8px;
+  }
+
+  .travelerImg {
+    width: 17px;
+  }
+
+  /* sobe a mensagem mais um pouco: o nome passa por cima da internet e do servidor, sem cobrir os desenhos */
+  .traveler {
+    padding-bottom: 20px;
+  }
+
+  /* os rótulos dos cartões são longos: desenha bem mais largo (uma fileira só) e encolhe */
+  .order {
+    width: 204%;
+    margin-left: -52%;
+    transform: scale(0.45);
+  }
+
+  .chainFit {
+    transform: scale(0.58);
+  }
+
+  .replayFit {
+    transform: scale(0.72);
+  }
+}
+
+@keyframes info-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes info-cue {
+  50% {
+    transform: scale(1.08);
+  }
+}

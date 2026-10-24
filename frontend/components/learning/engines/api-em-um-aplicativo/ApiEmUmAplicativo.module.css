@@ -1,0 +1,156 @@
+/* Aula 4.1 (Galáxia 2) — API em um aplicativo */
+
+.canvas {
+  --u: var(--kit-u, 1cqw);
+  background:
+    radial-gradient(ellipse 70% 45% at 50% 92%, rgba(107, 63, 160, 0.22), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 20% 45%, rgba(58, 214, 255, 0.06), transparent 70%);
+}
+
+/* Cena 1: funções do app */
+.features {
+  display: flex;
+  justify-content: center;
+  gap: max(8px, calc(1.4 * var(--u)));
+}
+
+.feature {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.feature img {
+  width: max(20px, calc(4 * var(--u)));
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.service {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(11px, calc(1.5 * var(--u)));
+  font-weight: 700;
+  animation: aea-pop 400ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.service img {
+  width: max(24px, calc(6 * var(--u)));
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.service .serviceBadge {
+  position: absolute;
+  top: calc(-1.6 * var(--u));
+  right: calc(-1.2 * var(--u));
+  width: max(16px, calc(3.4 * var(--u)));
+}
+
+/* Cena 2: os papéis do pedido ativo */
+.roles {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* Cena 4: limites */
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 8px;
+  background: #fbfaff;
+  color: #1b1640;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(11px, calc(1.5 * var(--u)));
+  font-weight: 700;
+  box-shadow:
+    0 0 0 3px #2a2350,
+    inset -3px -3px 0 0 rgba(0, 0, 0, 0.12);
+}
+
+.menuHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: max(4px, calc(0.6 * var(--u))) max(8px, calc(1 * var(--u)));
+  background: #2a2350;
+  color: #fff;
+}
+
+.menuHead img {
+  width: max(16px, calc(2.6 * var(--u)));
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.menuItem {
+  padding: 0 max(8px, calc(1 * var(--u)));
+}
+
+.ask {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: max(8px, calc(1.2 * var(--u)));
+  background: rgba(13, 11, 43, 0.92);
+  box-shadow: 0 0 0 3px #3b3478;
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(12px, calc(1.6 * var(--u)));
+  font-weight: 700;
+  animation: aea-pop 400ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.askOk {
+  box-shadow: 0 0 0 3px var(--green);
+}
+
+.askNo {
+  box-shadow: 0 0 0 3px var(--red);
+}
+
+.askText,
+.askResult {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ask img {
+  width: max(16px, calc(2.6 * var(--u)));
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.askResult {
+  color: var(--yellow);
+}
+
+@container (max-width: 560px) {
+  .feature,
+  .service,
+  .menu,
+  .ask {
+    font-size: 8px;
+  }
+}
+
+@keyframes aea-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

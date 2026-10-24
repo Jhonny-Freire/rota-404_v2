@@ -14,6 +14,7 @@ export const ROUTE_PREFIXES = {
 export const ROUTES = {
   home: "/",
   ageRanges: "/faixas-etarias",
+  login: "/entrar",
   galaxies: "/galaxias",
   galaxy: (slug: string) => `/galaxias/${enc(slug)}`,
   system: (slug: string) => `${ROUTE_PREFIXES.system}/${enc(slug)}`,

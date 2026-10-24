@@ -1,4 +1,5 @@
 import { planetHref, sortPlanets } from "@/lib/planetSlots";
+import { LAB_SCORE } from "@/lib/progress";
 import { isApiError, isNotFound, isNotImplemented } from "@/services/apiClient";
 import { getSystem } from "@/services/catalogService";
 import { getLab, getLesson } from "@/services/learningService";
@@ -84,7 +85,7 @@ export async function loadPlanetContext(kind: PlanetType, ref: string, systemSlu
       title: kind === "lesson" ? "Aula em preparação" : "Laboratório em preparação",
       code: number ?? null,
       engineKey: null,
-      maxScore: 100,
+      maxScore: LAB_SCORE.max,
       planet: null,
       system,
       orderedPlanets,
@@ -105,7 +106,7 @@ export async function loadPlanetContext(kind: PlanetType, ref: string, systemSlu
     title: plainTitle || plainName || (kind === "lesson" ? "Aula" : "Laboratório"),
     code: extra?.code ?? titleCode ?? nameCode,
     engineKey,
-    maxScore: detail && "max_score" in detail && detail.max_score > 0 ? detail.max_score : 100,
+    maxScore: detail && "max_score" in detail && detail.max_score > 0 ? detail.max_score : LAB_SCORE.max,
     planet,
     system,
     orderedPlanets,

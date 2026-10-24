@@ -1,0 +1,52 @@
+/* Laboratório 1.4 (Galáxia 2) — O servidor respondeu! */
+
+.canvas {
+  --u: var(--kit-u, 1cqw);
+  background:
+    radial-gradient(ellipse 70% 45% at 50% 92%, rgba(107, 63, 160, 0.22), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 80% 35%, rgba(247, 181, 0, 0.06), transparent 70%);
+}
+
+.calloutTitle {
+  display: block;
+  color: var(--cyan);
+  font-family: var(--font-body), system-ui, sans-serif;
+  letter-spacing: 0.04em;
+}
+
+/* Etapa 1: os cartões no palco (no celular, desenhados mais largos e encolhidos) */
+.orderFit {
+  width: 100%;
+  transform-origin: 50% 0;
+}
+
+@container (max-width: 560px) {
+  .orderFit {
+    width: 225%;
+    margin-left: -62.5%;
+    transform: scale(0.44);
+  }
+}
+
+/* Área de interação */
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.lead {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.lead strong {
+  color: var(--yellow);
+}
+
+.choices {
+  width: 100%;
+}

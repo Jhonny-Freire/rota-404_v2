@@ -90,7 +90,8 @@ export default function MissaoEncontrarOServidor({
   const tripSeq = useRef(0);
   const handledTrip = useRef(0);
   const missesRef = useRef(0);
-  const helpSaid = useRef(false);
+  /** cruzamento (camada) em que a fala de ajuda já foi dita */
+  const helpSaidAt = useRef(-1);
   const nudgeSeq = useRef(0);
   /** última fala pedida ao Bonzi por este laboratório e quando */
   const lineRef = useRef<{ text: string; at: number } | null>(null);
@@ -130,7 +131,8 @@ export default function MissaoEncontrarOServidor({
   const current = byId[route[route.length - 1]] ?? mission.start;
   const atJunction = JUNCTION_PHASES.includes(phase);
   const nextLayer = atJunction ? (layers[current.layer + 1] ?? []) : [];
-  const help = misses >= HELP_AFTER;
+  /** a seta só vale no cruzamento onde já houve erro: não entrega os passos seguintes */
+  const help = misses >= HELP_AFTER && nextLayer.some((node) => tried.includes(node.id));
   const guided = help && nextLayer.some((node) => node.correct);
   const ipShown = route.includes(INTERNET_ID);
   /** vez da criança: a requisição parou num cruzamento e espera a próxima etapa */
@@ -214,9 +216,10 @@ export default function MissaoEncontrarOServidor({
     if (done.kind === "back") {
       setPhase("choose");
       // de volta ao ponto seguro: diz o que fazer agora (com a seta do Bonzi, se a ajuda já apareceu)
+      const layer = byId[done.target]?.layer ?? 0;
       if (missesRef.current >= HELP_AFTER) {
-        if (!helpSaid.current) {
-          helpSaid.current = true;
+        if (helpSaidAt.current !== layer) {
+          helpSaidAt.current = layer;
           speak(TEXT.help, "help");
         }
         feedback({ tone: "hint", message: TEXT.helpFeedback });

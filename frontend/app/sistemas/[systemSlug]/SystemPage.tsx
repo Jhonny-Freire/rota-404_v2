@@ -1,13 +1,14 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useState, type CSSProperties, type ReactNode } from "react";
+import { useRef, useState, type CSSProperties, type ReactNode } from "react";
 import type { BonziBuddyProps } from "@/components/bonzi/BonziBuddy";
 import { formatPoints } from "@/components/gamification/ScoreCounter";
 import { AppShell } from "@/components/layout/AppShell";
+import { FitToHeight } from "@/components/layout/FitToHeight";
 import { StatusView } from "@/components/layout/StatusView";
 import { PlanetNode } from "@/components/space/PlanetNode";
-import { Rocket } from "@/components/space/Rocket";
+import { useRouteTravel } from "@/components/space/useRouteTravel";
 import { Sprite } from "@/components/ui/Sprite";
 import { SpriteButton } from "@/components/ui/SpriteButton";
 import { cx } from "@/components/ui/cx";
@@ -15,10 +16,10 @@ import { SPRITES, planetSprite, systemSprite } from "@/config/assets";
 import { ROUTES } from "@/config/routes";
 import { useAsync } from "@/hooks/useAsync";
 import { useProgress } from "@/hooks/useProgress";
-import { buildPlanetSlots, type PlanetSlot } from "@/lib/planetSlots";
+import { buildPlanetSlots, sortPlanets, type PlanetSlot } from "@/lib/planetSlots";
 import { PROGRESS_LABELS } from "@/lib/progress";
 import { getErrorMessage } from "@/services/apiClient";
-import { getSystem, getSystems } from "@/services/catalogService";
+import { getGalaxy, getSystem, getSystems } from "@/services/catalogService";
 import type { PlanetarySystem, ProgressState } from "@/types/domain";
 import styles from "./page.module.css";
 
@@ -85,7 +86,7 @@ function SystemHud({ slots, total, hydrated, points, doneCount, complete }: Syst
           const description = status ? `${slot.name} (${status})` : slot.name;
           return (
             <li key={slot.id} className={cx(styles.slot, state && SLOT_CLASS[state])} title={description}>
-              <Sprite src={planetSprite(slot.spriteKey, slot.type)} alt="" decorative className={styles.slotSprite} />
+              <Sprite src={planetSprite(slot.slug, slot.type)} alt="" decorative className={styles.slotSprite} />
               {state && <SlotBadge state={state} />}
               <span className="sr-only">{description}</span>
             </li>
@@ -116,13 +117,16 @@ function SystemHud({ slots, total, hydrated, points, doneCount, complete }: Syst
   );
 }
 
-const ORBIT_RX = 36;
-const ORBIT_RY = 32;
-const ORBIT_STYLE = { "--orbit-rx": `${ORBIT_RX}%`, "--orbit-ry": `${ORBIT_RY}%` } as CSSProperties;
-
-function orbitPosition(index: number, count: number) {
+/**
+ * Lugar do planeta em volta do sol: a ordem segue a órbita a partir do canto de cima à esquerda (horário). Vira célula
+ * de uma grade de 2 linhas (esquerda | sol | direita): as linhas crescem com o rótulo, então o rótulo de um planeta de
+ * cima nunca alcança o planeta de baixo (antes eram posições fixas numa elipse e rótulos altos invadiam o vizinho).
+ */
+function orbitCell(index: number, count: number) {
   const angle = ((360 * index) / count - 135) * (Math.PI / 180);
-  return { left: `${50 + ORBIT_RX * Math.cos(angle)}%`, top: `${50 + ORBIT_RY * Math.sin(angle)}%` };
+  const cos = Math.cos(angle);
+  const column = cos < -0.05 ? 1 : cos > 0.05 ? 3 : 2;
+  return { "--col": column, "--row": Math.sin(angle) < 0 ? 1 : 2 } as CSSProperties;
 }
 
 /**
@@ -138,6 +142,9 @@ async function loadSystem(slug: string) {
   return { system, siblings: siblings.sort((a, b) => a.order_index - b.order_index) };
 }
 
+/** vaga da nave à esquerda de cada planeta (sprite de 120 px) */
+const PLANET_DOCK = { x: -112, y: 24, size: 40, tilt: 30 };
+
 export default function SystemPage() {
   const { systemSlug } = useParams<{ systemSlug: string }>();
   const { data, loading, error, notFound, notImplemented, reload } = useAsync(() => loadSystem(systemSlug), [systemSlug], {
@@ -146,6 +153,37 @@ export default function SystemPage() {
   const progress = useProgress();
   const [lockedHint, setLockedHint] = useState(0);
   const system = data?.system;
+  // um sol de cada vez: o detalhe da galáxia (já em cache vindo do mapa) diz se o sistema anterior foi concluído
+  const galaxySlug = system?.galaxy.slug;
+  const galaxy = useAsync(() => (galaxySlug ? getGalaxy(galaxySlug) : Promise.resolve(null)), [galaxySlug], {
+    cacheKey: galaxySlug ? `galaxy:${galaxySlug}` : undefined,
+  });
+  let systemLocked = false;
+  if (system && galaxy.data && progress.hydrated) {
+    const ordered = [...galaxy.data.systems].sort((a, b) => a.order_index - b.order_index);
+    const position = ordered.findIndex((s) => s.id === system.id);
+    const ids = ordered.map((s) => sortPlanets(s.planets ?? []).map((planet) => planet.id));
+    systemLocked = position > 0 && !progress.systemUnlocked(ids, position);
+  }
+  const stateReady = progress.hydrated && !galaxy.loading;
+  const stateOf = stateReady ? (systemLocked ? () => "locked" as const : progress.planetState) : undefined;
+  const orbitRef = useRef<HTMLElement>(null);
+  /* a nave estaciona ao lado de um planeta e anda pela órbita até o planeta tocado (useRouteTravel) */
+  const travelSlots = system ? buildPlanetSlots(system, stateOf) : [];
+  const route = useRouteTravel({
+    mapId: `sistema:${systemSlug}`,
+    stops: travelSlots.map((slot) => ({
+      id: slot.id,
+      href: slot.href,
+      locked: slot.state === "locked",
+      title: slot.name,
+      kicker: `${slot.type === "lesson" ? "Aula" : "Laboratório"} · ${system?.name ?? ""}`,
+      completed: slot.state === "completed",
+    })),
+    defaultId: travelSlots.find((slot) => slot.state === "in_progress" || slot.state === "available")?.id,
+    containerRef: orbitRef,
+    dock: PLANET_DOCK,
+  });
 
   const breadcrumbs = [
     { label: "Início", href: ROUTES.home },
@@ -180,7 +218,7 @@ export default function SystemPage() {
     const index = position >= 0 ? position : Math.max(0, system.order_index - 1);
     const prev = position > 0 ? siblings[position - 1] : undefined;
     const next = position >= 0 ? siblings[position + 1] : undefined;
-    const slots = buildPlanetSlots(system, progress.hydrated ? progress.planetState : undefined);
+    const slots = buildPlanetSlots(system, stateOf);
     const allPreview = slots.every((slot) => slot.preview);
     const number = String(system.order_index || index + 1).padStart(2, "0");
     const planetIds = system.planets.map((planet) => planet.id);
@@ -189,8 +227,13 @@ export default function SystemPage() {
     const ratio = progress.completionRatio(planetIds);
     const doneCount = progress.hydrated ? progress.completedCount(planetIds) : 0;
     const complete = planetIds.length > 0 && ratio >= 1;
+    // próximo passo: o primeiro planeta (na ordem) disponível ou em andamento
+    const nextPlanetId = progress.hydrated
+      ? slots.find((slot) => !slot.preview && (slot.state === "available" || slot.state === "in_progress"))?.id
+      : undefined;
 
-    if (lockedHint > 0) bonzi = { state: "warning", message: "Conclua o planeta anterior para liberar este.", messageKey: lockedHint };
+    if (systemLocked) bonzi = { state: "warning", message: "Conclua o planeta anterior para liberar este.", messageKey: lockedHint };
+    else if (lockedHint > 0) bonzi = { state: "warning", message: "Conclua o planeta anterior para liberar este.", messageKey: lockedHint };
     else if (allPreview) bonzi = { state: "help", message: "Os planetas deste sistema ainda estão em construção." };
     else if (complete && next) bonzi = { state: "happy", message: "Sistema completo! Que tal o próximo?" };
     // último sistema da galáxia: não há "próximo" para sugerir
@@ -218,35 +261,42 @@ export default function SystemPage() {
           )}
         </header>
 
-        <section className={styles.orbit} style={ORBIT_STYLE} aria-label={`Planetas do sistema ${system.name}`}>
-          <span className={styles.outerRing} aria-hidden="true" />
-          <div className={styles.core}>
-            <span className={styles.innerRing} aria-hidden="true">
-              <span className={styles.rocketSlot}>
-                <Rocket size={34} angle={90} />
-              </span>
-            </span>
-            <Sprite src={systemSprite(system.slug, index)} alt="" decorative className={styles.coreSprite} />
-          </div>
+        <FitToHeight>
+          <section
+            ref={orbitRef}
+            className={styles.orbit}
+            aria-label={`Planetas do sistema ${system.name}`}
+            onClickCapture={route.onClickCapture}
+          >
+            <div className={styles.core}>
+              <span className={styles.innerRing} aria-hidden="true" />
+              <Sprite src={systemSprite(system.slug, index)} alt="" decorative className={styles.coreSprite} />
+            </div>
 
-          <ul className={styles.planets}>
-            {slots.map((slot, i) => (
-              <li key={slot.id} className={styles.planet} style={orbitPosition(i, slots.length)}>
-                <PlanetNode
-                  name={slot.name}
-                  type={slot.type}
-                  state={slot.state}
-                  href={slot.href}
-                  spriteKey={slot.spriteKey}
-                  preview={slot.preview}
-                  index={i}
-                  size={120}
-                  onLockedClick={() => setLockedHint((n) => n + 1)}
-                />
-              </li>
-            ))}
-          </ul>
-        </section>
+            <ul className={styles.planets}>
+              {slots.map((slot, i) => (
+                <li key={slot.id} className={styles.planet} style={orbitCell(i, slots.length)}>
+                  <div className={styles.stop} data-stop-id={slot.id}>
+                    {slot.state !== "locked" && route.dockFor(slot.id)}
+                    <PlanetNode
+                      name={slot.name}
+                      type={slot.type}
+                      state={slot.state}
+                      href={slot.href}
+                      slug={slot.slug}
+                      preview={slot.preview}
+                      index={i}
+                      size={120}
+                      onLockedClick={() => setLockedHint((n) => n + 1)}
+                      highlight={slot.id === nextPlanetId}
+                    />
+                    </div>
+                </li>
+              ))}
+            </ul>
+            {route.overlay}
+          </section>
+        </FitToHeight>
 
         <nav className={styles.travel} aria-label="Navegação entre sistemas">
           <SpriteButton
@@ -273,7 +323,7 @@ export default function SystemPage() {
   }
 
   return (
-    <AppShell breadcrumbs={breadcrumbs} bonzi={bonzi}>
+    <AppShell breadcrumbs={breadcrumbs} bonzi={bonzi} fit>
       {content}
     </AppShell>
   );

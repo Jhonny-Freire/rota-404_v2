@@ -1,11 +1,13 @@
 "use client";
 
+import { useEffect } from "react";
 import type { BonziBuddyProps } from "@/components/bonzi/BonziBuddy";
 import { AppShell } from "@/components/layout/AppShell";
 import { Sprite } from "@/components/ui/Sprite";
 import { SpriteButton } from "@/components/ui/SpriteButton";
 import { SPRITES } from "@/config/assets";
 import { ROUTES } from "@/config/routes";
+import { unlockAchievement } from "@/lib/achievementEvents";
 import styles from "./not-found.module.css";
 
 const BONZI: BonziBuddyProps = {
@@ -14,6 +16,9 @@ const BONZI: BonziBuddyProps = {
 };
 
 export default function NotFound() {
+  // conquista secreta S-02: achar uma rota que não existe
+  useEffect(() => unlockAchievement("s-02"), []);
+
   return (
     <AppShell bonzi={BONZI}>
       <section className={styles.lost} aria-labelledby="not-found-title">

@@ -30,7 +30,8 @@ Tudo foi conferido no código atual. `npx tsc --noEmit` em `frontend/` passa sem
 Os motores importam só tipos de `@/components/learning/runtime`, cujo `index.ts` reexporta tudo, incluindo `LessonRuntime`, `LabRuntime`, `useEngineModule` e `loadPlanetContext`.
 
 ```ts
-type Say = (message: string, state?: BonziState) => void; // padrão "speaking"; repetir a frase fala de novo
+type SayOptions = { afterCurrent?: boolean }; // true: entra na fila e só fala quando a fala atual terminar
+type Say = (message: string, state?: BonziState, options?: SayOptions) => void; // padrão "speaking"; repetir a frase fala de novo
 // BonziState = "idle"|"speaking"|"happy"|"thinking"|"warning"|"help" (types/domain.ts)
 
 type LessonEngineProps = {
@@ -76,12 +77,12 @@ type NextPlanetLink = { href: string; name: string };
 ## 3. Registro e carregamento
 
 - `frontend/components/learning/engines/index.ts` declara `ENGINES: Record<string, EngineLoader>`, onde cada chave aponta para `() => import("./<slug>")`. O arquivo também exporta `ENGINE_KEYS`, `hasEngine(key)` (que usa `hasOwnProperty`) e `getEngineLoader(key)`.
-- **Registrados (8):**
+- **Registrados (16, a Galáxia 1 inteira):**
   - S1: `o-que-e-uma-rede`, `como-meu-dispositivo-chega-a-internet`, `conectando-uma-rede` (lab) e `missao-recuperar-a-conexao` (lab).
   - S2: `todo-dispositivo-precisa-de-um-endereco`, `ip-dominio-e-site`, `encontrando-o-destino` (lab) e `missao-encontrar-o-servidor` (lab).
-- **Stubs que existem mas NÃO estão registrados (8)**, cada um um `index.tsx` de 14 linhas que chama `PlaceholderLessonEngine` ou `PlaceholderLabEngine` com meta e `code` próprios:
-  - S3: `o-que-acontece-quando-acesso-um-site` (3.1), `html-os-blocos-de-uma-pagina` (3.2), `monte-sua-pagina` (3.3) e `conserte-a-pagina` (3.4).
-  - S4: `como-as-informacoes-viajam` (4.1), `http-e-https` (4.2), `detetive-digital` (4.3) e `missao-navegacao-segura` (4.4).
+  - S3 (20/10/2026): `o-que-acontece-quando-acesso-um-site`, `html-os-blocos-de-uma-pagina`, `monte-sua-pagina` (lab) e `conserte-a-pagina` (lab).
+  - S4 (20/10/2026): `como-as-informacoes-viajam`, `http-e-https`, `detetive-digital` (lab) e `missao-navegacao-segura` (lab).
+- **Não há mais stubs.** `PlaceholderLessonEngine`/`PlaceholderLabEngine` continuam em `runtime/placeholders.tsx` para planetas futuros.
   - Cada stub cita a especificação que o motor real deve seguir, por exemplo `G1 - Internet e Web/S3 - Navegador e páginas Web/aula3-1.md`. Há um `.md` por planeta em `G1 - Internet e Web/S1..S4/` (`aulaX-Y.md` e `labX-Y.md`).
 - `runtime/useEngineModule.ts`, função `useEngineModule(engineKey)`, devolve `{status:"loading"|"ready"|"missing"|"error", module, error?}`.
   - Sem loader no registro, o status vira `"missing"`.
@@ -114,7 +115,7 @@ type NextPlanetLink = { href: string; name: string };
 - **Renderização:** `<SceneStage label="Cena X de N: título" ready={ready} frameRef={stageRef}><EngineBoundary key={run}><EngineView …/></EngineBoundary></SceneStage>`. O motor **não é remontado** ao trocar de cena. A convenção é renderizar um subcomponente por cena com `key`, por exemplo `{scene === 0 && <Cena1 key="intro" …/>}` ou `const Scene = SCENES[i]; <Scene key={i} …/>`.
 - **Estado:** `scene`, `visited` (a maior cena já vista), `ready`, `completed`, `run`, `line` (fala do Narrator) e `hint`.
 - **Troca de cena (`goTo`):** limita o índice ao intervalo válido, faz `setReady(false)`, zera `hint` e atualiza `visited = max(visited, target)`.
-- **Liberar o avanço:** `canNext = ready || allScenesOpen || scene < visited`. Ao voltar para uma cena já vista, dá para avançar sem refazê-la.
+- **Liberar o avanço:** `canNext = (ready && !speaking) || allScenesOpen || scene < visited`, com `speaking = useBonziSpeaking()` (estado REAL da voz). Ao voltar para uma cena já vista, dá para avançar sem refazê-la. Com a cena pronta e o Bonzi ainda falando, o painel diz "Muito bem! Escute o Bonzi até o fim." e o botão só chama atenção quando a fala acaba. `next()` do motor também espera a fala terminar (`whenIdle`) e só avança se a cena não mudou (revisão de UX de 20/10: o Bonzi era cortado no meio da frase).
 - **Painel "O que fazer":**
   - O texto vem de `hint ?? meta.hints?.[scene] ?? DEFAULT_HINT`, sendo `DEFAULT_HINT = "Acompanhe a cena e siga as dicas do Bonzi."`.
   - Quando `ready`, o rótulo muda para "Cena concluída", o ícone para `ELEMENTS.ok` (antes era `magnifier`) e o texto para `Muito bem! Agora toque em "Próxima cena".`, ou `"Concluir"` na última cena.
@@ -126,7 +127,7 @@ type NextPlanetLink = { href: string; name: string };
 - **Pausa antes de liberar:** é convenção dos motores, o shell não faz isso. O motor chama `setCanAdvance(true)` depois de uma pausa de leitura `{hold}`, por exemplo `timers.after(READY_PAUSE_MS=1400, () => setCanAdvance(true), {hold:true})` em `engines/como-meu-dispositivo-chega-a-internet/parts.ts`. Assim o aluno vê o resultado antes de o foco pular para o botão.
 - **Controles:** "Cena anterior" (só ícone, desabilitado na cena 0) e "Próxima cena" ou "Concluir". Na última cena o ícone é `ELEMENTS.ok` e o clique chama `complete`. A trilha numerada só deixa clicar em cenas abertas (`allScenesOpen || i <= visited`) e diferentes da atual. Há também uma `ProgressBar` só para leitor de tela.
 - **Conclusão (`complete`):** faz `completed=true`, o Bonzi diz "Aula concluída! Você mandou muito bem." em "happy" e `onComplete()` é chamado. `next()` do motor na última cena também chama `complete`.
-  - O `CompletionPanel` mostra troféu, "Aula concluída!" e as ações "Próximo planeta" (primária, se houver), "Voltar ao sistema" (primária quando não há próximo) e "Rever aula".
+  - O `CompletionPanel` mostra troféu, "Aula concluída!" e as ações "Próximo planeta" (primária, se houver), "Voltar ao sistema" (primária quando não há próximo) e "Rever aula". As ações ficam no pé do painel: as secundárias à esquerda e a primária no canto inferior direito.
   - "Rever aula" volta para a cena 0, zera `ready` e `hint` e faz `run+1`, o que remonta o `EngineBoundary`. `visited` não é zerado.
 - **Narrator:** a variante `balloon` (padrão, 96 px) mostra o `BonziBuddy` inline. Se o ajuste "Mostrar o Bonzi" estiver desligado, aparece só o texto.
 
@@ -150,12 +151,12 @@ type NextPlanetLink = { href: string; name: string };
   | `success` | "Muito bem!" | `ok` (22) |
 
   A moldura só muda de cor em `error` (vermelho) e `success` (verde). O bloco tem `key={tone:message}`, então repetir exatamente a mesma mensagem não reanima.
-- **Pontuação:** `labPoints(max, mistakes) = max(ceil(max*0.5), max − 10*mistakes)`, em `frontend/lib/progress.ts`, com `MISTAKE_PENALTY = 10`. Com 100 pontos: 0 erros = 100, 1 = 90, 2 = 80, 3 = 70, 4 = 60, 5 ou mais = 50 (piso).
+- **Pontuação:** `labScore(erros, segundos, {min, avg}, max)` em `frontend/lib/progress.ts` (fórmula da equipe, 22/10/2026): 1.000 por concluir + até 4.000 pelos erros (−1.000 cada) + até 5.000 pelo tempo (1ª metade de 2.500 cai de `min` até `avg`; 2ª metade cai de `avg` até 2 × `avg`). Total máximo 10.000 por lab (= `labs.max_score`), 80.000 por galáxia. Os tempos de cada lab ficam em `frontend/config/labTiming.ts` (estimativas: calibrar). O LabShell tem um cronômetro por tentativa (só conta com a aba visível; para no `finish()` do motor, antes da espera pela última fala) e o HUD mostra Tempo (tique de 1 s num componente próprio, `LiveHud`) e Erros. Os Pontos só aparecem no HUD depois da conclusão (decisão de 23/10/2026: ver a pontuação caindo durante o jogo desanima); o cálculo é feito só no `finish()`.
   - `mistake()` é ignorado depois do `finish`.
-  - O HUD fica no `ShellHeader aside` e mostra "Pontos" (`formatPoints`) e "Erro(s)".
+  - O HUD ("Placar do laboratório") fica no `ShellHeader aside` e mostra "Tempo" e "Erro(s)"; "Pontos" (`formatPoints`) entra só com o resultado.
 - **`finish()`:** é idempotente por tentativa (`finishedRef`).
-  - Calcula `final = labPoints(max, mistakes)`, `previousBest = bestPoints` (a prop) e `medal = medalFor(final, max)`. Ouro é ≥ 90%, prata ≥ 70% e bronze o resto: com 100 pontos, 0 ou 1 erro dá ouro, 2 ou 3 dá prata e 4 ou mais dá bronze.
-  - O Bonzi diz "Laboratório concluído! Você fez N pontos." em "happy" e `onFinish(final)` é chamado.
+  - Calcula `labScore(erros, segundos, timing, max)`, `previousBest = bestPoints` (a prop) e `medal = medalFor(total, max)` (ouro ≥ 90%, prata ≥ 70%, bronze o resto). A tela de resultado mostra a conta: Conclusão, Erros (n) e Tempo (m:ss).
+  - O Bonzi diz "Laboratório concluído! Você fez N pontos." em "happy" e `onFinish(final)` é chamado. A tela de resultado só aparece quando a fala anterior do motor termina (`whenIdle(12000)`, conferindo que a tentativa é a mesma).
   - `markCompleted(id, points)` grava `lastPoints` e `bestPoints = max(...)` em localStorage `rota404.progress` (`hooks/useProgress.tsx`).
 - **Tela de conclusão:** mostra a medalha (`MEDAL_SPRITES` e `MEDAL_LABELS`), o título "Novo recorde!" (só quando `previousBest !== null && points > previousBest`) ou "Laboratório concluído!", um `ScoreCounter` com "de N pontos" e "Melhor pontuação". As ações são "Jogar de novo", "Próximo planeta" (primária) e "Voltar ao sistema".
 - **"Jogar de novo" (`playAgain`):** zera `mistakes`, `step`, `fb`, `result`, a fala e `finishedRef`, e faz `attempt+1`. O motor é remontado com um `attempt` novo, que gera uma variação nova via `useSeededRandom`.
@@ -165,7 +166,11 @@ type NextPlanetLink = { href: string; name: string };
 - `SceneStage.tsx`: moldura 16:9. Mede `--stage-top` com `useLayoutEffect`, `ResizeObserver(document.body)` e `resize`. A largura é `min(100%, max(--stage-min 320px, (100svh − --stage-top − --stage-bottom)*16/9))`. Props: `children`, `contentRef`, `showPlaceholder`, `placeholderSprite`, `placeholderLabel`, `label`, `ready`, `frameRef` e `className`. Os shells definem `--stage-bottom` (66 px, ou 110/120 px abaixo de 1180 px de largura).
 - `ShellHeader.tsx`: props `kind` ("lesson" ou "lab"), `title`, `tags`, `preview`, `aside` e `back{href,label}`. Mostra uma etiqueta "AULA · Planeta 1.1", "Prévia" quando for o caso, e o botão de voltar com `SPRITES.ui.map`.
 - `Narrator.tsx`: exporta `NarratorLine {message,state,key}` e `EMPTY_LINE`. A variante "balloon" usa `BonziBuddy position="inline"`. A variante "portrait" usa `AnimatedSprite` com `BONZI_FRAMES[state]`, digita o texto com `useTypewriter` (instantâneo com movimento reduzido) e fala com `narrationService.speak(text,{enabled,volume,owner})`. A voz respeita os ajustes `narrationEnabled`, `volume` e `showBonzi` de `hooks/useSettings.tsx`.
-- `CompletionPanel.tsx`: `CompletionAction {label,sprite,href?,onClick?,primary?}`. A ação primária recebe `attention` e `focusOnAttention`, ou seja, ganha foco ao abrir.
+- `CompletionPanel.tsx`: `CompletionAction {label,sprite,href?,onClick?,primary?}`. A ação primária recebe `attention` e `focusOnAttention`, ou seja, ganha foco ao abrir, e vai para o canto inferior direito (`styles.forward`).
+- **Repetir fala:** o `BonziBuddy` (cabeçalho do balão) e o `Narrator` portrait têm um botão "Repetir" (`SPRITES.ui.soundOn`, aria-label "Repetir fala do Bonzi") que digita e fala de novo a última frase.
+- **Fila de falas do Bonzi** (`components/learning/useBonziLine.ts`, 23/10/2026): o `say` dos shells (aula e lab) põe a fala numa FILA. Uma fala nova nunca corta a atual: espera a voz terminar (`whenSilent`), uma pausa curta e, sem voz, o tempo de leitura (45 ms por letra). Fila de até 3 falas (com toques rápidos saem as mais antigas; a mesma fala repetida em seguida não entra). `afterCurrent` virou o comportamento padrão. `reset()` (troca de cena na aula, "Rever aula", "Jogar de novo" no lab) esvazia a fila e corta a voz da cena anterior; é o ÚNICO corte proposital, além dos botões "Repetir"/"Ouvir". O "Repetir" da aula fala de novo TODAS as falas da cena (`sayAll`), não só a última.
+- **Estado da voz:** `services/narrationService.ts` expõe `isSpeaking()` (= OCUPADO: voz falando OU falas na fila do shell, via `setPendingLines`), `subscribeSpeaking()`, `whenIdle(maxMs=15000)` (fim da fala E da fila: `next()`, `finish`, `useSpeech.afterSpeech` e o "Próxima cena" esperam a fila toda), `whenSilent()` (fim da voz atual, usado pela fila) e `yieldBackground()` (a leitura de apoio termina a FRASE atual e cede a vez). A fala tem um vigia (`texto.length*120 + 4000` ms) para nunca travar se o navegador não disparar `end`. `hooks/useBonziSpeaking.ts` lê esse estado com `useSyncExternalStore`.
+- **Leitura do painel do guia** (`components/learning/GuideVoice.tsx`, 23/10/2026): `useGuideVoice(texto, falaDoBonzi)` lê em voz alta o "O que fazer" da aula (`guideText`, menos "Escute o Bonzi até o fim") e o feedback do laboratório (`fb.message`), uma vez por texto novo, 1,5 s depois + `whenIdle` (a fala do Bonzi da cena nova chega ~0,7 s depois da troca: com 350 ms a instrução começava antes e era cortada) + `yieldBackground` (texto novo não corta a leitura anterior). Texto igual à fala do Bonzi não é repetido. Usa `speak({background:true})`: leitura de apoio que NÃO conta como ocupado, então não segura `canNext`, `next()` nem os `whenIdle` dos motores. É falada frase por frase: quando o Bonzi tem fala nova, a leitura termina a frase atual e para (nada é cortado no meio da frase). `ListenButton` ("Ouvir") repete o texto. Respeita `narrationEnabled`, `showBonzi` e `volume`.
 - `LockedPlanet.tsx`: props `title`, `backHref` e `backLabel`.
 - `runtime/EngineBoundary.tsx`: class component `ErrorBoundary`. Quando um motor quebra, mostra "Ops! Esta cena encontrou um problema." e o botão "Tentar de novo", que reseta o boundary. Também registra `console.error("[Rota 404] Falha no motor da cena:")`.
 
@@ -229,6 +234,7 @@ type NextPlanetLink = { href: string; name: string };
   - Mudar a assinatura dos passos, ou passar `play` de false para true, recomeça a sequência.
   - Todos os timers são limpos no unmount.
 - **useTimers({reducedMotion?})** → `{after(ms, fn, {hold?}) → cancelador, clearAll}`. O objeto é estável e tudo é cancelado no unmount.
+- **useSpeech()** → `{afterSpeech(line), pause(ms)}`: promessas para encadear falas e ações sem cortar o Bonzi (`say(A); await afterSpeech(A); …`). `afterSpeech` espera o FIM REAL do áudio; sem voz, espera ~65 ms por letra. Nenhuma das duas resolve depois de a cena desmontar. Prefira isto a estimar a duração da fala com `{hold}`.
 - **stepDuration**, **REDUCED_MOTION_MS = 0** e os tipos `SequenceStep`, `SequenceOptions`, `SequenceControls`, `Timers` e `TimerOptions`.
 
 **Aleatoriedade**
@@ -262,7 +268,7 @@ type NextPlanetLink = { href: string; name: string };
 - Os shells envolvem o motor em memo (useMemo(() => memo(Engine), [Engine])). O motor não re-renderiza quando o shell muda (fala, dica, feedback, pontos); ele só re-renderiza pelas próprias props (scene, attempt, reducedMotion) ou pelo próprio estado. Não conte com re-render vindo do pai.
 - setCanAdvance é zerado a cada troca de cena (goTo), e canNext também é true para cenas já visitadas (scene < visited) e quando a aula já foi concluída (allScenesOpen). 'Rever aula' não zera visited.
 - A 'pausa antes de liberar' fica a cargo do motor (ex.: timers.after(READY_PAUSE_MS=1400, () => setCanAdvance(true), {hold:true})). Quando ready vira true, o SpriteButton com focusOnAttention puxa o foco e rola até o botão. Liberar cedo demais tira o foco da cena antes de o aluno ver o resultado.
-- Pontuação do lab: max(ceil(50% de max), max - 10 × erros). Com 100 pontos, 5 ou mais erros já dão o piso de 50. Medalhas: ouro ≥ 90%, prata ≥ 70%, bronze abaixo disso. mistake() depois de finish() é ignorado, e finish() só vale uma vez por tentativa. 'Novo recorde!' só aparece quando já existia uma melhor pontuação anterior (previousBest !== null).
+- Pontuação do lab: 1.000 (conclusão) + até 4.000 (erros) + até 5.000 (tempo), ver labScore e config/labTiming.ts. 4 erros zeram a parte dos erros. Medalhas: ouro ≥ 90%, prata ≥ 70%, bronze abaixo disso. mistake() depois de finish() é ignorado, e finish() só vale uma vez por tentativa. 'Novo recorde!' só aparece quando já existia uma melhor pontuação anterior (previousBest !== null).
 - Para marcar todas as etapas como feitas, chame setStep(meta.steps.length): o stepper usa 'index < step' e setStep não limita o valor por cima. Os motores atuais fazem isso antes de finish().
 - No feedback do lab, o bloco usa key = tom:mensagem. Repetir exatamente a mesma mensagem não reanima. A moldura do guia só muda de cor em 'error' e 'success'.
 - Unidade do kit: dentro do SceneCanvas, 1 = 1% da largura (1cqw). No painel Interaction (fora do canvas), o fallback é 8px. Place, Link e Packet usam fallback 1cqw e só funcionam dentro de um SceneCanvas. O size do ActionButton é em px, não em unidade do kit.

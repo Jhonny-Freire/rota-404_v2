@@ -1,0 +1,54 @@
+/* Aula 3.2 (Galáxia 2) — Lendo uma resposta */
+
+.canvas {
+  --u: var(--kit-u, 1cqw);
+  background:
+    radial-gradient(ellipse 70% 45% at 50% 92%, rgba(107, 63, 160, 0.22), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 50% 45%, rgba(143, 227, 255, 0.05), transparent 70%);
+}
+
+.pop {
+  animation: lur-pop 400ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.typeCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: max(6px, calc(1 * var(--u)));
+  padding: max(10px, calc(1.6 * var(--u))) max(14px, calc(2 * var(--u)));
+  background: rgba(13, 11, 43, 0.92);
+  box-shadow: 0 0 0 3px var(--yellow);
+  animation: lur-pop 400ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.typeKey {
+  color: #8fe3ff;
+  font-family: "Courier New", monospace;
+  font-size: max(14px, calc(2.6 * var(--u)));
+  font-weight: 700;
+}
+
+.arrow {
+  display: block;
+  width: max(18px, calc(4 * var(--u)));
+  height: auto;
+  image-rendering: pixelated;
+}
+
+@container (max-width: 560px) {
+  .typeKey {
+    font-size: 11px;
+  }
+}
+
+@keyframes lur-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

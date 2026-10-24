@@ -2,10 +2,16 @@ import type { ComponentType, ReactNode } from "react";
 import type { BonziState } from "@/types/domain";
 
 /**
- * Fala do Bonzi inline (balão + voz, se a narração estiver ligada). Estado padrão: "speaking".
- * Repetir a mesma frase fala de novo.
+ * `afterCurrent`: espera o Bonzi terminar a fala atual antes desta (falas em sequência na mesma cena).
+ * `silent`: só o texto, sem voz (fim do laboratório: a pontuação não tem gravação e caía na voz do navegador).
  */
-export type Say = (message: string, state?: BonziState) => void;
+export type SayOptions = { afterCurrent?: boolean; silent?: boolean };
+
+/**
+ * Fala do Bonzi inline (balão + voz, se a narração estiver ligada). Estado padrão: "speaking".
+ * Repetir a mesma frase fala de novo. Uma fala nova interrompe a anterior, a não ser com `{ afterCurrent: true }`.
+ */
+export type Say = (message: string, state?: BonziState, options?: SayOptions) => void;
 
 /* ───────────────────────────── AULA ───────────────────────────── */
 
@@ -66,7 +72,7 @@ export type LabEngineProps = {
   feedback: (fb: LabFeedback) => void;
   /** etapa atual (índice em meta.steps) */
   setStep: (index: number) => void;
-  /** erro do aluno → penalidade (pontos = max(50% de maxScore, maxScore − 10 × erros)) */
+  /** erro do aluno → penalidade (−1.000 por erro, até 4.000; ver labScore em lib/progress.ts) */
   mistake: () => void;
   /** conclui com a pontuação atual → tela de conclusão (ouro ≥ 90%, prata ≥ 70%, bronze) */
   finish: () => void;

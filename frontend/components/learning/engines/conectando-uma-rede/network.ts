@@ -23,55 +23,49 @@ export type Variant = {
   devices: NodeId[];
 };
 
+/**
+ * Sempre UM aparelho + Wi-Fi + Roteador + Internet (decisão da equipe, 23/10/2026: com dois aparelhos, ou sem o Wi-Fi,
+ * as crianças se confundiam). A variação é só o aparelho.
+ */
 export const VARIANTS: Variant[] = [
-  { id: "computador", pieces: ["pc", "router", "internet"], devices: ["pc"] },
+  { id: "computador", pieces: ["pc", "wifi", "router", "internet"], devices: ["pc"] },
   { id: "celular", pieces: ["phone", "wifi", "router", "internet"], devices: ["phone"] },
-  { id: "dois-dispositivos", pieces: ["pc", "phone", "wifi", "router", "internet"], devices: ["phone", "pc"] },
 ];
 
 export const AREA_ZONE = "area";
 
+/** espaço da área "Monte a rede": `stage` = lugar no caminho (0 aparelhos, 1 Wi-Fi, 2 roteador, 3 internet) */
+export type Slot = { id: SlotId; x: number; y: number; name: string; stage: number };
+
+export type Layout = { slots: Slot[]; columns: { stage: number; x: number }[] };
+
+/** colunas da esquerda (aparelho) para a direita (internet), abaixo da faixa de instrução (% do palco) */
+const COLUMN_X0 = 38;
+const COLUMN_X1 = 89;
+const ROW_Y = 58;
+
 /**
- * Espaços da área "Monte a rede" num anel convexo (hexágono, % do palco), abaixo da faixa de instrução.
- * Todo subconjunto do anel continua convexo: nenhuma linha reta entre dois espaços cruza uma terceira peça.
+ * A área é o caminho: uma coluna por lugar do caminho, na ordem aparelho → Wi-Fi → roteador → internet.
+ * Cada peça só entra na coluna do seu lugar (a ordem importa).
  */
-export const SLOTS: { id: SlotId; x: number; y: number; name: string }[] = [
-  { id: "s0", x: 38, y: 58, name: "Espaço da esquerda" },
-  { id: "s1", x: 51, y: 35, name: "Espaço de cima, à esquerda" },
-  { id: "s2", x: 77, y: 35, name: "Espaço de cima, à direita" },
-  { id: "s3", x: 90, y: 58, name: "Espaço da direita" },
-  { id: "s4", x: 77, y: 81, name: "Espaço de baixo, à direita" },
-  { id: "s5", x: 51, y: 81, name: "Espaço de baixo, à esquerda" },
-];
-
-/** um espaço por peça: subconjunto espalhado do anel (a criança vê exatamente quantos espaços preencher) */
-const SLOT_SETS: Partial<Record<number, SlotId[]>> = {
-  3: ["s0", "s2", "s4"],
-  4: ["s1", "s2", "s4", "s5"],
-  5: ["s0", "s1", "s2", "s4", "s5"],
-};
-
-export function slotsFor(count: number): SlotId[] {
-  return SLOT_SETS[count] ?? SLOTS.slice(0, count).map((slot) => slot.id);
-}
-
-/** ordem de preenchimento quando a peça cai na área sem um espaço definido (esquerda → direita) */
-const FILL_ORDER: SlotId[] = ["s0", "s1", "s5", "s2", "s4", "s3"];
-
-export function fillOrder(slots: SlotId[]): SlotId[] {
-  return FILL_ORDER.filter((slot) => slots.includes(slot));
+export function layoutFor(pieces: NodeId[]): Layout {
+  const stages = [...new Set(pieces.map((id) => NODES[id].rank))].sort((a, b) => a - b);
+  const step = stages.length > 1 ? (COLUMN_X1 - COLUMN_X0) / (stages.length - 1) : 0;
+  const columns = stages.map((stage, index) => ({ stage, x: COLUMN_X0 + step * index }));
+  const slots: Slot[] = columns.map((column, index) => ({
+    id: `s${index}` as SlotId,
+    x: column.x,
+    y: ROW_Y,
+    stage: column.stage,
+    name: `Lugar ${index + 1} do caminho`,
+  }));
+  return { slots, columns };
 }
 
 export const RING_CENTER: ScenePoint = { x: 64, y: 58 };
 
-const SLOT_POINTS = new Map(SLOTS.map((slot) => [slot.id, { x: slot.x, y: slot.y }]));
-
 export function isSlotId(value: string): value is SlotId {
-  return SLOT_POINTS.has(value as SlotId);
-}
-
-export function slotPoint(slot: SlotId): ScenePoint {
-  return SLOT_POINTS.get(slot) ?? RING_CENTER;
+  return /^s[0-5]$/.test(value);
 }
 
 export function isNodeId(value: string | undefined | null): value is NodeId {
@@ -94,7 +88,7 @@ export function isWireless(key: EdgeKey): boolean {
 
 /** próximo trecho permitido a partir de cada peça */
 const FORWARD: Record<NodeId, NodeId[]> = {
-  pc: ["router", "wifi"],
+  pc: ["wifi"],
   phone: ["wifi"],
   wifi: ["router"],
   router: ["internet"],
@@ -204,5 +198,5 @@ export const CONCEPT_HINTS: Partial<Record<NodeId, string>> = {
   phone: "O celular não usa cabo: ele se conecta pelo Wi-Fi.",
   wifi: "O Wi-Fi leva o sinal até o roteador.",
   router: "É o roteador que leva até a internet.",
-  pc: "O computador pode ir por cabo até o roteador.",
+  pc: "O computador se liga ao Wi-Fi, e o Wi-Fi leva até o roteador.",
 };

@@ -52,6 +52,28 @@
   opacity: 0.9;
 }
 
+/* "Voltar para ..." só no celular (ver o @media de 560 px) */
+.back {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  margin: var(--px);
+  padding: 8px 12px;
+  color: var(--cyan);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+  background: rgba(13, 11, 43, 0.66);
+  box-shadow: var(--pixel-border);
+  transition: color 120ms, background-color 120ms;
+}
+
+.back:hover,
+.back:focus-visible {
+  color: var(--space-950);
+  background: var(--cyan);
+}
+
 @media (max-width: 767px) {
   .list {
     padding: 6px 10px;
@@ -60,5 +82,16 @@
 
   .item {
     font-size: 16px;
+  }
+}
+
+@media (max-width: 560px) {
+  .full,
+  .hideCompact {
+    display: none;
+  }
+
+  .back {
+    display: inline-flex;
   }
 }

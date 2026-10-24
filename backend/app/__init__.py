@@ -12,6 +12,8 @@ from app.controllers.learning_controller import LearningController
 from app.controllers.planetary_system_controller import PlanetarySystemController
 from app.controllers.user_controller import UserController
 from app.errors import register_error_handlers
+from app.repositories.achievement_repository import AchievementRepository, UserAchievementRepository
+from app.repositories.account_repository import ProgressRepository, ScoreRepository, UserRepository
 from app.repositories.age_range_repository import AgeRangeRepository
 from app.repositories.data_source import create_data_source
 from app.repositories.galaxy_repository import GalaxyRepository
@@ -46,6 +48,20 @@ def create_app(settings: Settings | None = None) -> Flask:
     planets = PlanetRepository(data_source)
     lessons = LessonRepository(data_source)
     labs = LabRepository(data_source)
+    users = UserRepository(data_source)
+    accounts = UserService(users, age_ranges)
+    gamification = GamificationService(
+        accounts,
+        users,
+        ProgressRepository(data_source),
+        ScoreRepository(data_source),
+        galaxies,
+        systems,
+        planets,
+        labs,
+        AchievementRepository(data_source),
+        UserAchievementRepository(data_source),
+    )
 
     controllers = Controllers(
         health=HealthController(HealthService(age_ranges)),
@@ -53,8 +69,8 @@ def create_app(settings: Settings | None = None) -> Flask:
         galaxies=GalaxyController(GalaxyService(galaxies, age_ranges, systems, planets)),
         systems=PlanetarySystemController(PlanetarySystemService(systems, galaxies, planets)),
         learning=LearningController(LearningService(lessons, labs, planets, systems)),
-        gamification=GamificationController(GamificationService()),
-        users=UserController(UserService()),
+        gamification=GamificationController(gamification),
+        users=UserController(accounts),
     )
 
     register_error_handlers(app)

@@ -1,74 +1,40 @@
 "use client";
 
-import { useId } from "react";
+import { useState } from "react";
 import { AchievementBadge, RARITY_LABELS } from "@/components/gamification/AchievementBadge";
 import { AppShell } from "@/components/layout/AppShell";
+import { FitToHeight } from "@/components/layout/FitToHeight";
 import { StatusView } from "@/components/layout/StatusView";
 import { ProgressBar } from "@/components/progress/ProgressBar";
 import { Sprite } from "@/components/ui/Sprite";
 import { cx } from "@/components/ui/cx";
-import { BADGES, SPRITES, badgeSprite } from "@/config/assets";
+import { ACHIEVEMENTS, ACHIEVEMENT_RARITIES, achievementBySlug } from "@/config/achievements";
+import { SPRITES } from "@/config/assets";
 import { ROUTES } from "@/config/routes";
-import { useAsync } from "@/hooks/useAsync";
-import { getErrorMessage, isNotImplemented } from "@/services/apiClient";
-import { getAchievements, getMyAchievements } from "@/services/gamificationService";
-import type { Achievement, AchievementRarity, UserAchievement } from "@/types/domain";
+import { useAchievements } from "@/hooks/useAchievements";
+import { useSession } from "@/hooks/useSession";
 import styles from "./page.module.css";
 
-type BadgeView = {
-  id: string;
-  name: string;
-  sprite: string;
-  rarity: AchievementRarity;
-  description: string | null;
-  unlocked: boolean;
-};
-
-const RARITIES: AchievementRarity[] = ["comum", "rara", "lenda"];
-
-async function loadAchievements(): Promise<BadgeView[]> {
-  let achievements: Achievement[];
-  try {
-    achievements = await getAchievements();
-  } catch (error) {
-    if (!isNotImplemented(error)) throw error;
-    return BADGES.map((b) => ({
-      id: b.slug,
-      name: "???",
-      sprite: b.sprite,
-      rarity: b.rarity,
-      description: null,
-      unlocked: false,
-    }));
-  }
-
-  let mine: UserAchievement[] = [];
-  try {
-    mine = await getMyAchievements();
-  } catch (error) {
-    if (!isNotImplemented(error)) throw error;
-  }
-
-  const unlockedIds = new Set(mine.map((m) => m.achievement_id));
-  return achievements.map((a) => ({
-    id: a.id,
-    name: a.name,
-    sprite: badgeSprite(a.sprite_key),
-    rarity: a.rarity,
-    description: a.description,
-    unlocked: unlockedIds.has(a.id),
-  }));
+function formatDate(iso: string): string {
+  const date = new Date(iso);
+  return Number.isNaN(date.getTime()) ? "" : date.toLocaleDateString("pt-BR");
 }
 
 export default function AchievementsPage() {
-  const result = useAsync(loadAchievements, []);
-  const ids = useId();
-  const badges = result.data ?? [];
-  const unlocked = badges.filter((b) => b.unlocked);
-  const locked = badges.filter((b) => !b.unlocked);
+  const { ready, unlocked } = useAchievements();
+  const { status } = useSession();
+  const [picked, setPicked] = useState<string | null>(null);
+  const total = ACHIEVEMENTS.length;
+  const count = ACHIEVEMENTS.filter((a) => unlocked[a.slug]).length;
+  // sem escolha: a mais recente; sem nenhuma, a primeira a buscar
+  const latest = ACHIEVEMENTS.filter((a) => unlocked[a.slug]).sort((a, b) => unlocked[b.slug].localeCompare(unlocked[a.slug]))[0];
+  const current = (picked && achievementBySlug(picked)) || latest || ACHIEVEMENTS[0];
+  const currentUnlocked = Boolean(unlocked[current.slug]);
+  const currentHidden = current.secret && !currentUnlocked;
 
   return (
     <AppShell
+      fit
       breadcrumbs={[{ label: "Início", href: ROUTES.home }, { label: "Conquistas" }]}
       bonzi={{ state: "thinking", message: "Cada missão concluída pode revelar uma conquista nova." }}
     >
@@ -77,76 +43,81 @@ export default function AchievementsPage() {
           <Sprite src={SPRITES.ui.achievements} alt="" decorative size={56} className={styles.medal} />
           <h1 className={styles.title}>Conquistas</h1>
         </div>
-        {result.data && (
+        {ready && (
           <div className={styles.counter}>
             <p className={styles.count}>
               <span aria-hidden="true">
-                <span className={styles.countValue}>{unlocked.length}</span> / {badges.length}
+                <span className={styles.countValue}>{count}</span> / {total}
               </span>
               <span className="sr-only">
-                {unlocked.length} de {badges.length} conquistas desbloqueadas
+                {count} de {total} conquistas desbloqueadas
               </span>
             </p>
-            <ProgressBar
-              value={badges.length > 0 ? unlocked.length / badges.length : 0}
-              label="Conquistas desbloqueadas"
-              segments={Math.max(1, badges.length)}
-            />
+            <ProgressBar value={count / total} label="Conquistas desbloqueadas" segments={total} />
           </div>
         )}
       </header>
 
-      {result.loading && <StatusView kind="loading" title="Abrindo o cofre" />}
+      {!ready && <StatusView kind="loading" title="Abrindo o cofre" />}
 
-      {result.error !== undefined && (
-        <StatusView kind="error" message={getErrorMessage(result.error)} onRetry={result.reload} />
-      )}
-
-      {result.data && (
-        <>
-          <section className={styles.section} aria-labelledby={`${ids}-unlocked`}>
-            <h2 id={`${ids}-unlocked`} className={styles.sectionTitle}>
-              Desbloqueadas
-            </h2>
-            {unlocked.length === 0 ? (
-              <StatusView kind="empty" title="Nenhuma ainda" message="Conclua missões para ganhar conquistas." />
-            ) : (
+      {ready && (
+        <FitToHeight align="top">
+          <div className={styles.board}>
+            {/* uma grade só, na ordem das raridades (a cor e a etiqueta de cada medalha dizem a raridade): cabe na janela */}
+            <div className={styles.collection}>
+              <ul className={styles.legend} aria-label="Conquistas por raridade">
+                {ACHIEVEMENT_RARITIES.map((rarity) => {
+                  const list = ACHIEVEMENTS.filter((a) => a.rarity === rarity);
+                  return (
+                    <li key={rarity} className={cx(styles.chip, styles[rarity])}>
+                      {RARITY_LABELS[rarity]}
+                      <span className={styles.chipCount}>
+                        {list.filter((a) => unlocked[a.slug]).length}/{list.length}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
               <ul className={styles.grid}>
-                {unlocked.map((b) => (
-                  <li key={b.id}>
-                    <AchievementBadge name={b.name} sprite={b.sprite} rarity={b.rarity} description={b.description} unlocked />
+                {ACHIEVEMENTS.map((a) => (
+                  <li key={a.slug}>
+                    <button
+                      type="button"
+                      className={cx(styles.pick, a.slug === current.slug && styles.picked)}
+                      onClick={() => setPicked(a.slug)}
+                      aria-pressed={a.slug === current.slug}
+                    >
+                      <AchievementBadge name={a.name} sprite={a.sprite} rarity={a.rarity} secret={a.secret} unlocked={Boolean(unlocked[a.slug])} compact />
+                    </button>
                   </li>
                 ))}
               </ul>
-            )}
-          </section>
+            </div>
 
-          <section className={styles.section} aria-labelledby={`${ids}-locked`}>
-            <h2 id={`${ids}-locked`} className={styles.sectionTitle}>
-              Bloqueadas
-            </h2>
-            {locked.length === 0 && <p className={styles.note}>Todas as conquistas foram desbloqueadas.</p>}
-            {RARITIES.map((rarity) => {
-              const group = locked.filter((b) => b.rarity === rarity);
-              if (group.length === 0) return null;
-              return (
-                <div key={rarity} className={cx(styles.group, styles[rarity])}>
-                  <h3 className={styles.groupTitle}>
-                    {RARITY_LABELS[rarity]}
-                    <span className={styles.groupCount}>{group.length}</span>
-                  </h3>
-                  <ul className={styles.grid}>
-                    {group.map((b) => (
-                      <li key={b.id}>
-                        <AchievementBadge name={b.name} sprite={b.sprite} rarity={b.rarity} unlocked={false} />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              );
-            })}
-          </section>
-        </>
+            <aside className={cx(styles.detail, styles[current.rarity])} aria-live="polite" aria-label="Detalhes da conquista">
+              <Sprite
+                src={current.sprite}
+                alt=""
+                decorative
+                size={128}
+                className={cx(styles.detailArt, !currentUnlocked && styles.detailLocked, currentHidden && styles.detailHidden)}
+              />
+              <span className={styles.detailRarity}>{RARITY_LABELS[current.rarity]}</span>
+              <h2 className={styles.detailName}>{currentHidden ? "???" : current.name}</h2>
+              <p className={styles.detailText}>
+                {currentHidden ? "Conquista secreta: continue explorando para descobrir." : current.description}
+              </p>
+              <p className={cx(styles.detailStatus, currentUnlocked && styles.detailDone)}>
+                {currentUnlocked ? `Desbloqueada em ${formatDate(unlocked[current.slug])}` : "Ainda bloqueada"}
+              </p>
+              <p className={styles.note}>
+                {status === "guest"
+                  ? "Jogando sem conta: as conquistas ficam só neste aparelho e as de ranking não valem."
+                  : "Toque numa conquista para ver como ganhar. Algumas são secretas!"}
+              </p>
+            </aside>
+          </div>
+        </FitToHeight>
       )}
     </AppShell>
   );

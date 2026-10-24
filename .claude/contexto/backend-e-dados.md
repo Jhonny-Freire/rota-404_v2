@@ -1,7 +1,7 @@
 <!-- Referência detalhada gerada a partir da leitura do código em 17/10/2026. Se o código mudar, atualize este arquivo. -->
 # Ficha técnica: BACKEND E DADOS (Rota 404)
 
-Tudo abaixo foi conferido no código atual em 2026-10-17. Os caminhos são relativos à raiz do projeto. Também conferi na API que está no ar (`http://127.0.0.1:5000/api`): `GET /api/health` responde `{"data":{"status":"ok","data_source":"supabase","database":"ok"}}`, servidor `Werkzeug/3.1.9 Python/3.14.3`. raiz do projeto **não** é repositório git.
+Tudo abaixo foi conferido no código atual em 2026-10-17. Os caminhos são relativos à raiz do projeto. Também conferi na API que está no ar (`http://127.0.0.1:9001/api`): `GET /api/health` responde `{"data":{"status":"ok","data_source":"supabase","database":"ok"}}`, servidor `Werkzeug/3.1.9 Python/3.14.3`. raiz do projeto **não** é repositório git.
 
 ---
 
@@ -30,6 +30,8 @@ backend/
                               (Python 3.14) e um venv Linux/WSL (Python 3.12) — use o nome que preferir, ambos estão no .gitignore
 supabase/
   migrations/20261009000000_init_schema.sql
+  migrations/20261022000000_accounts.sql, 20261023000000_knowledge_level.sql
+  migrations/20261024000000_achievements.sql   catálogo das 19 conquistas (rodar no SQL Editor; idempotente)
   seed.sql                    (não existe supabase/config.toml)
 ```
 
@@ -98,19 +100,22 @@ Arquivos da raiz que ficam fora desta área: `README.md`, `.gitignore`, `planeta
 | GET | `/lessons/<ref>` | – | `Lesson + planet:Planet\|null + system:System\|null` |
 | GET | `/labs` | `?system=<ref>` | `[Lab]` |
 | GET | `/labs/<ref>` | – | `Lab + planet + system` |
-| GET | `/progress` | – | **501** |
-| PUT | `/progress/<planet_id>` | JSON | **501** |
+| GET | `/progress` | Bearer | `[{planet_id, status, best_points, updated_at}]` da conta (401 sem sessão) |
+| PUT | `/progress/<planet_id>` | Bearer + `{status: in_progress\|completed, points?}` | Salva (nunca rebaixa `completed`); num lab concluído grava a MELHOR pontuação em `scores` (limitada a `max_score`) |
 | GET | `/scores` | – | **501** |
 | POST | `/scores` | JSON | **501** (o sucesso futuro responderia 201) |
-| GET | `/achievements` | – | **501** |
-| GET | `/achievements/me` | – | **501** |
-| GET | `/rankings/galaxies/<ref>` | – | **501** |
-| GET | `/rankings/systems/<ref>` | – | **501** |
-| GET | `/users/me` | – | **501** |
-| POST | `/users` | JSON | **501** (o sucesso futuro responderia 201) |
-| PATCH | `/users/me` | JSON | **501** |
+| GET | `/achievements` | – | catálogo público (19): `id, slug, code, name, description, sprite_key, rarity, secret, order_index` (raridade, código e "secreta" vêm de `criteria` jsonb) |
+| GET | `/achievements/me` | Bearer | as da conta: `[{achievement_id, slug, unlocked_at}]` (401 sem token) |
+| POST | `/achievements/me` | Bearer + `{slug}` | grava (idempotente): 201 nova, 200 já tinha (devolve a data original); 404 slug desconhecido, 400 sem slug |
+| GET | `/rankings/galaxies/<ref>` | Bearer opcional | `{scope, scope_id, entries:[{position, user_id, display_name, avatar_slug, points, completed_labs, achievements}], me}`: `achievements` = quantas conquistas a conta tem (todas; 24/10/2026); soma das melhores pontuações por lab; empate divide a posição; top 50; contas sem apelido ficam fora |
+| GET | `/rankings/systems/<ref>` | Bearer opcional | Igual, por sistema |
+| POST | `/users` | `{nickname, password, age, avatar_key?, knowledge_level?}` | 201 `{token, user}`. Apelido 3–16 (letras, números, espaço . _ -), único sem diferenciar maiúsculas; senha 4–64; idade 4–120. `age_range_id` (= galáxia) vem do NÍVEL: até 13 anos só `avancado` vai para 14-ou-mais; de 14 anos ou mais só `iniciante` fica em 13-ou-menos; sem nível, vale a idade. 409 se o apelido existe. `knowledge_level`: iniciante, intermediario ou avancado (400 se outro) |
+| POST | `/sessions` | `{nickname, password}` | `{token, user}`; 401 "Apelido ou senha incorretos."; 429 após 5 erros seguidos (30 s) |
+| DELETE | `/sessions/me` | Bearer | Encerra a sessão |
+| GET | `/users/me` | Bearer | Conta pública: id, nickname, display_name, age, age_range_id, avatar_key, knowledge_level, timestamps, `age_range {id, slug, name}` |
+| PATCH | `/users/me` | Bearer + `{avatar_key?, age?, knowledge_level?}` | Conta atualizada (idade ou nível novo recalcula a faixa, com a mesma regra do cadastro) |
 
-Os 501 vêm de `GamificationService` e `UserService`, que só levantam `NotImplementedFeatureError` (mensagem "Recurso ainda não disponível nesta versão do Rota 404."). `json_body()` devolve `dict` ou `None` (`get_json(silent=True)`).
+Contas (22/10/2026): `services/user_service.py` (cadastro, login, sessão, validação), `services/auth.py` (PBKDF2-SHA256 com sal, token `secrets.token_urlsafe(32)` guardado como SHA-256 em `users.token_hash`, `LoginThrottle`), `services/gamification_service.py` (progresso e ranking), `repositories/account_repository.py` (`UserRepository`, `ProgressRepository`, `ScoreRepository`). A conta pública nunca expõe `password_hash`/`token_hash`/`nickname_key`. Erros novos: 401 `unauthorized`, 409 `conflict`, 429 `too_many_requests`. Conquistas (24/10/2026): `repositories/achievement_repository.py` (`AchievementRepository` — tabela de catálogo, em `CATALOG_TABLES` —, `UserAchievementRepository`); as REGRAS ficam no frontend (`config/achievements.ts`, `lib/achievements.ts`): o servidor só guarda o que a conta ganhou. O 501 restante (`/scores`) levanta `NotImplementedFeatureError` (mensagem "Recurso ainda não disponível nesta versão do Rota 404."). `json_body()` devolve `dict` ou `None` (`get_json(silent=True)`).
 
 **Lessons e labs por ref** (`LearningService._get_detail` / `_find`): o ref pode ser id ou slug da aula ou laboratório, **ou** id ou slug do planeta.
 - Com UUID, busca primeiro o planeta pelo id (é por ele que o frontend navega) e depois `get_by_planet_id`. São 3 consultas no total (`LearningQueriesTest`).
@@ -151,18 +156,18 @@ Os 501 vêm de `GamificationService` e `UserService`, que só levantam `NotImple
 |---|---|---|---|
 | `FLASK_DEBUG` | `False` | `1` | Verdadeiro se for um de `{"1","true","yes","on"}` (sem diferenciar maiúsculas). Com `HOST` fora do loopback, `run.py` ignora o debug e loga um warning |
 | `HOST` | `127.0.0.1` | `127.0.0.1` | Valor vazio cai no default. `Settings.exposed_to_network = not is_loopback_host(host)`; contam como loopback `localhost`, `127.x`, `::1` e `[::1]`. `0.0.0.0` aceita a rede (tablets) |
-| `PORT` | `5000` | `5000` | `int()`; um valor inválido derruba a inicialização com `ValueError` |
+| `PORT` | `9001` | `9001` | `int()`; um valor inválido derruba a inicialização com `ValueError` |
 | `DATA_SOURCE` | `auto` | `auto` | `auto` / `supabase` / `local` (minúsculas). Outro valor gera `RuntimeError` |
 | `SUPABASE_URL` | `""` | vazio | URL do projeto |
 | `SUPABASE_KEY` | `""` | vazio | Chave **service_role**: ignora RLS e fica só no servidor |
-| `CORS_ORIGINS` | `("http://localhost:3000","http://127.0.0.1:3000")`, só quando vazio | `http://localhost:3000` | Separadas por vírgula, com strip |
+| `CORS_ORIGINS` | `("http://localhost:9000","http://127.0.0.1:9000")`, só quando vazio | `http://localhost:9000` | Separadas por vírgula, com strip |
 | `CATALOG_CACHE_SECONDS` | `3600` | `3600` | `float`, `max(0, …)`. `0` desliga o cache e também o warmup |
 | `FALLBACK_TO_LOCAL` | `True` | `1` | Só é falso se for um de `{"0","false","no","off"}` |
 | `WERKZEUG_RUN_MAIN` | – | – | Interna, definida pelo reloader do Werkzeug; `run.py` usa para aquecer só no processo que atende |
 
 - `seed_path` (`DEFAULT_SEED_PATH = backend/app/data/seed.json`) **não** vem de variável de ambiente; só pode ser passado ao construtor de `Settings`.
-- O `backend/.env` local não define `HOST` nem `FALLBACK_TO_LOCAL`, então valem os defaults. O servidor atual não libera o origin `http://127.0.0.1:3000`.
-- Lado do frontend (só referência): `frontend/.env.example` tem `NEXT_PUBLIC_API_URL`. Sem ele, o navegador chama `http://<mesmo host da página>:5000/api` (`frontend/services/apiClient.ts`, `apiBaseUrl()`).
+- O `backend/.env` local não define `HOST` nem `FALLBACK_TO_LOCAL`, então valem os defaults. O servidor atual não libera o origin `http://127.0.0.1:9000`.
+- Lado do frontend (só referência): `frontend/.env.example` tem `NEXT_PUBLIC_API_URL`. Sem ele, o navegador chama `http://<mesmo host da página>:9001/api` (`frontend/services/apiClient.ts`, `apiBaseUrl()`).
 
 **`DATA_SOURCE`** (`_create_raw_data_source` em `data_source.py`):
 
@@ -177,7 +182,7 @@ Os 501 vêm de `GamificationService` e `UserService`, que só levantam `NotImple
 
 ## 4. DataSource (`backend/app/repositories/data_source.py`)
 
-- **`DataSource`** é um `Protocol` só de leitura: `name`, `list(table, filters=None, order_by=None)`, `get(table, column, value)`, `ping()`. Não existe API de escrita.
+- **`DataSource`** é um `Protocol`: `name`, `list(table, filters=None, order_by=None)`, `get(table, column, value)`, `ping()` e, desde 22/10/2026, `insert(table, row)` e `update(table, filters, values)` só para as tabelas de conta. `LocalDataSource` grava em memória (some ao reiniciar; serve para testes e `DATA_SOURCE=local`); `SupabaseDataSource` transforma violação de unicidade (23505) em `ConflictError` e coluna ausente (42703/PGRST204) em 503 com log apontando a migration de contas; `CachedDataSource` só repassa a escrita.
 
 ### LocalDataSource
 - Carrega o JSON no `__init__`.
@@ -286,14 +291,15 @@ Regras gerais:
 ## 8. Seed: `supabase/seed.sql` × `backend/app/data/seed.json`
 
 - O seed.sql se declara "espelho exato" do seed.json, que é um snapshot da produção.
-- Os inserts seguem a ordem das FKs (age_ranges → galaxies → planetary_systems → planets → lessons → labs) e terminam em `on conflict (id) do nothing`. Os campos jsonb usam `'…'::jsonb`, 16 ocorrências.
+- Os inserts seguem a ordem das FKs (age_ranges → galaxies → planetary_systems → planets → lessons → labs → achievements) e terminam em `on conflict (id) do nothing`. Os campos jsonb usam `'…'::jsonb`, 32 + 19 ocorrências (aulas, labs e conquistas).
+- `achievements` (24/10/2026): 19 linhas (slug = código `c-01`…`s-03`, `sprite_key` = slug, `criteria` = `{code, rarity, secret}`). Gerados pela mesma lista de `frontend/config/achievements.ts`; `AchievementTest.test_frontend_config_matches_the_catalog` confere slug, raridade e nome na mesma ordem. No Supabase entram pela migration `20261024000000_achievements.sql` (que também atualiza nome/descrição se rodar de novo).
 - **Conteúdo:**
   - 2 faixas: `13-ou-menos` (0–13) e `14-ou-mais` (14–null).
   - 2 galáxias: `internet-e-web` (faixa 13-, sprite `galaxy-internet-e-web`) e `api-rest` (faixa 14+).
   - 8 sistemas: 4 por galáxia, sprites `star-1..4`, `description` null.
   - 16 planetas, 8 aulas e 8 labs, **todos na galáxia `internet-e-web`**: 4 sistemas com 4 planetas cada (x.1 e x.2 são lesson, x.3 e x.4 são lab).
-  - Os 4 sistemas de `api-rest` (`conhecendo-uma-api`, `requisicoes-http`, `entendendo-os-dados`, `api-em-situacoes-reais`) **não têm planetas**.
-  - Todos os labs têm `max_score` 100. Tipos de `config.type`: montagem, diagnostico, associacao, labirinto, construtor, correcao, investigacao, decisoes.
+  - Os 4 sistemas de `api-rest` (`conhecendo-uma-api`, `requisicoes-http`, `entendendo-os-dados`, `api-em-situacoes-reais`) têm 4 planetas cada desde 22/10/2026 (32 planetas no total; tabela em `motores-g2.md`).
+  - Todos os labs têm `max_score` 10000 (desde 22/10/2026, pontuação da equipe; também no Supabase). Tipos de `config.type`: montagem, diagnostico, associacao, labirinto, construtor, correcao, investigacao, decisoes.
 - **Invariantes conferidas em teste:**
   - o slug da aula ou lab é igual ao slug do planeta;
   - `content.engine` / `config.engine` é igual ao slug;
@@ -344,7 +350,7 @@ python -m venv .venv                      # ou: py -3.12 -m venv .venv  (qualque
 .\.venv\Scripts\Activate.ps1              # cmd: .venv\Scripts\activate  (se o PS bloquear: Set-ExecutionPolicy -Scope Process Bypass)
 pip install -r requirements.txt
 Copy-Item .env.example .env               # preencher SUPABASE_URL/SUPABASE_KEY, ou DATA_SOURCE=local
-python run.py                             # http://127.0.0.1:5000/api/health
+python run.py                             # http://127.0.0.1:9001/api/health
 python -m unittest discover -s tests      # 110 testes
 python -m unittest discover -s tests -p "test_resilience.py"     # um arquivo
 python -m unittest tests.test_resilience.SettingsTest            # uma classe
@@ -352,7 +358,7 @@ python -m unittest tests.test_resilience.SettingsTest            # uma classe
 ```
 
 - Supabase: no SQL Editor, rode a migration e depois `supabase/seed.sql`. Com a CLI já vinculada, `supabase db push` e depois o seed.
-- Feira (tablets): no `backend/.env`, `FLASK_DEBUG=0`, `HOST=0.0.0.0` e `CORS_ORIGINS=http://localhost:3000,http://<IP>:3000`. Libere as portas 3000 e 5000 no firewall (rede privada).
+- Feira (tablets): no `backend/.env`, `FLASK_DEBUG=0`, `HOST=0.0.0.0` e `CORS_ORIGINS=http://localhost:9000,http://<IP>:9000`. Libere as portas 9000 e 9001 no firewall (rede privada).
 - Para publicar conteúdo novo do banco antes de o TTL vencer, reinicie a API.
 
 ## 12. Como estender (padrão do código)
@@ -363,7 +369,7 @@ python -m unittest tests.test_resilience.SettingsTest            # uma classe
 4. Crie o repositório herdando `BaseRepository` (`table`, `model`, `default_order`) e o model como dataclass frozen herdando `Model`.
 5. Ligue tudo em `create_app()` (`app/__init__.py`) e, se for um controller novo, no dataclass `Controllers`.
 6. Uma nova tabela de catálogo precisa entrar em `CATALOG_TABLES` para ganhar cache e reserva. Atualize migration, seed.sql e seed.json com **a mesma ordem de colunas**; os testes de seed e migration vão exigir isso.
-7. Gamificação e usuários (hoje 501):
+7. Gamificação e usuários (só `/scores` ainda 501; as notas abaixo são de antes das contas):
    - o `DataSource` é só leitura, então será preciso acrescentar escrita;
    - essas tabelas ficam fora do cache e da reserva, então o Supabase fora do ar devolve 503;
    - o backend usa service_role, que ignora RLS;
@@ -382,11 +388,11 @@ python -m unittest tests.test_resilience.SettingsTest            # uma classe
 - Tabelas fora de CATALOG_TABLES (users, scores, user_progress etc.) nunca usam cache nem reserva. Quando forem implementadas, o Supabase fora do ar vai devolver 503 nelas. O Protocol DataSource é só leitura (list/get/ping) e não tem métodos de escrita.
 - O pré-aquecimento só acontece via 'python run.py' e só se CATALOG_CACHE_SECONDS > 0. Com FLASK_DEBUG=1 o reloader cria dois processos e só o filho (WERKZEUG_RUN_MAIN=true) aquece. create_app(), os testes e servidores WSGI não aquecem. catalog_paths precisa pedir as mesmas URLs do frontend, porque a chave de cache inclui filtros e ordem.
 - Com HOST fora do loopback (ex.: 0.0.0.0), run.py ignora FLASK_DEBUG=1 por segurança: o debugger do Werkzeug executa código.
-- O CORS compara o Origin de forma exata. O default ('http://localhost:3000' e 'http://127.0.0.1:3000') só vale quando CORS_ORIGINS está vazio. O .env.example (e o .env atual) liberam só http://localhost:3000, então abrir o frontend em http://127.0.0.1:3000 ou pelo IP da rede falha por CORS até a origem ser adicionada.
+- O CORS compara o Origin de forma exata. O default ('http://localhost:9000' e 'http://127.0.0.1:9000') só vale quando CORS_ORIGINS está vazio. O .env.example (e o .env atual) liberam só http://localhost:9000, então abrir o frontend em http://127.0.0.1:9000 ou pelo IP da rede falha por CORS até a origem ser adicionada.
 - load_dotenv não sobrescreve variáveis que já existem no SO: uma variável definida no ambiente do Windows vence o backend/.env. PORT ou CATALOG_CACHE_SECONDS inválidos derrubam a inicialização com ValueError; DATA_SOURCE inválido, ou 'supabase' sem URL/KEY, gera RuntimeError.
 - seed.sql usa 'on conflict (id) do nothing': rodar de novo não atualiza linhas que já existem. Para corrigir conteúdo, faça update ou delete no banco.
-- seed.json, seed.sql e a migration precisam estar sincronizados, inclusive na ordem das colunas (test_rows_are_identical e test_catalog_columns_match_the_snapshot). Invariantes testadas: o slug da aula ou lab é igual ao slug do planeta, content.engine/config.engine é igual ao slug, há 16 planetas G1 e todo max_score é 100.
-- A galáxia 'api-rest' (faixa 14+) tem 4 sistemas e nenhum planeta, aula ou lab no seed. Todo o conteúdo atual está em 'internet-e-web'.
+- seed.json, seed.sql e a migration precisam estar sincronizados, inclusive na ordem das colunas (test_rows_are_identical e test_catalog_columns_match_the_snapshot). Invariantes testadas: o slug da aula ou lab é igual ao slug do planeta, content.engine/config.engine é igual ao slug, há 16 planetas G1 e todo max_score é 10000. O PUT /progress limita os pontos a `max_score` (padrão 10.000).
+- A galáxia 'api-rest' (faixa 14+) tem 16 planetas (8 aulas, 8 labs) desde 22/10/2026, nos dois seeds e no Supabase. Os testes conferem G1_ENGINES + G2_ENGINES (ALL_ENGINES).
 - Os models de backend/app/models/gamification.py e user.py não são usados e não batem com a migration. Exemplos: ProgressEntry tem planet_id, mas user_progress tem entity_type/entity_id/progress_percent; Score não tem galaxy_id, que é obrigatório; Achievement.rarity e Avatar.order_index não existem nas tabelas. Alinhe antes de implementar os endpoints que hoje respondem 501.
 - Um query param vazio (ex.: '?galaxy=') responde 400 em vez de ser ignorado. Refs em UUID viram minúsculas; slugs diferenciam maiúsculas e minúsculas. Em /api/lessons/<ref> e /api/labs/<ref>, o ref pode ser o id ou slug do planeta, e um planeta do tipo errado dá 404 com mensagem específica.
 - SUPABASE_KEY é a chave service_role, que ignora RLS: use só no backend, nunca no frontend. Settings.supabase_key tem repr=False e um teste garante que a chave não aparece nos logs. Nunca copie valores do backend/.env para documentação.

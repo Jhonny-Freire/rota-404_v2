@@ -37,6 +37,37 @@
   padding: 0;
 }
 
+/*
+ * fit: a tela tem a altura da janela (sem rolagem) em telas largas. O Bonzi flutua no canto sem reservar 150 px
+ * embaixo; a página põe o que pode encolher num FitToHeight (mapas). Se ainda não couber, a página rola como antes.
+ */
+@media (min-width: 900px) {
+  .fit {
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .fit .frame {
+    min-height: 0;
+    gap: 14px;
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+
+  .fit.immersive .frame {
+    padding: 0;
+  }
+
+  .fit .main {
+    min-height: 0;
+    gap: 18px;
+  }
+
+  .fit .withBonzi {
+    padding-bottom: 0;
+  }
+}
+
 @media (max-width: 767px) {
   .frame {
     gap: 14px;

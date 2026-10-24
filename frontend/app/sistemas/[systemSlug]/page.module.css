@@ -241,27 +241,12 @@
   animation: ribbonIn 480ms steps(4) both;
 }
 
+/* o sol fica no centro; os planetas numa grade de 2 linhas, à esquerda e à direita dele (ver orbitCell) */
 .orbit {
-  --lift: 62px;
   position: relative;
   width: 100%;
-  aspect-ratio: 2.15;
-  min-height: 620px;
-  /* os rótulos dos planetas de baixo passam um pouco da órbita */
-  margin-bottom: 56px;
-}
-
-.outerRing {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: calc(var(--orbit-rx) * 2);
-  height: calc(var(--orbit-ry) * 2);
-  border: 2px dashed rgba(185, 179, 217, 0.3);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 40px rgba(107, 63, 160, 0.18) inset;
-  pointer-events: none;
+  margin-bottom: 32px;
+  padding: 24px 0;
 }
 
 .core {
@@ -303,27 +288,21 @@
   pointer-events: none;
 }
 
-.rocketSlot {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  z-index: 2;
-  line-height: 0;
-  transform: translate(-50%, -50%);
-}
-
 .planets {
-  position: absolute;
-  inset: 0;
+  position: relative;
   z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) calc(var(--core-gap, 300px)) minmax(0, 1fr);
+  align-items: start;
+  row-gap: 56px;
   list-style: none;
 }
 
 .planet {
-  position: absolute;
   display: flex;
+  grid-column: var(--col);
+  grid-row: var(--row);
   justify-content: center;
-  transform: translate(-50%, calc(var(--lift) * -1));
 }
 
 /* rótulos mais largos: nomes longos de planeta quebram em menos linhas e não invadem o vizinho */
@@ -331,6 +310,10 @@
 .planet > button,
 .planet > div {
   max-width: 250px;
+}
+
+.stop {
+  position: relative;
 }
 
 .planet:hover,
@@ -347,6 +330,13 @@
 
 .travel .nextButton {
   flex-direction: row-reverse;
+}
+
+/* tela que cabe na janela: os botões ficam à esquerda, longe do canto onde o Bonzi flutua */
+@media (min-width: 900px) {
+  .travel {
+    justify-content: flex-start;
+  }
 }
 
 @keyframes spin {
@@ -387,8 +377,8 @@
 }
 
 @media (max-width: 1279px) {
-  .orbit {
-    --lift: 54px;
+  .planets {
+    --core-gap: 240px;
   }
 }
 
@@ -402,8 +392,8 @@
     justify-self: start;
   }
 
-  .orbit {
-    --lift: 46px;
+  .planets {
+    --core-gap: 200px;
   }
 }
 
@@ -460,14 +450,8 @@
     flex-direction: column;
     align-items: center;
     gap: 64px;
-    aspect-ratio: auto;
-    min-height: 0;
     margin-bottom: 0;
     padding-top: 56px;
-  }
-
-  .outerRing {
-    display: none;
   }
 
   .core {
@@ -487,8 +471,8 @@
   }
 
   .planet {
-    position: static;
-    transform: none;
+    grid-column: auto;
+    grid-row: auto;
   }
 }
 

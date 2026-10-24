@@ -276,20 +276,27 @@ const TAIL = 3;
 const LABEL_SPACE = 6.6;
 
 /**
- * Balão "Parou aqui!" junto do ponto em que o pacote parou, com o rabicho apontando para ele.
- * Cada lugar foi escolhido no espaço livre ao redor da fileira, sem cobrir legendas, selos, linhas nem a parede da casa
- * (conferido com o palco a 560 e 900 px).
+ * Balão de erro junto da peça com problema, com o rabicho apontando para ela. Nas falhas do Wi-Fi, do roteador e do
+ * cabo o pacote para na própria peça ("Parou aqui!"). Na falha do computador o pacote vai até a impressora, mas o
+ * problema é o computador (é nele que se conserta): o balão fica nele (revisão de 23/10/2026: na impressora, as
+ * crianças achavam que a impressora estava quebrada).
+ * Cada lugar foi escolhido no espaço livre ao redor da fileira, sem cobrir legendas, selos, linhas nem a parede da casa.
  */
-export const STOP_CALLOUT: Record<FaultId, { at: ScenePoint; anchor: PlaceAnchor; tail: "left" | "up" | "down" }> = {
+export const STOP_CALLOUT: Record<FaultId, { at: ScenePoint; anchor: PlaceAnchor; tail: "left" | "up" | "down"; text: string }> = {
   // acima do Wi-Fi, um pouco à direita para não encostar na legenda da impressora e um pouco mais alto para não
   // encostar no anel do roteador já investigado
-  wifi: { at: { x: POS.wifi.x + 2, y: POS.wifi.y - halfHeight("wifi") - TAIL - 1 }, anchor: "bottom", tail: "down" },
+  wifi: { at: { x: POS.wifi.x + 2, y: POS.wifi.y - halfHeight("wifi") - TAIL - 1 }, anchor: "bottom", tail: "down", text: "Parou aqui!" },
   // acima do lugar vazio, um pouco à esquerda para não encostar na parede da casa
-  router: { at: { x: POS.router.x - 1.5, y: POS.router.y - SLOT.height / 2 / VU - TAIL }, anchor: "bottom", tail: "down" },
+  router: { at: { x: POS.router.x - 1.5, y: POS.router.y - SLOT.height / 2 / VU - TAIL }, anchor: "bottom", tail: "down", text: "Parou aqui!" },
   // embaixo da legenda do cabo solto: acima ficaria entre as linhas, à direita sobre o selo da Internet
-  cable: { at: { x: POS.loose.x, y: POS.loose.y + halfHeight("cable") + LABEL_SPACE + TAIL }, anchor: "top", tail: "up" },
-  // à direita da impressora, entre o nome da rede de casa e a legenda da impressora: o rabicho chega perto do anel dela
-  target: { at: { x: POS.printer.x + spriteSize("printer") / 2 + 3.25, y: POS.printer.y - 1.9 }, anchor: "left", tail: "left" },
+  cable: { at: { x: POS.loose.x, y: POS.loose.y + halfHeight("cable") + LABEL_SPACE + TAIL }, anchor: "top", tail: "up", text: "Parou aqui!" },
+  // à direita do computador, acima do Wi-Fi e abaixo da legenda da impressora: o rabicho chega perto do anel dele
+  target: {
+    at: { x: POS.pc.x + spriteSize("pc") / 2 + 3.25, y: POS.pc.y - halfHeight("pc") - 3 },
+    anchor: "left",
+    tail: "left",
+    text: "Caminho errado!",
+  },
 };
 
 export const travelMs = (path: ScenePoint[]) =>

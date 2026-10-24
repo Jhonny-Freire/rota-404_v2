@@ -45,6 +45,8 @@ export type OrderCardsProps = {
   disabled?: boolean;
   /** quanto tempo (ms) a marca de erro fica visível. Padrão 1400 */
   retryMs?: number;
+  /** cartões da mesma largura, ícones na mesma altura e nomes alinhados (sprites de proporções diferentes) */
+  uniform?: boolean;
   ariaLabel?: string;
   className?: string;
 };
@@ -69,6 +71,7 @@ export function OrderCards({
   showNumbers = true,
   disabled = false,
   retryMs = 1400,
+  uniform = false,
   ariaLabel,
   className,
 }: OrderCardsProps) {
@@ -234,11 +237,17 @@ export function OrderCards({
     }
     setWrongIndex(Math.max(0, firstWrong));
     setAnnouncement(`A posição ${Math.max(0, firstWrong) + 1} ainda não está certa.`);
+    /* "Verificar" fica desativado durante a nova tentativa: o foco iria para o body; leva-o ao cartão marcado */
+    const wrongId = order[Math.max(0, firstWrong)];
+    timers.after(0, () => {
+      const active = document.activeElement;
+      if (!active || active === document.body || active.closest("button")?.disabled) cardRefs.current.get(wrongId)?.focus();
+    }, { hold: true });
     timers.after(retryMs, () => setWrongIndex(-1), { hold: true });
   };
 
   return (
-    <div className={cx(styles.root, styles[direction], className)} style={cssVars({ "--s": size })}>
+    <div className={cx(styles.root, styles[direction], uniform && styles.uniform, className)} style={cssVars({ "--s": size })}>
       <ol className={styles.list} aria-label={ariaLabel ?? "Sequência"}>
         {order.map((id, index) => {
           const item = byId.get(id);

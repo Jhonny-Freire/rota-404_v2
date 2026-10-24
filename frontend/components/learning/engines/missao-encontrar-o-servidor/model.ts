@@ -322,5 +322,8 @@ export const TIMING = {
   finishHold: 4200,
 } as const;
 
-/** erros totais a partir dos quais o Bonzi mostra a direção do próximo passo */
+/**
+ * Erros totais a partir dos quais o Bonzi pode mostrar a direção do próximo passo. A seta só aparece no cruzamento em
+ * que a criança acabou de errar: num cruzamento novo ela sempre tenta sozinha primeiro.
+ */
 export const HELP_AFTER = 2;

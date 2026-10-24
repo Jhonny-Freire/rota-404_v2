@@ -6,9 +6,10 @@ import { AppShell } from "@/components/layout/AppShell";
 import { StatusView } from "@/components/layout/StatusView";
 import { Sprite } from "@/components/ui/Sprite";
 import { cx } from "@/components/ui/cx";
-import { DEFAULT_GALAXY_SPRITE, PLANET_SPRITES, SPRITES, galaxySprite, systemSprite } from "@/config/assets";
+import { DEFAULT_GALAXY_SPRITE, SPRITES, galaxySprite, systemSprite } from "@/config/assets";
 import { ROUTES } from "@/config/routes";
 import { useAsync } from "@/hooks/useAsync";
+import { useSession } from "@/hooks/useSession";
 import { getErrorMessage } from "@/services/apiClient";
 import { getGalaxies, getSystems } from "@/services/catalogService";
 import { getGalaxyRanking, getSystemRanking } from "@/services/gamificationService";
@@ -18,7 +19,7 @@ type Scope = "galaxy" | "system";
 
 const TABS: { id: Scope; label: string; sprite: string }[] = [
   { id: "galaxy", label: "Por galáxia", sprite: DEFAULT_GALAXY_SPRITE },
-  { id: "system", label: "Por sistema", sprite: PLANET_SPRITES.dns },
+  { id: "system", label: "Por sistema", sprite: systemSprite("dispositivos-e-conexao", 0) },
 ];
 
 const EMPTY_MESSAGE = "O ranking aparecerá quando as primeiras missões forem concluídas.";
@@ -29,6 +30,7 @@ export default function RankingPage() {
   const [galaxySlug, setGalaxySlug] = useState("");
   const [systemSlug, setSystemSlug] = useState("");
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const { user } = useSession();
 
   const catalog = useAsync(() => Promise.all([getGalaxies(), getSystems()]), [], { cacheKey: "galaxies+systems" });
   const galaxies = catalog.data?.[0] ?? [];
@@ -37,8 +39,13 @@ export default function RankingPage() {
     .map((galaxy) => ({ galaxy, systems: systems.filter((s) => s.galaxy_id === galaxy.id) }))
     .filter((group) => group.systems.length > 0);
   const orderedSystems = groups.flatMap((group) => group.systems);
-  const selectedGalaxy = galaxies.find((g) => g.slug === galaxySlug) ?? galaxies[0];
-  const selectedSystem = orderedSystems.find((s) => s.slug === systemSlug) ?? orderedSystems[0];
+  // sem escolha, abre na galáxia (e no 1º sistema) da faixa etária da conta
+  const myGalaxy = galaxies.find((g) => g.age_range_id === user?.age_range_id);
+  const selectedGalaxy = galaxies.find((g) => g.slug === galaxySlug) ?? myGalaxy ?? galaxies[0];
+  const selectedSystem =
+    orderedSystems.find((s) => s.slug === systemSlug) ??
+    orderedSystems.find((s) => s.galaxy_id === myGalaxy?.id) ??
+    orderedSystems[0];
 
   const onTabKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
     const targets: Record<string, number> = { ArrowRight: index + 1, ArrowLeft: index - 1, Home: 0, End: TABS.length - 1 };
@@ -134,8 +141,9 @@ export default function RankingPage() {
 
   return (
     <AppShell
+      fit
       breadcrumbs={[{ label: "Início", href: ROUTES.home }, { label: "Ranking" }]}
-      bonzi={{ state: "idle", message: "Escolha uma galáxia ou um sistema para ver quem lidera." }}
+      bonzi={{ state: "idle", message: "Cada laboratório concluído soma a sua melhor pontuação. Veja quem lidera!" }}
     >
       <header className={styles.header}>
         <Sprite src={SPRITES.ui.ranking} alt="" decorative size={64} className={styles.trophy} />
@@ -193,5 +201,12 @@ function RankingResult({ scope, slug, title }: { scope: Scope; slug: string; tit
     return <StatusView kind="error" message={getErrorMessage(ranking.error)} onRetry={ranking.reload} />;
   }
 
-  return <RankingBoard title={title} entries={ranking.data?.entries ?? []} emptyMessage={EMPTY_MESSAGE} />;
+  return (
+    <RankingBoard
+      title={title}
+      entries={ranking.data?.entries ?? []}
+      me={ranking.data?.me ?? null}
+      emptyMessage={EMPTY_MESSAGE}
+    />
+  );
 }

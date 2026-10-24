@@ -1,0 +1,96 @@
+/* Vaga da nave ao lado do destino (left/top vêm do mapa) */
+.dock {
+  position: absolute;
+  left: calc(50% + var(--dock-x, 0px) * var(--dock-k, 1));
+  z-index: 3;
+  line-height: 0;
+  pointer-events: none;
+}
+
+/* Nave andando pelo traçado: sem drop-shadow (recalculado a cada quadro com a rotação) */
+.traveler {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 5;
+  line-height: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Bonzi pergunta se quer entrar (só nos mapas com `confirm`; fixo no pé da tela, acima de tudo) */
+.briefing {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  z-index: 180;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  width: min(460px, calc(100vw - 32px));
+  padding: 14px 16px;
+  background: var(--space-900);
+  color: var(--text);
+  box-shadow:
+    0 0 0 3px var(--cyan),
+    8px 8px 0 0 rgba(0, 0, 0, 0.45);
+  transform: translateX(-50%);
+  animation: briefing-in 0.3s steps(4) both;
+}
+
+.bonzi {
+  flex: none;
+  width: 64px;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.kicker {
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.title {
+  color: var(--yellow);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.question {
+  font-size: 16px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+@keyframes briefing-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%);
+  }
+}
+
+/* telas estreitas: a vaga fica mais perto do destino (longe demais, a nave saía pela borda) */
+@media (max-width: 599px) {
+  .dock {
+    --dock-k: 0.7;
+  }
+}

@@ -6,14 +6,19 @@ import { ScoreCounter, formatPoints } from "@/components/gamification/ScoreCount
 import { Sprite } from "@/components/ui/Sprite";
 import { cx } from "@/components/ui/cx";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { MEDAL_LABELS, MEDAL_SPRITES, labPoints, medalFor, type Medal } from "@/lib/progress";
+import { whenIdle } from "@/services/narrationService";
+import type { LabTiming } from "@/config/labTiming";
+import { LAB_SCORE, MEDAL_LABELS, MEDAL_SPRITES, formatDuration, labScore, medalFor, type LabScore, type Medal } from "@/lib/progress";
 import { CompletionPanel, type CompletionAction } from "./CompletionPanel";
-import { EMPTY_LINE, Narrator, type NarratorLine } from "./Narrator";
+import { ListenButton, useGuideVoice } from "./GuideVoice";
+import { Narrator } from "./Narrator";
+import { useBonziLine } from "./useBonziLine";
 import { SceneStage } from "./SceneStage";
+import { playSceneIn } from "./sceneTransition";
 import { ShellHeader } from "./ShellHeader";
 import { EngineBoundary } from "./runtime/EngineBoundary";
 import { Interaction, PortalTargets, Stage } from "./runtime/portals";
-import type { LabEngineMeta, LabEngineProps, LabFeedback, LabFeedbackTone, NextPlanetLink, Say } from "./runtime/types";
+import type { LabEngineMeta, LabEngineProps, LabFeedback, LabFeedbackTone, NextPlanetLink } from "./runtime/types";
 import styles from "./LabShell.module.css";
 
 export type LabShellProps = {
@@ -24,13 +29,15 @@ export type LabShellProps = {
   Engine: ComponentType<LabEngineProps>;
   /** labs.max_score */
   maxScore: number;
+  /** tempos de referência do bônus de tempo (config/labTiming.ts) */
+  timing: LabTiming;
   /** melhor pontuação salva (antes/depois de concluir) */
   bestPoints?: number | null;
   backHref: string;
   backLabel?: string;
   nextPlanet?: NextPlanetLink | null;
-  /** chamado uma vez por partida concluída, com a pontuação final */
-  onFinish?: (points: number) => void;
+  /** chamado uma vez por partida concluída, com a pontuação final e os erros da partida */
+  onFinish?: (points: number, mistakes: number) => void;
 };
 
 /** Ícone de cada tipo de mensagem, em tamanho inteiro da arte (ok/erro: 22px = 1×; ? e lupa: 2×). */
@@ -55,7 +62,61 @@ const GUIDE_TONES: Partial<Record<LabFeedbackTone, string>> = {
   success: styles.guideSuccess,
 };
 
-type Result = { points: number; medal: Medal; previousBest: number | null };
+type Result = { points: number; medal: Medal; previousBest: number | null; score: LabScore; seconds: number };
+
+/** Cronômetro da partida: só conta com a aba visível (aba escondida não gasta o bônus de tempo). */
+function createStopwatch() {
+  let acc = 0;
+  let since: number | null = typeof document === "undefined" || !document.hidden ? performance.now() : null;
+  return {
+    seconds: () => (acc + (since === null ? 0 : performance.now() - since)) / 1000,
+    hide: () => {
+      if (since !== null) acc += performance.now() - since;
+      since = null;
+    },
+    show: () => {
+      if (since === null) since = performance.now();
+    },
+  };
+}
+
+type Stopwatch = ReturnType<typeof createStopwatch>;
+
+/**
+ * HUD ao vivo (tempo) num componente próprio: o tique de 1 s re-renderiza só este pedaço, nunca o laboratório.
+ * Os pontos só aparecem na conclusão: ver a pontuação caindo durante o jogo desanima a criança.
+ */
+function LiveHud({ stopwatch, result }: { stopwatch: Stopwatch; result: Result | null }) {
+  const [, tick] = useState(0);
+  useEffect(() => {
+    if (result) return;
+    const id = window.setInterval(() => tick((t) => t + 1), 1000);
+    return () => window.clearInterval(id);
+  }, [result]);
+  const seconds = result ? result.seconds : stopwatch.seconds();
+  return (
+    <>
+      {result && (
+        <>
+          <div className={styles.stat}>
+            <Sprite src={SPRITES.rewards.star} alt="" decorative size={28} className={styles.hudStar} />
+            <span className={styles.statText}>
+              <span className={cx(styles.statValue, styles.pointsValue)}>{formatPoints(result.points)}</span>
+              <span className={styles.statLabel}>Pontos</span>
+            </span>
+          </div>
+          <span className={styles.hudDivider} aria-hidden="true" />
+        </>
+      )}
+      <div className={styles.stat}>
+        <span className={styles.statText}>
+          <span className={styles.statValue}>{formatDuration(seconds)}</span>
+          <span className={styles.statLabel}>Tempo</span>
+        </span>
+      </div>
+    </>
+  );
+}
 
 export function LabShell({
   title,
@@ -64,6 +125,7 @@ export function LabShell({
   meta,
   Engine,
   maxScore,
+  timing,
   bestPoints = null,
   backHref,
   backLabel = "Voltar ao sistema",
@@ -82,27 +144,45 @@ export function LabShell({
   const [step, setStepState] = useState(0);
   const [fb, setFb] = useState<LabFeedback>(null);
   const [result, setResult] = useState<Result | null>(null);
-  const [line, setLine] = useState<NarratorLine>(EMPTY_LINE);
+  const bonzi = useBonziLine();
+  const { line, say, clear: clearLine } = bonzi;
+  // o resultado/instrução do painel também é lido em voz alta, depois da fala do Bonzi
+  const listen = useGuideVoice(result ? null : (fb?.message ?? null), line.message);
   const [stageEl, setStageEl] = useState<HTMLDivElement | null>(null);
   const [interactionEl, setInteractionEl] = useState<HTMLDivElement | null>(null);
   const guideId = useId();
   const controlsId = useId();
   const mistakesRef = useRef(0);
   const finishedRef = useRef(false);
+  const attemptRef = useRef(0);
   const bestRef = useRef(bestPoints);
   const onFinishRef = useRef(onFinish);
   const maxRef = useRef(safeMax);
-  const points = labPoints(safeMax, mistakes);
+  const timingRef = useRef(timing);
+  const stopwatchRef = useRef<Stopwatch | null>(null);
+  if (stopwatchRef.current === null) stopwatchRef.current = createStopwatch();
+  /** segundos no momento em que o motor chamou finish (a espera pela última fala do Bonzi não conta) */
+  const finishSecondsRef = useRef(0);
 
   useEffect(() => {
     bestRef.current = bestPoints;
     onFinishRef.current = onFinish;
     maxRef.current = safeMax;
+    timingRef.current = timing;
   });
 
-  const say = useCallback<Say>((message, state = "speaking") => {
-    setLine((prev) => ({ message, state, key: prev.key + 1 }));
+  // "Jogar de novo": a nova tentativa entra suave no palco
+  useEffect(() => {
+    playSceneIn(stageEl, reducedMotion);
+  }, [attempt, stageEl, reducedMotion]);
+
+  useEffect(() => {
+    const onVisibility = () => (document.hidden ? stopwatchRef.current?.hide() : stopwatchRef.current?.show());
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
   }, []);
+
+  // `say` vem da fila do Bonzi (useBonziLine): uma fala nova espera a atual terminar, nunca a corta
 
   const feedback = useCallback((value: LabFeedback) => setFb(value), []);
 
@@ -114,36 +194,45 @@ export function LabShell({
     setMistakes(mistakesRef.current);
   }, []);
 
+  /** Conclui: espera o Bonzi terminar a última fala do laboratório antes de mostrar o resultado. */
   const finish = useCallback(() => {
     if (finishedRef.current) return;
     finishedRef.current = true;
-    const max = maxRef.current;
-    const final = labPoints(max, mistakesRef.current);
-    const previousBest = bestRef.current ?? null;
-    const medal = medalFor(final, max);
-    setResult({ points: final, medal, previousBest });
-    setLine((prev) => ({
-      message: `Laboratório concluído! Você fez ${final} pontos.`,
-      state: "happy",
-      key: prev.key + 1,
-    }));
-    onFinishRef.current?.(final);
+    finishSecondsRef.current = stopwatchRef.current?.seconds() ?? 0;
+    const run = attemptRef.current;
+    whenIdle(12000).then(() => {
+      if (attemptRef.current === run) showResult();
+    });
   }, []);
 
+  const showResult = () => {
+    const max = maxRef.current;
+    const seconds = finishSecondsRef.current;
+    const score = labScore(mistakesRef.current, seconds, timingRef.current, max);
+    const final = score.total;
+    const previousBest = bestRef.current ?? null;
+    const medal = medalFor(final, max);
+    setResult({ points: final, medal, previousBest, score, seconds });
+    // só escrito: a pontuação não tem gravação (caía na voz do navegador), pedido da equipe em 24/10
+    say(`Laboratório concluído! Você fez ${formatPoints(final)} pontos.`, "happy", { silent: true });
+    onFinishRef.current?.(final, mistakesRef.current);
+  };
+
   const playAgain = () => {
+    attemptRef.current += 1;
     finishedRef.current = false;
     mistakesRef.current = 0;
+    stopwatchRef.current = createStopwatch();
     setMistakes(0);
     setStepState(0);
     setFb(null);
     setResult(null);
-    setLine(EMPTY_LINE);
+    clearLine();
     setAttempt((a) => a + 1);
   };
 
   const best = result ? Math.max(result.points, result.previousBest ?? 0) : bestPoints;
   const newRecord = result !== null && result.previousBest !== null && result.points > result.previousBest;
-  const shownPoints = result ? result.points : points;
 
   const actions: CompletionAction[] = [
     { label: "Jogar de novo", sprite: SPRITES.ui.play, onClick: playAgain },
@@ -160,14 +249,8 @@ export function LabShell({
         preview={preview}
         back={{ href: backHref, label: backLabel }}
         aside={
-          <section className={cx(styles.hud, result && styles.hudDone)} aria-label="Pontuação">
-            <div className={styles.stat}>
-              <Sprite src={SPRITES.rewards.star} alt="" decorative size={28} className={styles.hudStar} />
-              <span className={styles.statText}>
-                <span className={cx(styles.statValue, styles.pointsValue)}>{formatPoints(shownPoints)}</span>
-                <span className={styles.statLabel}>Pontos</span>
-              </span>
-            </div>
+          <section className={cx(styles.hud, result && styles.hudDone)} aria-label="Placar do laboratório">
+            <LiveHud stopwatch={stopwatchRef.current} result={result} />
             <span className={styles.hudDivider} aria-hidden="true" />
             <div className={cx(styles.stat, mistakes > 0 && styles.statWarn)}>
               <Sprite src={ELEMENTS.error} alt="" decorative size={22} className={styles.mistakeIcon} />
@@ -216,10 +299,28 @@ export function LabShell({
                 title={newRecord ? "Novo recorde!" : "Laboratório concluído!"}
                 actions={actions}
               >
-                <ScoreCounter points={result.points} label={`de ${safeMax} pontos`} size="lg" />
+                <ScoreCounter points={result.points} label={`de ${formatPoints(safeMax)} pontos`} size="lg" />
                 <span className={styles.medalName}>{MEDAL_LABELS[result.medal]}</span>
+                <dl className={styles.breakdown} aria-label="Como a pontuação foi calculada">
+                  <div>
+                    <dt>Conclusão</dt>
+                    <dd>{formatPoints(result.score.completion)}</dd>
+                  </div>
+                  <div>
+                    <dt>Erros ({mistakes})</dt>
+                    <dd>
+                      {formatPoints(result.score.errors)} de {formatPoints((LAB_SCORE.errors * safeMax) / LAB_SCORE.max)}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Tempo ({formatDuration(result.seconds)})</dt>
+                    <dd>
+                      {formatPoints(result.score.time)} de {formatPoints((2 * LAB_SCORE.timeHalf * safeMax) / LAB_SCORE.max)}
+                    </dd>
+                  </div>
+                </dl>
                 <span className={styles.best}>
-                  Melhor pontuação: <strong>{best ?? result.points}</strong>
+                  Melhor pontuação: <strong>{formatPoints(best ?? result.points)}</strong>
                 </span>
               </CompletionPanel>
             ) : (
@@ -256,6 +357,7 @@ export function LabShell({
                     <strong className={styles.feedbackLabel}>{FEEDBACK_TITLES[fb.tone]}</strong>{" "}
                     <span className={styles.feedbackText}>{fb.message}</span>
                   </p>
+                  <ListenButton onListen={listen} className={styles.feedbackListen} />
                 </div>
               )}
             </div>

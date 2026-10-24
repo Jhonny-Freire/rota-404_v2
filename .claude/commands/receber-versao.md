@@ -18,6 +18,6 @@ Recebemos uma nova versão do projeto (zip vindo de outro membro da equipe). Fa�
      (no Linux/WSL: `source .venv/bin/activate`). Confira se `backend/.env` existe (sem exibir o conteúdo da chave).
    - `cd frontend; npm install`.
 5. **Valide**: `python -m unittest discover -s tests` (backend), `npm run typecheck` e `npm run build` (frontend),
-   suba `python run.py` e `npm run dev` e confira `http://127.0.0.1:5000/api/health` e as páginas principais.
+   suba `python run.py` e `npm run dev` e confira `http://127.0.0.1:9001/api/health` e as páginas principais.
 6. **Relate** ao usuário: o que mudou, se tudo passou, e qualquer pendência encontrada. Pergunte qual é a próxima
    tarefa (normalmente o próximo sistema/planeta — ver "Próximos passos" no `CLAUDE.md`).

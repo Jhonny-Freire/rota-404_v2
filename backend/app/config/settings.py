@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 BACKEND_DIR = Path(__file__).resolve().parents[2]
 DEFAULT_SEED_PATH = BACKEND_DIR / "app" / "data" / "seed.json"
-DEFAULT_CORS_ORIGINS = ("http://localhost:3000", "http://127.0.0.1:3000")
+DEFAULT_CORS_ORIGINS = ("http://localhost:9000", "http://127.0.0.1:9000")
 DATA_SOURCES = ("auto", "supabase", "local")
 TRUE_VALUES = {"1", "true", "yes", "on"}
 FALSE_VALUES = {"0", "false", "no", "off"}
@@ -20,7 +20,7 @@ DEFAULT_CATALOG_CACHE_SECONDS = 3600
 @dataclass(frozen=True)
 class Settings:
     debug: bool = False
-    port: int = 5000
+    port: int = 9001
     data_source: str = "auto"
     supabase_url: str = ""
     supabase_key: str = field(default="", repr=False)
@@ -45,7 +45,7 @@ class Settings:
         )
         return cls(
             debug=env.get("FLASK_DEBUG", "").strip().lower() in TRUE_VALUES,
-            port=int(env.get("PORT", "").strip() or 5000),
+            port=int(env.get("PORT", "").strip() or 9001),
             data_source=env.get("DATA_SOURCE", "").strip().lower() or "auto",
             supabase_url=env.get("SUPABASE_URL", "").strip(),
             supabase_key=env.get("SUPABASE_KEY", "").strip(),

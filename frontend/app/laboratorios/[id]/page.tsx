@@ -12,7 +12,7 @@ export default function LabPage() {
   return (
     <Suspense
       fallback={
-        <AppShell>
+        <AppShell easterEgg={false}>
           <StatusView kind="loading" title="Montando o laboratório" />
         </AppShell>
       }

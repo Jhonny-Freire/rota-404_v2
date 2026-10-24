@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
-import { BONZI_FRAMES, SPRITES } from "@/config/assets";
+import { BONZI_FRAMES, BONZI_POSE_MS, SPRITES } from "@/config/assets";
 import { AnimatedSprite } from "@/components/ui/AnimatedSprite";
 import { Sprite } from "@/components/ui/Sprite";
 import { cx } from "@/components/ui/cx";
@@ -22,10 +22,13 @@ export type BonziBuddyProps = {
   audioSrc?: string;
   onClose?: () => void;
   onSpeechEnd?: () => void;
+  /** "Repetir": quem usa o Bonzi decide o que repetir (sem isto, repete a fala atual) */
+  onRepeat?: () => void;
   size?: number;
+  /** só o balão escrito, sem voz */
+  silent?: boolean;
 };
 
-const FPS: Record<BonziState, number> = { idle: 1, speaking: 5, happy: 1, thinking: 1.5, warning: 1, help: 1 };
 const AUTO_COLLAPSE_MS = 8000;
 
 export function BonziBuddy({
@@ -37,11 +40,15 @@ export function BonziBuddy({
   audioSrc,
   onClose,
   onSpeechEnd,
+  onRepeat,
   size = 120,
+  silent = false,
 }: BonziBuddyProps) {
   const { settings, hydrated } = useSettings();
   const reducedMotion = useReducedMotion();
   const [collapsed, setCollapsed] = useState(false);
+  /** "Repetir fala": muda para o Bonzi falar (e escrever) a mesma mensagem de novo */
+  const [replay, setReplay] = useState(0);
   const onSpeechEndRef = useRef(onSpeechEnd);
   const figureRef = useRef<HTMLButtonElement>(null);
   const bubbleRef = useRef<HTMLDivElement>(null);
@@ -51,7 +58,7 @@ export function BonziBuddy({
   const text = message?.trim() ?? "";
   const floating = position !== "inline";
   // digitação escrita direto no DOM (só re-renderiza no começo e no fim da fala)
-  const { typedRef, typing } = useTypewriter(text, messageKey, !reducedMotion);
+  const { typedRef, typing } = useTypewriter(text, `${messageKey ?? ""}:${replay}`, !reducedMotion);
 
   useEffect(() => {
     onSpeechEndRef.current = onSpeechEnd;
@@ -76,6 +83,10 @@ export function BonziBuddy({
 
   useEffect(() => {
     if (!visible || !text || !hydrated) return;
+    if (silent) {
+      onSpeechEndRef.current?.();
+      return;
+    }
     let active = true;
     narrationService
       .speak(text, { audioSrc, enabled: settings.narrationEnabled, volume: volumeRef.current, owner: speechOwner })
@@ -87,7 +98,7 @@ export function BonziBuddy({
       active = false;
       narrationService.stop(speechOwner);
     };
-  }, [text, messageKey, audioSrc, settings.narrationEnabled, visible, hydrated, speechOwner]);
+  }, [text, messageKey, replay, audioSrc, settings.narrationEnabled, visible, hydrated, speechOwner, silent]);
 
   if (!visible) return null;
 
@@ -106,7 +117,7 @@ export function BonziBuddy({
     <>
       <span className={styles.shadow} aria-hidden="true" />
       <span className={styles.figure}>
-        <AnimatedSprite frames={BONZI_FRAMES[displayState]} fps={FPS[displayState]} alt="" size={size} className={styles.sprite} />
+        <AnimatedSprite frames={BONZI_FRAMES[displayState]} fps={1000 / BONZI_POSE_MS} alt="" size={size} className={styles.sprite} />
       </span>
       {text && collapsed && <span className={styles.ping} aria-hidden="true" />}
     </>
@@ -122,9 +133,16 @@ export function BonziBuddy({
           <div key={`${messageKey ?? ""}:${text}`} className={cx(styles.bubble, state === "thinking" && styles.thought)}>
             <div className={styles.bubbleHeader}>
               <span className={styles.speaker}>Bonzi</span>
-              <button type="button" className={styles.close} onClick={close} aria-label="Fechar fala do Bonzi">
-                <Sprite src={SPRITES.ui.close} alt="" decorative size={18} />
-              </button>
+              <span className={styles.headerActions}>
+                <button type="button" className={styles.repeat} onClick={() => (onRepeat ? onRepeat() : setReplay((n) => n + 1))}
+                  aria-label="Repetir fala do Bonzi">
+                  <Sprite src={SPRITES.ui.soundOn} alt="" decorative size={16} />
+                  <span>Repetir</span>
+                </button>
+                <button type="button" className={styles.close} onClick={close} aria-label="Fechar fala do Bonzi">
+                  <Sprite src={SPRITES.ui.close} alt="" decorative size={18} />
+                </button>
+              </span>
             </div>
             <p className={styles.text}>
               <span className="sr-only">{text}</span>

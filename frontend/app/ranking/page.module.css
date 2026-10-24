@@ -221,3 +221,36 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* tela que cabe na janela (AppShell fit): o painel ocupa o resto da altura e a lista do ranking rola por dentro
+   (só com as duas colunas; abaixo de 1024px a página rola como antes) */
+@media (min-width: 1024px) {
+  .tabs {
+    padding-bottom: 10px;
+  }
+
+  .panel:not([hidden]) {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .layout {
+    flex: 1;
+    grid-template-rows: minmax(0, 1fr);
+    min-height: 0;
+  }
+
+  .picker {
+    align-self: start;
+  }
+
+  .result {
+    align-self: stretch;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--panel-border) transparent;
+  }
+}

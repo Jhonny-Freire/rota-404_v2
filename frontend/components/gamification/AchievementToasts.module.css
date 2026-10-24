@@ -1,0 +1,95 @@
+.stack {
+  position: fixed;
+  top: calc(var(--hud-height) + 12px);
+  right: 16px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  max-width: min(380px, calc(100vw - 32px));
+  pointer-events: none;
+}
+
+.toast {
+  --rarity: var(--cyan);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: var(--px);
+  padding: 10px 16px 10px 10px;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--rarity) 22%, transparent), transparent 70%),
+    var(--space-900);
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--rarity),
+    0 var(--px) 0 0 var(--rarity),
+    calc(var(--px) * -1) 0 0 0 var(--rarity),
+    var(--px) 0 0 0 var(--rarity),
+    8px 8px 0 0 rgba(0, 0, 0, 0.4);
+  animation: enter 260ms steps(4) both;
+}
+
+.rara {
+  --rarity: var(--yellow);
+}
+
+.lenda {
+  --rarity: #ff5fae;
+}
+
+.brutal {
+  --rarity: var(--red);
+}
+
+.secreta {
+  --rarity: #33e0c8;
+}
+
+.sprite {
+  flex: none;
+  filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.5));
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.label {
+  color: var(--rarity);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.name {
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.rarity {
+  color: var(--text-dim);
+  font-size: 14px;
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* "Reduzir animações": globals.css já zera as animações */
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
+}

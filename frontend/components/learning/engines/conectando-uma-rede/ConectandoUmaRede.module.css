@@ -407,3 +407,17 @@
 .route {
   justify-content: flex-start;
 }
+
+/* setas entre as colunas da área: o caminho vai do aparelho (esquerda) até a internet (direita) */
+.flowArrow {
+  position: absolute;
+  z-index: 1;
+  width: 3.2%;
+  min-width: 14px;
+  height: auto;
+  transform: translate(-50%, -50%);
+  image-rendering: pixelated;
+  pointer-events: none;
+  opacity: 0.85;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.5));
+}

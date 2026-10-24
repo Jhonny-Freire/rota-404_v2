@@ -1,0 +1,412 @@
+/* Laboratório 3.3 — Monte sua página (palco conferido a ~560 e ~900 px de largura) */
+
+.canvas {
+  --u: var(--kit-u, 1cqw);
+  background:
+    linear-gradient(180deg, rgba(58, 214, 255, 0.04), transparent 40%),
+    radial-gradient(ellipse 70% 45% at 50% 95%, rgba(107, 63, 160, 0.22), transparent 70%);
+}
+
+/* sem caixa: as colunas continuam posicionadas pelo SceneCanvas */
+.root {
+  display: contents;
+}
+
+.colFit {
+  transform-origin: 0 0;
+}
+
+.colTitle {
+  margin: 0 0 max(4px, calc(0.6 * var(--u)));
+  color: var(--yellow);
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: max(9px, calc(1.2 * var(--u)));
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+/* Coluna da esquerda: os blocos */
+
+.palette {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.blockPiece {
+  flex-direction: row;
+  justify-content: flex-start;
+  min-height: max(36px, calc(5 * var(--u)));
+  margin: max(3px, calc(0.45 * var(--u))) 0;
+}
+
+.used {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.pieceFace {
+  display: flex;
+  align-items: center;
+  gap: max(5px, calc(0.8 * var(--u)));
+  min-width: 0;
+  pointer-events: none;
+}
+
+.pieceName {
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(11px, calc(1.45 * var(--u)));
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* ícone do bloco em CSS (o mesmo na coluna de blocos e na área de edição) */
+.kindIcon {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  width: max(18px, calc(2.8 * var(--u)));
+  height: max(14px, calc(2.2 * var(--u)));
+  padding: 2px;
+  background: #fbfaff;
+  box-shadow: 0 0 0 2px #1b1640;
+}
+
+.kindIcon span {
+  display: block;
+  height: 2px;
+  background: #9b94c4;
+}
+
+.icon-title span:first-child {
+  height: 5px;
+  background: #1b1640;
+}
+
+.icon-title span:not(:first-child),
+.icon-image span,
+.icon-button span:not(:nth-child(2)) {
+  display: none;
+}
+
+.icon-text span:nth-child(3) {
+  width: 60%;
+}
+
+.icon-image {
+  padding: 3px;
+}
+
+.icon-image span:first-child {
+  display: block;
+  flex: 1;
+  background: linear-gradient(180deg, #8fd0ff 0 55%, #3ccf6e 55% 100%);
+}
+
+.icon-button {
+  align-items: center;
+}
+
+.icon-button span:nth-child(2) {
+  width: 80%;
+  height: 6px;
+  background: var(--blue);
+}
+
+/* Centro: área de edição */
+
+.editZone {
+  min-height: max(150px, calc(32 * var(--u)));
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: max(6px, calc(0.9 * var(--u)));
+  padding: max(5px, calc(0.7 * var(--u))) max(6px, calc(0.9 * var(--u)));
+  background: var(--space-800);
+  color: var(--text);
+  box-shadow:
+    0 0 0 2px var(--panel-border),
+    inset -2px -2px 0 0 rgba(0, 0, 0, 0.3);
+}
+
+.rowName {
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(11px, calc(1.45 * var(--u)));
+  font-weight: 700;
+}
+
+.rowIn {
+  animation: build-pop 320ms steps(4) both;
+}
+
+/* Centro, no fim: o código HTML */
+
+.code {
+  display: flex;
+  flex-direction: column;
+  min-height: max(150px, calc(32 * var(--u)));
+  padding: max(8px, calc(1 * var(--u)));
+  background: #0b0a24;
+  box-shadow:
+    0 0 0 3px var(--green),
+    6px 6px 0 0 rgba(0, 0, 0, 0.4);
+}
+
+.codeList {
+  display: flex;
+  flex-direction: column;
+  gap: max(6px, calc(0.9 * var(--u)));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.codeLine code {
+  display: block;
+  padding: max(3px, calc(0.4 * var(--u))) max(5px, calc(0.7 * var(--u)));
+  border-left: 4px solid var(--line);
+  background: rgba(255, 255, 255, 0.05);
+  color: #e8e4ff;
+  font-family: "Courier New", monospace;
+  font-size: max(11px, calc(1.35 * var(--u)));
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.code-title {
+  --line: var(--yellow);
+}
+
+.code-text {
+  --line: var(--cyan);
+}
+
+.code-image {
+  --line: var(--green);
+}
+
+.code-button {
+  --line: var(--blue);
+}
+
+.lineIn {
+  animation: build-line 360ms steps(4) both;
+}
+
+/* Direita: a prévia */
+
+.preview {
+  display: flex;
+  flex-direction: column;
+}
+
+.previewFrame {
+  display: flex;
+  transform-origin: 50% 0;
+}
+
+.browser {
+  flex: 1;
+  min-width: 0;
+}
+
+.page {
+  gap: max(4px, calc(0.7 * var(--u)));
+}
+
+.buttonRow {
+  align-self: flex-start;
+}
+
+.blockIn {
+  animation: build-pop 320ms steps(4) both;
+}
+
+/* "Ver página": a janela salta uma vez */
+.pageOpen {
+  animation: build-open 520ms steps(5) 1;
+}
+
+/* cores da página (pequena escolha visual): fundo da página e cor do botão (--blue do Block) */
+.page.color-blue {
+  --blue: #2f6fe0;
+  background: #f2f6ff;
+}
+
+.page.color-green {
+  --blue: #1f9a50;
+  background: #effaf2;
+}
+
+.page.color-purple {
+  --blue: #7a3fd0;
+  background: #f6f0ff;
+}
+
+/* Área de interação */
+
+.panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 20px;
+}
+
+.choices {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.choices:disabled {
+  opacity: 0.55;
+}
+
+.choiceTitle {
+  margin-bottom: 6px;
+  padding: 0;
+  color: var(--text-dim);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.choiceRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 4px 10px;
+  border: 0;
+  background: var(--space-800);
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow:
+    0 0 0 2px var(--panel-border),
+    inset -2px -2px 0 0 rgba(0, 0, 0, 0.3);
+}
+
+.choice:hover:not(:disabled),
+.choice:focus-visible {
+  background: var(--space-700);
+}
+
+.choice:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.choice:disabled {
+  cursor: default;
+}
+
+.choiceOn {
+  box-shadow:
+    0 0 0 3px var(--yellow),
+    inset -2px -2px 0 0 rgba(0, 0, 0, 0.3);
+}
+
+.choiceImg {
+  width: 28px;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.choiceWait {
+  max-width: 34ch;
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.swatch {
+  width: 18px;
+  height: 18px;
+  box-shadow: 0 0 0 2px #fbfaff;
+}
+
+.swatch-blue {
+  background: #2f6fe0;
+}
+
+.swatch-green {
+  background: #1f9a50;
+}
+
+.swatch-purple {
+  background: #7a3fd0;
+}
+
+.viewRow {
+  display: flex;
+  margin-left: auto;
+}
+
+/* celular (~340 px de palco): as três colunas são desenhadas mais largas e encolhidas por transform */
+@container (max-width: 480px) {
+  /* a faixa do palco quebra em 2 linhas no celular: as colunas descem um pouco */
+  .colFit {
+    margin-top: 8px;
+  }
+
+  .colFit {
+    width: 150%;
+    transform: scale(0.66);
+  }
+
+  /* a página pronta é a coluna mais alta: mais larga (menos linhas de texto) e menor */
+  .previewFit {
+    width: 182%;
+    transform: scale(0.51);
+  }
+
+  .editZone,
+  .code {
+    min-height: 0;
+  }
+}
+
+@keyframes build-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes build-line {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes build-open {
+  40% {
+    transform: scale(1.06);
+  }
+}

@@ -1,0 +1,233 @@
+/* Laboratório 2.4 (Galáxia 2) — Encontre o problema */
+
+.canvas {
+  --u: var(--kit-u, 1cqw);
+  background:
+    radial-gradient(ellipse 70% 45% at 50% 92%, rgba(107, 63, 160, 0.22), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 50% 45%, rgba(255, 107, 107, 0.05), transparent 70%);
+}
+
+.goal {
+  display: flex;
+  align-items: center;
+  gap: max(8px, calc(1.2 * var(--u)));
+  padding: max(8px, calc(1.2 * var(--u))) max(12px, calc(1.6 * var(--u)));
+  background: #fff3c4;
+  color: #6b4a00;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(11px, calc(1.4 * var(--u)));
+  font-weight: 700;
+  box-shadow:
+    0 0 0 3px #8a5a00,
+    inset -3px -3px 0 0 rgba(0, 0, 0, 0.12);
+  animation: eop-pop 400ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.goal img {
+  width: max(22px, calc(4 * var(--u)));
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.goal strong {
+  display: block;
+  color: #1b1640;
+  font-size: max(14px, calc(2.4 * var(--u)));
+}
+
+/* A requisição, tocável em partes */
+.line {
+  display: flex;
+  align-items: center;
+  gap: max(4px, calc(0.6 * var(--u)));
+  padding: max(6px, calc(1 * var(--u))) max(10px, calc(1.4 * var(--u)));
+  background: #0d0b2b;
+  box-shadow: 0 0 0 3px #3b3478;
+}
+
+.lineOk {
+  box-shadow: 0 0 0 3px var(--green);
+}
+
+.lineWrong {
+  box-shadow: 0 0 0 3px var(--red);
+}
+
+.seg {
+  min-height: 40px;
+  padding: max(3px, calc(0.4 * var(--u))) max(4px, calc(0.6 * var(--u)));
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  box-shadow: 0 0 0 2px transparent;
+  touch-action: manipulation;
+}
+
+.seg:hover:not(:disabled) {
+  box-shadow: 0 0 0 2px #5a5480;
+}
+
+.seg:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.seg:disabled {
+  cursor: default;
+}
+
+.segPath {
+  color: #bff3ff;
+  font-family: "Courier New", monospace;
+  font-size: max(15px, calc(2.8 * var(--u)));
+  font-weight: 700;
+}
+
+.segLit {
+  box-shadow: 0 0 0 3px var(--yellow);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: max(6px, calc(1 * var(--u)));
+}
+
+.chip {
+  padding: 0.2em 0.6em;
+  background: rgba(13, 11, 43, 0.9);
+  box-shadow: 0 0 0 2px #3b3478;
+  color: var(--text-dim);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(11px, calc(1.5 * var(--u)));
+  font-weight: 700;
+}
+
+.chipLit {
+  box-shadow: 0 0 0 2px var(--yellow);
+  color: var(--yellow);
+}
+
+.message {
+  margin: 0;
+  padding: max(6px, calc(0.9 * var(--u))) max(10px, calc(1.3 * var(--u)));
+  background: rgba(13, 11, 43, 0.94);
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(12px, calc(1.6 * var(--u)));
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
+  animation: eop-pop 400ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.messageOk {
+  box-shadow: 0 0 0 3px var(--green);
+}
+
+.messageWrong {
+  box-shadow: 0 0 0 3px var(--red);
+}
+
+/* Área de interação */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.group legend {
+  width: 100%;
+  margin-bottom: 4px;
+  padding: 0;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.opt {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 40px;
+  padding: 4px 8px;
+  border: 0;
+  background: var(--space-800);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow:
+    0 0 0 2px var(--panel-border),
+    inset -2px -2px 0 0 rgba(0, 0, 0, 0.3);
+  touch-action: manipulation;
+}
+
+.opt:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.opt:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.optMono {
+  font-family: "Courier New", monospace;
+}
+
+.optOn {
+  background: var(--space-700);
+  box-shadow:
+    0 0 0 3px var(--yellow),
+    inset -2px -2px 0 0 rgba(0, 0, 0, 0.3);
+}
+
+@container (max-width: 560px) {
+  .goal {
+    font-size: 8px;
+  }
+
+  .goal strong {
+    font-size: 10px;
+  }
+
+  .seg {
+    min-height: 30px;
+  }
+
+  .segPath {
+    font-size: 11px;
+  }
+
+  .chip {
+    font-size: 8px;
+  }
+
+  .message {
+    font-size: 8px;
+  }
+}
+
+@keyframes eop-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

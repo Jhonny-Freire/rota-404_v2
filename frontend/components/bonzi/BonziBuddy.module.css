@@ -165,6 +165,40 @@
   text-shadow: none;
 }
 
+.headerActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* "Repetir fala": o Bonzi fala a mensagem de novo */
+.repeat {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 28px;
+  padding: 0 8px;
+  border: 0;
+  background: rgba(0, 0, 0, 0.22);
+  color: #fff;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 120ms;
+}
+
+.repeat:hover,
+.repeat:focus-visible {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.state-happy .repeat,
+.state-help .repeat {
+  color: var(--space-950);
+  background: rgba(255, 255, 255, 0.35);
+}
+
 .close {
   display: inline-flex;
   align-items: center;
@@ -266,30 +300,6 @@ button.figureButton:focus-visible .figure {
   background: radial-gradient(ellipse at center, rgba(58, 214, 255, 0.38), transparent 70%);
 }
 
-.state-idle .figure {
-  animation: float 3.2s ease-in-out infinite;
-}
-
-.state-speaking .figure {
-  animation: talk 0.5s steps(2) infinite;
-}
-
-.state-happy .figure {
-  animation: jump 0.9s cubic-bezier(0.3, 0.7, 0.4, 1) infinite;
-}
-
-.state-thinking .figure {
-  animation: sway 2.6s ease-in-out infinite;
-}
-
-.state-warning .figure {
-  animation: shake 1.6s linear infinite;
-}
-
-.state-help .figure {
-  animation: bob 1.4s ease-in-out infinite;
-}
-
 @keyframes pop {
   from {
     opacity: 0;
@@ -309,88 +319,6 @@ button.figureButton:focus-visible .figure {
   to {
     opacity: 0;
     transform: scale(2.6);
-  }
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-6px);
-  }
-}
-
-@keyframes talk {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-3px);
-  }
-}
-
-@keyframes jump {
-  0%,
-  100% {
-    transform: translateY(0) scale(1, 1);
-  }
-  15% {
-    transform: translateY(0) scale(1.06, 0.94);
-  }
-  45% {
-    transform: translateY(-18px) scale(0.97, 1.04);
-  }
-  75% {
-    transform: translateY(0) scale(1.04, 0.96);
-  }
-}
-
-@keyframes sway {
-  0%,
-  100% {
-    transform: rotate(-3deg);
-  }
-  50% {
-    transform: rotate(3deg);
-  }
-}
-
-@keyframes shake {
-  0%,
-  50%,
-  100% {
-    transform: translateX(0);
-  }
-  55% {
-    transform: translateX(-5px);
-  }
-  62% {
-    transform: translateX(5px);
-  }
-  69% {
-    transform: translateX(-4px);
-  }
-  76% {
-    transform: translateX(4px);
-  }
-  83% {
-    transform: translateX(-2px);
-  }
-}
-
-@keyframes bob {
-  0%,
-  100% {
-    transform: translateY(0) rotate(0);
-  }
-  30% {
-    transform: translateY(-5px) rotate(-2deg);
-  }
-  60% {
-    transform: translateY(0) rotate(2deg);
   }
 }
 

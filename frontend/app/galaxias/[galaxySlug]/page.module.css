@@ -4,6 +4,16 @@
   gap: clamp(14px, 2vw, 28px);
 }
 
+/* coluna à direita do título: "Voltar ao início" e "Finalizar viagem" com a mesma largura */
+.headerActions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  max-width: 420px;
+  margin-left: auto;
+}
+
 .galaxyArt {
   position: relative;
   display: grid;
@@ -78,7 +88,16 @@
 
 @media (max-width: 767px) {
   .header {
+    flex-wrap: wrap;
     align-items: flex-start;
+  }
+
+  .headerActions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: none;
+    margin-left: 0;
   }
 
   .description {

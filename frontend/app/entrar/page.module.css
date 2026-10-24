@@ -1,0 +1,805 @@
+/* cartão de embarque (esquerda) + formulário com abas (direita); no celular, um embaixo do outro */
+.page {
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(24px, 3vw, 40px);
+  width: min(100%, 1080px);
+  margin: 0 auto;
+  padding: 28px 0 140px;
+}
+
+.pageLogin {
+  width: min(100%, 900px);
+}
+
+/* ───────── cartão de embarque ───────── */
+
+.ticket {
+  position: sticky;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+}
+
+.logo {
+  filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.5));
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin: var(--px);
+  padding: 22px 20px 24px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(58, 214, 255, 0.16), transparent 60%),
+    var(--panel-bg);
+  box-shadow: var(--pixel-border), var(--pixel-bevel);
+  text-align: center;
+}
+
+.cardKicker {
+  color: var(--cyan);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.cardAvatar {
+  margin: 6px 0 4px;
+}
+
+.cardName {
+  max-width: 100%;
+  color: var(--yellow);
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.cardRole {
+  color: var(--text-dim);
+  font-size: 15px;
+}
+
+/* linha picotada, como num bilhete, separando o nome dos dados */
+.cardRows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin: 8px 0 0;
+  padding-top: 16px;
+  background: repeating-linear-gradient(90deg, var(--panel-border) 0 8px, transparent 8px 14px) top / 100% 2px no-repeat;
+  text-align: left;
+}
+
+.cardRows div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cardRows dt {
+  color: var(--text-dim);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.cardRows dd {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.cardEmpty {
+  color: var(--text-dim);
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.cardText {
+  margin: 0;
+  color: var(--text);
+  font-size: 17px;
+  line-height: 1.4;
+}
+
+/* ───────── formulário ───────── */
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.pageLogin .main {
+  max-width: 520px;
+}
+
+/* abas presas no topo do painel do formulário */
+.tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: -20px;
+  padding: 0 var(--px);
+}
+
+.tab {
+  position: relative;
+  min-height: 48px;
+  padding: 10px 22px;
+  border: 0;
+  background: var(--space-800);
+  color: var(--text-dim);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--panel-border),
+    calc(var(--px) * -1) 0 0 0 var(--panel-border),
+    var(--px) 0 0 0 var(--panel-border);
+}
+
+.tab:hover {
+  color: var(--text);
+}
+
+.tab:focus-visible {
+  z-index: 2;
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.tabActive {
+  z-index: 1;
+  background: var(--space-900);
+  color: var(--yellow);
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--yellow),
+    calc(var(--px) * -1) 0 0 0 var(--yellow),
+    var(--px) 0 0 0 var(--yellow);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  margin: var(--px);
+  padding: clamp(20px, 3vw, 30px);
+  background: var(--space-900);
+  box-shadow: var(--pixel-border), var(--pixel-bevel);
+}
+
+/* o título fica para leitores de tela: as abas já dizem onde a criança está */
+.heading {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.step + .step {
+  padding-top: 22px;
+  background: repeating-linear-gradient(90deg, var(--panel-border) 0 8px, transparent 8px 14px) top / 100% 2px no-repeat;
+}
+
+.stepTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.stepNumber {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  background: var(--yellow);
+  color: var(--space-950);
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: 13px;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.45);
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.loginFields {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.label {
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.hint {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.input {
+  width: calc(100% - 2 * var(--px));
+  margin: var(--px);
+  padding: 12px 14px;
+  border: 0;
+  background: var(--space-950);
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 19px;
+  font-weight: 600;
+  box-shadow: var(--pixel-border), inset 0 var(--px) 0 0 rgba(0, 0, 0, 0.4);
+}
+
+.input::placeholder {
+  color: var(--text-dim);
+  opacity: 0.6;
+}
+
+.input:focus-visible {
+  outline: none;
+  box-shadow: var(--pixel-border-yellow), inset 0 var(--px) 0 0 rgba(0, 0, 0, 0.4);
+}
+
+.ageRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.ageInput {
+  width: 6em;
+}
+
+/* o universo aparece assim que a idade e o nível são escolhidos */
+.universe {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  margin: 0 0 var(--px);
+  padding: 8px 14px;
+  color: var(--text-dim);
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.universeOn {
+  background: rgba(58, 214, 255, 0.08);
+  color: var(--text);
+  font-size: 17px;
+  box-shadow: var(--pixel-border-cyan);
+}
+
+.universeOn strong {
+  color: var(--cyan);
+}
+
+.levels {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.levels legend {
+  margin-bottom: 10px;
+}
+
+.levelOptions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+/* cada nível é um cartão; o rádio fica invisível mas continua no teclado (setas trocam a opção) */
+.level {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 44px;
+  margin: var(--px);
+  padding: 12px 14px;
+  background: var(--space-800);
+  cursor: pointer;
+  box-shadow: var(--pixel-border);
+}
+
+.level:hover .levelName {
+  color: var(--yellow);
+}
+
+.level:has(.levelRadio:focus-visible) {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.levelActive {
+  background: var(--space-700);
+  box-shadow: var(--pixel-border-yellow);
+}
+
+.levelRadio {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.levelName {
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.levelActive .levelName {
+  color: var(--yellow);
+}
+
+.levelDetail {
+  color: var(--text-dim);
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.avatars {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.error {
+  min-height: 1.4em;
+  margin: 0;
+  color: #ff8a8a;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.error:empty {
+  display: none;
+}
+
+/* botão de enviar ocupa a largura toda: é o próximo passo */
+.submit {
+  display: flex;
+}
+
+.submit > * {
+  flex: 1 1 auto;
+  justify-content: center;
+  /* "Criar conta e embarcar" quebra a linha no celular em vez de passar da tela */
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+}
+
+.switch {
+  margin: -6px 0 0;
+  color: var(--text-dim);
+  font-size: 16px;
+  text-align: center;
+}
+
+.switchLink {
+  padding: 2px 4px;
+  border: 0;
+  background: none;
+  color: var(--cyan);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.switchLink:hover,
+.switchLink:focus-visible {
+  color: var(--space-950);
+  background: var(--cyan);
+  text-decoration: none;
+}
+
+.offlinePanel {
+  width: 100%;
+}
+
+.offline {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+/* ───────── já está a bordo ───────── */
+
+.signedInPanel {
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: min(100%, 520px);
+}
+
+.signedIn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.welcome {
+  margin: 0;
+  font-size: 18px;
+}
+
+.welcome strong {
+  color: var(--yellow);
+}
+
+.signedInActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* ───────── "Já tenho conta": tripulação, rota e painel de decolagem ───────── */
+
+.welcomeCard {
+  gap: 14px;
+}
+
+/* todos os personagens, flutuando fora de sincronia (só transform; para com "Reduzir animações") */
+.crew {
+  display: grid;
+  grid-template-columns: repeat(3, 64px);
+  gap: 8px 16px;
+  margin: 2px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.crewMember {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  background: radial-gradient(circle at 50% 70%, rgba(58, 214, 255, 0.16), transparent 68%);
+  animation: crew-float 2.4s steps(4) infinite;
+  animation-delay: calc(var(--i, 0) * -0.37s);
+}
+
+@keyframes crew-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.route {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  margin-top: 4px;
+  padding-top: 14px;
+  background: repeating-linear-gradient(90deg, var(--panel-border) 0 8px, transparent 8px 14px) top / 100% 2px no-repeat;
+}
+
+/* trilha pontilhada entre as galáxias, com a nave no meio */
+.routeTrail {
+  position: relative;
+  display: grid;
+  flex: 1;
+  place-items: center;
+  min-width: 56px;
+  height: 56px;
+  background: repeating-linear-gradient(90deg, var(--cyan) 0 6px, transparent 6px 14px) center / 100% 3px no-repeat;
+}
+
+.routeRocket {
+  rotate: 90deg;
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.5));
+  animation: rocket-bob 1.6s steps(4) infinite;
+}
+
+@keyframes rocket-bob {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-4px);
+  }
+}
+
+.loginHeader {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 18px;
+  background: repeating-linear-gradient(90deg, var(--panel-border) 0 8px, transparent 8px 14px) bottom / 100% 2px no-repeat;
+}
+
+/* luzes do painel piscando (opacity) */
+.lights {
+  position: absolute;
+  top: 2px;
+  right: 0;
+  display: flex;
+  gap: 6px;
+}
+
+.lights span {
+  width: 10px;
+  height: 10px;
+  background: var(--green);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.45);
+  animation: light-blink 1.2s steps(1) infinite;
+}
+
+.lights span:nth-child(2) {
+  background: var(--yellow);
+  animation-delay: 0.4s;
+}
+
+.lights span:nth-child(3) {
+  background: var(--cyan);
+  animation-delay: 0.8s;
+}
+
+@keyframes light-blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.loginKicker {
+  color: var(--cyan);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.loginTitle {
+  margin: 0;
+  color: var(--yellow);
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.loginLead {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+/* campo com ícone à esquerda (o ícone acende junto com o foco do campo) */
+.inputRow {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.inputIcon {
+  display: grid;
+  flex: 0 0 56px;
+  place-items: center;
+  margin: var(--px);
+  background: var(--space-800);
+  box-shadow: var(--pixel-border-cyan);
+}
+
+.inputRow .input {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+}
+
+.inputRow:focus-within .inputIcon {
+  background: var(--space-700);
+  box-shadow: var(--pixel-border-yellow);
+}
+
+.loginSwitch {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 18px;
+  background: repeating-linear-gradient(90deg, var(--panel-border) 0 8px, transparent 8px 14px) top / 100% 2px no-repeat;
+}
+
+/* ───────── telas menores ───────── */
+
+@media (max-width: 899px) {
+  .page,
+  .pageLogin {
+    grid-template-columns: minmax(0, 1fr);
+    width: min(100%, 640px);
+    padding-top: 16px;
+  }
+
+  .pageLogin .main {
+    max-width: none;
+  }
+
+  /* cartão compacto: personagem à esquerda, dados à direita */
+  .ticket {
+    position: static;
+    gap: 16px;
+  }
+
+  .pageSignup .card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "avatar kicker"
+      "avatar name"
+      "avatar role"
+      "rows rows";
+    align-items: center;
+    column-gap: 16px;
+    row-gap: 2px;
+    padding: 16px;
+    text-align: left;
+  }
+
+  .pageSignup .cardKicker {
+    grid-area: kicker;
+  }
+
+  .pageSignup .cardAvatar {
+    grid-area: avatar;
+    margin: 0;
+  }
+
+  .pageSignup .cardName {
+    grid-area: name;
+  }
+
+  .pageSignup .cardRole {
+    grid-area: role;
+  }
+
+  .pageSignup .cardRows {
+    grid-area: rows;
+    margin-top: 12px;
+  }
+
+  /* uma coluna: a tripulação sairia empurrando o formulário para baixo */
+  .crew {
+    display: none;
+  }
+}
+
+@media (max-width: 599px) {
+  .tab {
+    flex: 1 1 0;
+    padding: 10px 12px;
+    font-size: 17px;
+  }
+
+  .pair,
+  .levelOptions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .logo {
+    width: min(314px, 100%);
+    height: auto;
+  }
+}
+
+/* ───────── tela que cabe na janela (AppShell fit) ───────── */
+
+@media (min-width: 900px) {
+  .page {
+    padding-bottom: 16px;
+  }
+}
+
+/* cadastro em tela larga: etapas 1 e 2 à esquerda; personagem, botão e link à direita */
+@media (min-width: 1180px) {
+  .pageSignup {
+    grid-template-columns: 300px minmax(0, 1fr);
+    width: min(100%, 1320px);
+    padding-top: 16px;
+  }
+
+  .formSignup {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "s1 s3"
+      "s2 s3"
+      "s2 err"
+      "s2 submit"
+      "s2 switch";
+    align-content: start;
+    gap: 12px 32px;
+  }
+
+  .s1 {
+    grid-area: s1;
+  }
+
+  .s2 {
+    grid-area: s2;
+  }
+
+  /* começa a coluna da direita: sem a linha picotada de cima */
+  .formSignup .s3 {
+    grid-area: s3;
+    padding-top: 0;
+    background: none;
+  }
+
+  .formSignup .error {
+    grid-area: err;
+  }
+
+  .formSignup .submit {
+    grid-area: submit;
+  }
+
+  .formSignup .switch {
+    grid-area: switch;
+    margin: 0;
+  }
+}

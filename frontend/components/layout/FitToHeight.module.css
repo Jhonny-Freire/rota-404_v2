@@ -1,0 +1,27 @@
+/* no celular e no tablet em pé: bloco comum (a página rola como antes) */
+.box {
+  min-width: 0;
+}
+
+/* tela larga: o bloco ocupa a altura que sobra (AppShell fit) e o conteúdo encolhe por igual até caber, centrado */
+@media (min-width: 900px) {
+  .box {
+    position: relative;
+    flex: 1 1 0;
+    align-self: stretch;
+    min-height: 0;
+  }
+
+  .inner {
+    position: absolute;
+    top: max(0px, calc((100% - var(--fit-h, 100%)) / 2));
+    right: 0;
+    left: 0;
+    transform: scale(var(--fit-scale, 1));
+    transform-origin: 50% 0;
+  }
+
+  .top .inner {
+    top: 0;
+  }
+}

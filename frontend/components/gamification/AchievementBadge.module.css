@@ -1,16 +1,15 @@
+/* página de conquistas: arte à esquerda, nome e regra à direita */
 .badge {
   --rarity: var(--cyan);
   position: relative;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   margin: var(--px);
-  padding: 18px 14px 16px;
+  padding: 4px 12px 4px 4px;
   background:
-    linear-gradient(180deg, color-mix(in srgb, var(--rarity) 14%, transparent), transparent 60%),
+    linear-gradient(90deg, color-mix(in srgb, var(--rarity) 16%, transparent), transparent 65%),
     var(--panel-bg);
-  text-align: center;
   box-shadow:
     0 calc(var(--px) * -1) 0 0 color-mix(in srgb, var(--rarity) 70%, var(--panel-border)),
     0 var(--px) 0 0 color-mix(in srgb, var(--rarity) 70%, var(--panel-border)),
@@ -25,20 +24,29 @@
 }
 
 .rara {
-  --rarity: var(--bonzi);
+  --rarity: var(--yellow);
 }
 
 .lenda {
-  --rarity: var(--yellow);
+  --rarity: #ff5fae;
+}
+
+.brutal {
+  --rarity: var(--red);
+}
+
+.secreta {
+  --rarity: #33e0c8;
 }
 
 .art {
   position: relative;
   display: flex;
+  flex: none;
   align-items: center;
   justify-content: center;
-  width: 88px;
-  height: 88px;
+  width: 68px;
+  height: 68px;
 }
 
 .halo {
@@ -53,8 +61,16 @@
   filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.5));
 }
 
-.lenda:not(.locked) .halo {
+.lenda:not(.locked) .halo,
+.brutal:not(.locked) .halo {
   animation: shine 2.4s ease-in-out infinite;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .rarity {
@@ -66,22 +82,50 @@
   letter-spacing: 0.08em;
 }
 
-.rara .rarity {
-  color: color-mix(in srgb, var(--bonzi) 60%, white);
-}
-
 .name {
-  font-size: 12px;
+  font-size: 11px;
   line-height: 1.5;
 }
 
 .description {
   color: var(--text-dim);
-  font-size: 16px;
-  line-height: 1.3;
+  font-size: 15px;
+  line-height: 1.2;
 }
 
+/* prévia do perfil: arte em cima, sem texto */
+.compact {
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 6px;
+  text-align: center;
+}
+
+.compact .art {
+  width: 56px;
+  height: 56px;
+}
+
+.compact .body {
+  align-items: center;
+}
+
+.compact {
+  min-width: 0;
+}
+
+.compact .name {
+  max-width: 100%;
+  font-size: 9px;
+  overflow-wrap: anywhere;
+}
+
+/* bloqueada: a arte apagada mostra o que buscar; a secreta vira silhueta */
 .locked .sprite {
+  filter: grayscale(1) brightness(0.55);
+}
+
+.locked .sprite.hidden {
   filter: brightness(0) opacity(0.55);
 }
 
@@ -91,13 +135,12 @@
 
 .locked .name {
   color: var(--text-dim);
-  letter-spacing: 0.2em;
 }
 
 .lock {
   position: absolute;
-  right: 10px;
-  bottom: 8px;
+  right: 0;
+  bottom: 2px;
   height: auto;
   filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.6));
 }

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { cx } from "@/components/ui/cx";
 import { Connection, type Point } from "./Connection";
-import { Rocket } from "./Rocket";
+import { useRouteTravel, type RocketDock, type TravelStop } from "./useRouteTravel";
 import styles from "./SpaceMap.module.css";
 
 export type SpaceMapNode = {
@@ -12,22 +12,30 @@ export type SpaceMapNode = {
   y: number;
   content: ReactNode;
   locked?: boolean;
+  /** nome do destino (com `confirmEnter`, o Bonzi o diz na pergunta "Quer entrar?") */
+  title?: string;
+  kicker?: string;
+  href?: string;
+  completed?: boolean;
 };
 
 export type SpaceMapProps = {
   nodes: SpaceMapNode[];
   edges?: Array<[string, string]>;
+  /** onde a nave estaciona se ainda não parou em nenhum destino deste mapa */
   rocketAt?: string;
+  /** identifica o mapa (a nave lembra onde parou em cada um) */
+  mapId: string;
+  /** vaga da nave ao lado de cada destino */
+  dock: RocketDock;
   aspectRatio?: number;
   ariaLabel: string;
   className?: string;
+  /** o Bonzi pergunta "Quer entrar?" antes de pousar (ver useRouteTravel) */
+  confirmEnter?: boolean;
 };
 
-type Box = { x: number; y: number; w: number; h: number; stacked: boolean; rocketX: number; rocketY: number };
-
-const ROCKET_SIZE = 44;
-const ROCKET_HEIGHT = (ROCKET_SIZE * 900) / 540;
-const FLIGHT_MS = 900;
+type Box = { x: number; y: number; w: number; h: number; stacked: boolean };
 
 function trim(box: Box, ux: number, uy: number): number {
   if (!box.stacked) return Math.min(box.w, box.h) * 0.42;
@@ -40,14 +48,39 @@ function clampPercent(value: number): number {
   return Math.min(100, Math.max(0, value));
 }
 
-export function SpaceMap({ nodes, edges, rocketAt, aspectRatio = 16 / 9, ariaLabel, className }: SpaceMapProps) {
+export function SpaceMap({
+  nodes,
+  edges,
+  rocketAt,
+  mapId,
+  dock,
+  aspectRatio = 16 / 9,
+  ariaLabel,
+  className,
+  confirmEnter = false,
+}: SpaceMapProps) {
   const containerRef = useRef<HTMLElement>(null);
   const nodeRefs = useRef(new Map<string, HTMLLIElement>());
   const [boxes, setBoxes] = useState<Record<string, Box>>({});
-  const boxesRef = useRef(boxes);
-  const lastRocketId = useRef(rocketAt);
-  const [tilt, setTilt] = useState(0);
   const layoutKey = nodes.map((n) => `${n.id}:${n.x}:${n.y}`).join("|");
+
+  const stops: TravelStop[] = nodes.map((n) => ({
+    id: n.id,
+    href: n.href,
+    locked: n.locked,
+    title: n.title ?? "",
+    kicker: n.kicker,
+    completed: n.completed,
+  }));
+  const route = useRouteTravel({
+    mapId,
+    stops,
+    defaultId: rocketAt,
+    containerRef,
+    dock,
+    connect: edges === undefined || edges.length > 0,
+    confirm: confirmEnter,
+  });
 
   useEffect(() => {
     const container = containerRef.current;
@@ -57,21 +90,20 @@ export function SpaceMap({ nodes, edges, rocketAt, aspectRatio = 16 / 9, ariaLab
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         const base = container.getBoundingClientRect();
+        // mapa encolhido (FitToHeight): as medidas da tela voltam para as coordenadas do próprio mapa
+        const scale = container.offsetWidth > 0 ? base.width / container.offsetWidth : 1;
         const next: Record<string, Box> = {};
         nodeRefs.current.forEach((el, id) => {
           const art = el.querySelector<HTMLElement>("[data-map-anchor]") ?? el;
           const stacked = getComputedStyle(el).position === "static";
           const target = stacked ? el : art;
           const rect = target.getBoundingClientRect();
-          const artRect = art.getBoundingClientRect();
           next[id] = {
-            x: rect.left - base.left + rect.width / 2,
-            y: rect.top - base.top + rect.height / 2,
+            x: (rect.left - base.left + rect.width / 2) / scale,
+            y: (rect.top - base.top + rect.height / 2) / scale,
             w: target.offsetWidth,
             h: target.offsetHeight,
             stacked,
-            rocketX: artRect.left - base.left + artRect.width / 2,
-            rocketY: artRect.top - base.top + art.offsetHeight * 0.08,
           };
         });
         setBoxes(next);
@@ -85,24 +117,6 @@ export function SpaceMap({ nodes, edges, rocketAt, aspectRatio = 16 / 9, ariaLab
       observer.disconnect();
     };
   }, [layoutKey]);
-
-  useEffect(() => {
-    boxesRef.current = boxes;
-  }, [boxes]);
-
-  useEffect(() => {
-    const from = lastRocketId.current;
-    lastRocketId.current = rocketAt;
-    if (!from || !rocketAt || from === rocketAt) return;
-    const a = boxesRef.current[from];
-    const b = boxesRef.current[rocketAt];
-    if (!a || !b) return;
-    let angle = (Math.atan2(b.rocketY - a.rocketY, b.rocketX - a.rocketX) * 180) / Math.PI + 90;
-    if (angle > 180) angle -= 360;
-    setTilt(angle);
-    const id = window.setTimeout(() => setTilt(0), FLIGHT_MS);
-    return () => window.clearTimeout(id);
-  }, [rocketAt]);
 
   const pairs: Array<[string, string]> = edges ?? nodes.slice(1).map((node, i) => [nodes[i].id, node.id]);
   const lockedIds = new Set(nodes.filter((n) => n.locked).map((n) => n.id));
@@ -126,8 +140,6 @@ export function SpaceMap({ nodes, edges, rocketAt, aspectRatio = 16 / 9, ariaLab
     return [{ key: `${a}->${b}`, from, to, state }];
   });
 
-  const rocketBox = rocketAt ? boxes[rocketAt] : undefined;
-
   return (
     <section
       ref={containerRef}
@@ -141,7 +153,7 @@ export function SpaceMap({ nodes, edges, rocketAt, aspectRatio = 16 / 9, ariaLab
         ))}
       </div>
 
-      <ol className={styles.list}>
+      <ol className={styles.list} onClickCapture={route.onClickCapture}>
         {nodes.map((node) => (
           <li
             key={node.id}
@@ -149,25 +161,18 @@ export function SpaceMap({ nodes, edges, rocketAt, aspectRatio = 16 / 9, ariaLab
               if (el) nodeRefs.current.set(node.id, el);
               else nodeRefs.current.delete(node.id);
             }}
-            className={cx(styles.item, node.id === rocketAt && styles.current)}
+            className={cx(styles.item, node.id === route.parked && styles.current)}
             style={{ left: `${clampPercent(node.x)}%`, top: `${clampPercent(node.y)}%` }}
           >
-            {node.content}
+            <div className={styles.stop} data-stop-id={node.id}>
+              {!node.locked && route.dockFor(node.id)}
+              {node.content}
+            </div>
           </li>
         ))}
       </ol>
 
-      {rocketBox && (
-        <span
-          className={styles.rocket}
-          aria-hidden="true"
-          style={{
-            transform: `translate3d(${rocketBox.rocketX - ROCKET_SIZE / 2}px, ${rocketBox.rocketY - ROCKET_HEIGHT + 8}px, 0)`,
-          }}
-        >
-          <Rocket size={ROCKET_SIZE} angle={tilt} />
-        </span>
-      )}
+      {route.overlay}
     </section>
   );
 }

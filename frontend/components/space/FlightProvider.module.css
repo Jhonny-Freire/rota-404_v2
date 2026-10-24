@@ -1,0 +1,73 @@
+/* Viagem ao entrar num destino (portada do Rota 404 antigo) */
+
+.layer {
+  position: fixed;
+  inset: 0;
+  z-index: 190;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* holofote: escurece a tela e ilumina o destino durante o pouso (uma animação curta, só opacity) */
+.spotlight {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--tx) var(--ty), rgba(4, 6, 26, 0) 0 160px, rgba(4, 6, 26, 0.35) 520px);
+  animation: flight-spotlight 0.4s ease-out both;
+}
+
+/* sem drop-shadow: recalculado a cada quadro com a nave girando */
+.rocket {
+  position: absolute;
+  left: 0;
+  top: 0;
+  line-height: 0;
+  will-change: transform;
+}
+
+/* hiperespaço: linhas de estrelas saindo do centro na troca de página (curto, transform/opacity) */
+.warp {
+  position: fixed;
+  inset: -60%;
+  z-index: 200;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at center, rgba(4, 6, 26, 0.2) 0 6%, rgba(4, 6, 26, 0.95) 50%),
+    repeating-conic-gradient(from 0deg, transparent 0deg 7deg, rgba(150, 200, 255, 0.35) 7deg 7.3deg);
+  animation: flight-warp-in 0.35s ease-in forwards;
+}
+
+.warpOut {
+  animation: flight-warp-out 0.4s ease-out forwards;
+}
+
+@keyframes flight-spotlight {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes flight-warp-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+}
+
+@keyframes flight-warp-out {
+  from {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2);
+  }
+}

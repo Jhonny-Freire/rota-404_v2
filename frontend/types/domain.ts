@@ -108,34 +108,43 @@ export interface LabDetail extends Lab {
   system: PlanetarySystem;
 }
 
+/** Progresso de um planeta salvo na conta (GET/PUT /progress). */
 export interface ProgressEntry {
   planet_id: UUID;
-  status: ProgressState;
-  started_at: string | null;
-  completed_at: string | null;
+  status: "in_progress" | "completed";
+  best_points: number | null;
+  updated_at: string | null;
 }
 
 export interface Score {
   id: UUID;
   user_id: UUID;
-  lab_id: UUID;
+  galaxy_id: UUID;
+  planetary_system_id: UUID | null;
+  lab_id: UUID | null;
   points: number;
   created_at: string;
+  updated_at: string;
 }
 
-export type AchievementRarity = "comum" | "rara" | "lenda";
+export type AchievementRarity = "comum" | "rara" | "lenda" | "brutal" | "secreta";
 
+/** Catálogo do servidor (o frontend usa a cópia em config/achievements.ts, que tem as regras). */
 export interface Achievement {
   id: UUID;
   slug: string;
+  code: string | null;
   name: string;
   description: string | null;
   sprite_key: string | null;
   rarity: AchievementRarity;
+  secret: boolean;
+  order_index: number;
 }
 
 export interface UserAchievement {
   achievement_id: UUID;
+  slug: string;
   unlocked_at: string;
 }
 
@@ -145,6 +154,10 @@ export interface RankingEntry {
   display_name: string;
   avatar_slug: string | null;
   points: number;
+  /** laboratórios com pontuação nesse escopo */
+  completed_labs: number;
+  /** conquistas da conta (todas, não só deste escopo); ausente em servidor antigo */
+  achievements?: number;
 }
 
 export type RankingScope = "galaxy" | "planetary_system";
@@ -153,13 +166,29 @@ export interface Ranking {
   scope: RankingScope;
   scope_id: UUID;
   entries: RankingEntry[];
+  /** posição de quem pediu (com sessão), mesmo fora do top 50 */
+  me: RankingEntry | null;
 }
 
+/** Conta do aluno (apelido + senha + idade). A idade define a faixa etária. */
 export interface User extends Timestamps {
   id: UUID;
+  nickname: string;
   display_name: string;
-  avatar_id: UUID | null;
+  age: number;
   age_range_id: UUID | null;
+  age_range: { id: UUID; slug: string; name: string } | null;
+  avatar_key: string | null;
+  /** nível que o aluno escolheu no cadastro (null em contas antigas) */
+  knowledge_level: KnowledgeLevel | null;
+}
+
+export type KnowledgeLevel = "iniciante" | "intermediario" | "avancado";
+
+/** Resposta de cadastro e login. */
+export interface Session {
+  token: string;
+  user: User;
 }
 
 export interface Avatar {

@@ -164,15 +164,18 @@
   background: #ffc933;
 }
 
+/*
+ * só opacity: o anel crescendo (scale 1.12 x 1.35) passava da borda da janela quando o botão ficava no pé da tela
+ * (botão "Próximo sistema", "Quer entrar?" do mapa). A página ganhava alguns px de rolagem a cada pulso e a barra de
+ * rolagem aparecia e sumia, empurrando a tela para o lado ("tela tremendo", 24/10/2026).
+ */
 @keyframes sb-attention-ring {
   0% {
     opacity: 1;
-    transform: scale(1);
   }
   70%,
   100% {
-    opacity: 0;
-    transform: scale(1.12, 1.35);
+    opacity: 0.15;
   }
 }
 

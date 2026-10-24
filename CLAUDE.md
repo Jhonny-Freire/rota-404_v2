@@ -10,17 +10,20 @@ co-piloto **Bonzi Buddy** narra e orienta tudo. Responda e escreva a UI sempre e
 |---|---|
 | `.claude/contexto/historico-e-decisoes.md` | SEMPRE na primeira sessão: o que já foi feito, por quê, e as pendências |
 | `.claude/contexto/motores-g1.md` | Antes de criar/alterar uma aula ou laboratório (tabela dos 16 planetas, padrões, passo a passo) |
+| `.claude/contexto/motores-g2.md` | Galáxia 2 "API REST": tabela dos 16 planetas G2, módulo `engines/_api`, decisões por planeta |
 | `.claude/contexto/runtime-shells-e-kit.md` | Contrato dos motores, shells (LessonShell/LabShell) e todas as primitivas do kit de cena |
 | `.claude/contexto/frontend.md` | Páginas, providers/localStorage, API client, assets, fontes, componentes |
 | `.claude/contexto/backend-e-dados.md` | Endpoints, variáveis de ambiente, cache/fallback, schema, seeds, testes |
 | `.claude/contexto/desempenho.md` | Antes de mexer em animação, arraste ou carregamento (regras medidas — não reverta) |
 | `prompt_base (1).md`, `resumo (1).md` | Requisitos originais da base e visão geral pedagógica |
-| `G1 - Internet e Web/S*/*.md` | Especificação pedagógica de CADA planeta (fonte da verdade do conteúdo) |
+| `random/G1 - Internet e Web/S*/*.md` | Especificação pedagógica de CADA planeta da G1 (fonte da verdade do conteúdo) |
+| `random/G2 - API REST/faixa14-completa.md` | Especificação dos 16 planetas da G2 (fonte da verdade do conteúdo) |
 
 Comandos prontos: `/implementar-planeta <código>` (ex.: `/implementar-planeta 3.1`) e `/receber-versao`.
 
 ## Como a equipe trabalha (importante)
-- O projeto **não usa git**. Ele vai e volta como **zip da pasta inteira** entre os membros da equipe (Google Drive).
+- Código no GitHub: `Jhonny-Freire/rota-404_v2` (público; cada push na `main` republica a versão online no Render).
+  O zip da pasta inteira pelo Google Drive continua valendo entre os membros, mas prefira `git clone`/`git pull`.
   Cada um refina o que precisa e devolve; o outro continua em cima da versão recebida.
 - **A versão recebida é a base oficial.** Preserve as melhorias de quem enviou; não reverta nada sem motivo técnico
   forte e explicado. Ao receber uma versão nova, rode `/receber-versao` (reinstala dependências, compara com o zip
@@ -39,24 +42,26 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1          # Linux/WSL: source .venv/bin/activate
 pip install -r requirements.txt
 Copy-Item .env.example .env           # só se não existir; preencha SUPABASE_URL/SUPABASE_KEY ou use DATA_SOURCE=local
-python run.py                          # http://127.0.0.1:5000/api/health  (pré-aquece o cache em segundo plano)
+# contas/ranking: rode UMA vez supabase/migrations/20261022000000_accounts.sql no SQL Editor do Supabase
+python run.py                          # http://127.0.0.1:9001/api/health  (pré-aquece o cache em segundo plano)
 
 # frontend (Node 20.9+)
 cd frontend
 npm install
-npm run dev                            # http://localhost:3000 (desenvolvimento)
+npm run dev                            # http://localhost:9000 (desenvolvimento)
 npm run build ; npm start              # PRODUÇÃO — use na feira (dev pesa 6–7x mais). Build precisa de internet (fontes)
 ```
-- Testes: `cd backend; python -m unittest discover -s tests` (110 testes) e `cd frontend; npm run typecheck`
+- Testes: `cd backend; python -m unittest discover -s tests` (131+ testes) e `cd frontend; npm run typecheck`
   (não há ESLint nem testes de frontend).
 - Sem Supabase: `DATA_SOURCE=local` usa `backend/app/data/seed.json` (cópia fiel do banco). Com o Supabase fora do ar,
   a API cai sozinha para o seed (`FALLBACK_TO_LOCAL=1`, padrão).
 - Versão online no Render: `render.yaml` + seção "Publicar no Render" do README. Build estático local:
   `STATIC_EXPORT=1` + `npm run build` + `node scripts/flatten-export-segments.mjs` (gera `frontend/out/`).
   Rotas dinâmicas novas precisam de `generateStaticParams` (ver `frontend/lib/staticParams.ts`): a `page.tsx` é
-  servidor e renderiza o componente cliente da mesma pasta.
-- Tablets na rede da feira: `HOST=0.0.0.0` e `CORS_ORIGINS` com `http://<IP>:3000` no `backend/.env`, frontend em
-  build+start, portas 3000/5000 liberadas no firewall (ver README). Não defina `NEXT_PUBLIC_API_URL=localhost`.
+  servidor e renderiza o componente cliente da mesma pasta. Página nova = regra de reescrita nova no `render.yaml`
+  (o Render não completa a barra final da URL). No site estático `usePathname()` vem com "/" no fim.
+- Tablets na rede da feira: `HOST=0.0.0.0` e `CORS_ORIGINS` com `http://<IP>:9000` no `backend/.env`, frontend em
+  build+start, portas 9000/9001 liberadas no firewall (ver README). Não defina `NEXT_PUBLIC_API_URL=localhost`.
 
 ## Estrutura
 ```
@@ -82,7 +87,8 @@ G1 - Internet e Web/      especificações (.md) dos 16 planetas da galáxia 1
 2. **Conteúdo pedagógico segue o `.md` do planeta FIELMENTE**: cenas/etapas na ordem, falas do Bonzi LITERAIS,
    textos de feedback literais. Interpretações próprias devem ser registradas (ver `motores-g1.md`).
 3. **Arquitetura**: Flask é o único backend (nada de API routes no Next). Controllers finos, sem acesso a dados.
-   Supabase só para LEITURA do catálogo; progresso/pontos ficam no `localStorage` do navegador.
+   Catálogo no Supabase só para LEITURA. Contas, progresso e pontos (tabelas users, user_progress, scores) são
+   gravados pelo backend (service_role); o `localStorage` guarda a sessão e uma cópia do progresso da conta.
 4. **Nunca** `text-transform: uppercase` com a fonte display (Press Start 2P, inclusive h1–h4): ela deforma
    maiúsculas acentuadas ("LABORATóRIO"). Caixa alta só com a fonte do corpo (Pixelify Sans).
 5. **Desempenho** (o público usa notebook fraco): animação infinita só com `transform`/`opacity`; nada de setState por
@@ -99,23 +105,27 @@ G1 - Internet e Web/      especificações (.md) dos 16 planetas da galáxia 1
 10. Nada de segredos no código. Sem dependências novas sem necessidade real. Comentários escassos, nomes em inglês,
     textos de UI em português.
 
-## Estado atual (17/10/2026)
+## Estado atual (20/10/2026, fim do dia)
 | Parte | Situação |
 |---|---|
 | Base (páginas, mapas, HUD, Bonzi, perfil, ajustes, 404) | pronta |
 | Galáxia 1 "Internet e Web" (faixa 13-ou-menos) — S1 Dispositivos e conexão (1.1–1.4) | **pronta e testada** |
 | S2 Endereços e sites (2.1–2.4) | **pronta e testada** |
-| S3 Navegador e páginas Web (3.1–3.4) e S4 Comunicação e segurança (4.1–4.4) | especificação pronta; motores são **stubs** (abrem em "Prévia") |
-| Galáxia 2 "API REST" (faixa 14-ou-mais) | 4 sistemas sem planetas no banco (mostram prévias) |
-| Progresso/pontuação | só local (`rota404.progress`), desbloqueio sequencial por sistema; "Liberar todos os planetas" em Ajustes |
-| Conquistas, ranking, usuários, progresso no servidor | endpoints respondem **501** (só estrutura) |
+| S3 Navegador e páginas Web (3.1–3.4) | **pronta e testada** (navegador interno, 1440/tablet/375 px) |
+| S4 Comunicação e segurança (4.1–4.4) | **pronta e testada** (navegador interno, 1440/tablet/375 px) — Galáxia 1 completa |
+| Galáxia 2 "API REST" (faixa 14-ou-mais) | **pronta e testada** (22/10/2026): 16 planetas no banco e 16 motores (`motores-g2.md`) |
+| Contas (22/10/2026) | login OBRIGATÓRIO em `/entrar`: apelido + senha + idade + nível de conhecimento; o NÍVEL define a faixa (galáxia), ver histórico 23/10. Sem servidor de contas, "Jogar sem conta" (visitante, sem ranking) |
+| Progresso/pontuação | na conta (servidor) + cópia local por dono (`rota404.progress.owner`); desbloqueio sequencial (planetas dentro do sistema e, desde 24/10, sistemas na galáxia); "Liberar todos" em Ajustes |
+| Pontuação (22/10/2026) | 10.000 por lab = 1.000 conclusão + até 4.000 erros + até 5.000 tempo (`labScore`, tempos em `config/labTiming.ts`, a calibrar); 80.000 por galáxia |
+| Ranking | por galáxia e por sistema: soma da melhor pontuação de cada lab (`/rankings/...`), destaca quem está vendo |
+| Conquistas (24/10/2026) | 19 conquistas da tabela da equipe (`config/achievements.ts`, regras em `lib/achievements.ts`), no aparelho e na conta (`/achievements/me`); medalhas originais (Brutal e Secreta recoloridas por `frontend/scripts/gerar-conquistas.py`); easter egg do suco de abacaxi. No Supabase: rodar `supabase/migrations/20261024000000_achievements.sql` |
+| `/scores` | responde **501** (só estrutura; a pontuação vai pelo `/progress`) |
 | Desempenho | otimizado e medido (55–60 FPS em notebook fraco simulado) |
-| Versão online (Render) | **no ar**: https://rota404.onrender.com (API: https://rota404-api.onrender.com). Repositório GitHub `Jhonny-Freire/rota-404_v2` (público); cada push na `main` republica |
+| Versão online (Render) | **no ar**: https://rota404.onrender.com (API: https://rota404-api.onrender.com), plano grátis |
 
 ## Próximos passos prováveis
-1. Implementar o **S3** (3.1, 3.2, 3.3, 3.4) e depois o **S4** com `/implementar-planeta`, um planeta por vez,
-   testando cada um no navegador. O kit já tem `BrowserFrame`, `PagePreview`/`Block`/`BLOCK_TAGS`, `ChoiceGrid`,
-   `OrderCards`, `AnswerInput` e `DragProvider` prontos para esses planetas.
+1. As duas galáxias estão completas (32 planetas). Próximo: testar em tablets/celulares reais e na rede da feira; revisar
+   com a equipe as interpretações registradas no histórico (S3/S4 e G2); calibrar os tempos dos labs (`labTiming.ts`).
 2. Pendências abertas (detalhes no histórico): decisão do microteste da 1.1; layout de celular (≤ 375 px) dos labs
    2.3/2.4/1.4 e do microteste 2.1; altura variável da fala no painel do Bonzi dos labs; testar tablets reais na rede.
 3. Antes de implementar gamificação no servidor, alinhar `backend/app/models/gamification.py`/`user.py` ao schema real.

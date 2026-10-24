@@ -1,0 +1,245 @@
+/* Laboratório 4.4 (Galáxia 2) — Desafio final: missão API */
+
+.canvas {
+  --u: var(--kit-u, 1cqw);
+  background:
+    radial-gradient(ellipse 70% 45% at 50% 92%, rgba(107, 63, 160, 0.22), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 70% 40%, rgba(110, 224, 138, 0.05), transparent 70%);
+}
+
+.mission {
+  display: flex;
+  flex-direction: column;
+  gap: max(4px, calc(0.6 * var(--u)));
+  padding: max(8px, calc(1.2 * var(--u)));
+  background: #fff3c4;
+  color: #1b1640;
+  font-family: var(--font-body), system-ui, sans-serif;
+  box-shadow:
+    0 0 0 3px #8a5a00,
+    inset -3px -3px 0 0 rgba(0, 0, 0, 0.12);
+}
+
+.missionHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #6b4a00;
+  font-size: max(10px, calc(1.3 * var(--u)));
+  font-weight: 700;
+}
+
+.missionHead img {
+  width: max(14px, calc(2 * var(--u)));
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.mission strong {
+  font-size: max(12px, calc(1.8 * var(--u)));
+  line-height: 1.3;
+}
+
+.request {
+  display: flex;
+}
+
+.placeholder {
+  padding: max(6px, calc(0.9 * var(--u))) max(10px, calc(1.2 * var(--u)));
+  background: rgba(13, 11, 43, 0.9);
+  box-shadow: 0 0 0 2px #3b3478;
+  color: var(--text-dim);
+  font-size: max(11px, calc(1.4 * var(--u)));
+  font-weight: 700;
+}
+
+.response {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: max(6px, calc(0.8 * var(--u)));
+  animation: dfm-pop 400ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.response > :last-child {
+  align-self: stretch;
+}
+
+/* Cartão do produto */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: max(4px, calc(0.6 * var(--u)));
+  padding-bottom: max(6px, calc(0.9 * var(--u)));
+  background: #fbfaff;
+  color: #1b1640;
+  box-shadow:
+    0 0 0 3px #2a2350,
+    inset -3px -3px 0 0 rgba(0, 0, 0, 0.12);
+  animation: dfm-pop 400ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.cardDone {
+  box-shadow:
+    0 0 0 3px var(--green),
+    inset -3px -3px 0 0 rgba(0, 0, 0, 0.12);
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: max(3px, calc(0.5 * var(--u))) max(8px, calc(1 * var(--u)));
+  background: #2a2350;
+  color: #fff;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(11px, calc(1.4 * var(--u)));
+  font-weight: 700;
+}
+
+.cardHead img {
+  width: max(14px, calc(2.2 * var(--u)));
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.cardRow {
+  display: grid;
+  grid-template-columns: 4.5em 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 0 max(8px, calc(1 * var(--u)));
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(11px, calc(1.4 * var(--u)));
+  font-weight: 700;
+}
+
+.slot {
+  min-height: calc(4.6 * var(--u));
+  padding: 2px;
+}
+
+.hint {
+  color: var(--text-dim);
+  font-size: max(10px, calc(1.2 * var(--u)));
+}
+
+.value {
+  font-family: "Courier New", monospace;
+  font-weight: 700;
+}
+
+/* Área de interação */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lead {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 15px;
+}
+
+.group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.group legend {
+  width: 100%;
+  margin-bottom: 4px;
+  padding: 0;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.opt {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 40px;
+  padding: 4px 8px;
+  border: 0;
+  background: var(--space-800);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow:
+    0 0 0 2px var(--panel-border),
+    inset -2px -2px 0 0 rgba(0, 0, 0, 0.3);
+  touch-action: manipulation;
+}
+
+.opt:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.mono {
+  font-family: "Courier New", monospace;
+}
+
+.optOn {
+  background: var(--space-700);
+  box-shadow:
+    0 0 0 3px var(--yellow),
+    inset -2px -2px 0 0 rgba(0, 0, 0, 0.3);
+}
+
+.pool {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cue {
+  display: inline-flex;
+  animation: dfm-cue 1.3s ease-in-out infinite;
+}
+
+@container (max-width: 560px) {
+  .missionHead {
+    font-size: 7px;
+  }
+
+  .mission strong,
+  .placeholder,
+  .cardHead,
+  .cardRow {
+    font-size: 8px;
+  }
+
+  .hint {
+    font-size: 7px;
+  }
+
+  .slot {
+    min-height: 0;
+  }
+}
+
+@keyframes dfm-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dfm-cue {
+  50% {
+    transform: translateY(-3px);
+  }
+}

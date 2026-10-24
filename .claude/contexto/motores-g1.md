@@ -64,14 +64,14 @@ Na tabela, chave do motor = slug = content.engine ou config.engine (os três coi
 | 2.2 | IP, domínio e site | lesson | ip-dominio-e-site | 39233cf4-36b9-4517-a9c8-b14bada25ac1 | S2/aula2-2.md | implementado e registrado |
 | 2.3 | Encontrando o destino | lab (associacao) | encontrando-o-destino | 95af5ac6-f9eb-4bd2-84e9-3535f30a72f0 | S2/lab2-3.md | implementado e registrado |
 | 2.4 | Missão: encontrar o servidor | lab (labirinto) | missao-encontrar-o-servidor | fff18e03-8baf-470d-b136-7c03075c4548 | S2/lab2-4.md | implementado e registrado |
-| 3.1 | O que acontece quando acesso um site? | lesson | o-que-acontece-quando-acesso-um-site | 28178e76-38a1-445f-afb3-4e61ec61fbb9 | S3/aula3-1.md | stub, não registrado, abre em prévia |
-| 3.2 | HTML: os blocos de uma página | lesson | html-os-blocos-de-uma-pagina | 69517683-7e23-432e-8b30-ce1198715810 | S3/aula3-2.md | stub, prévia |
-| 3.3 | Monte sua página | lab (construtor) | monte-sua-pagina | 34d5ed89-e884-4f4e-921c-f6813d9eab21 | S3/lab3-3.md | stub, prévia |
-| 3.4 | Conserte a página | lab (correcao) | conserte-a-pagina | dc2289ef-4b9b-424d-b351-f4115bd95639 | S3/lab3-4.md | stub, prévia |
-| 4.1 | Como as informações viajam? | lesson | como-as-informacoes-viajam | 0bc02c66-205e-4351-87cd-e4129dcd98e1 | S4/aula4-1.md | stub, prévia |
-| 4.2 | HTTP e HTTPS | lesson | http-e-https | c97af471-eb71-4239-8687-1a8288e2b8c5 | S4/aula4-2.md | stub, prévia |
-| 4.3 | Detetive digital | lab (investigacao) | detetive-digital | 002ca2f6-5188-4a95-aa6a-4466e12a5f6a | S4/lab4-3.md | stub, prévia |
-| 4.4 | Missão: navegação segura | lab (decisoes) | missao-navegacao-segura | 3a21810a-44f3-4ecd-ad77-a60bff685c83 | S4/lab4-4.md | stub, prévia |
+| 3.1 | O que acontece quando acesso um site? | lesson | o-que-acontece-quando-acesso-um-site | 28178e76-38a1-445f-afb3-4e61ec61fbb9 | S3/aula3-1.md | implementado e registrado |
+| 3.2 | HTML: os blocos de uma página | lesson | html-os-blocos-de-uma-pagina | 69517683-7e23-432e-8b30-ce1198715810 | S3/aula3-2.md | implementado e registrado |
+| 3.3 | Monte sua página | lab (construtor) | monte-sua-pagina | 34d5ed89-e884-4f4e-921c-f6813d9eab21 | S3/lab3-3.md | implementado e registrado |
+| 3.4 | Conserte a página | lab (correcao) | conserte-a-pagina | dc2289ef-4b9b-424d-b351-f4115bd95639 | S3/lab3-4.md | implementado e registrado |
+| 4.1 | Como as informações viajam? | lesson | como-as-informacoes-viajam | 0bc02c66-205e-4351-87cd-e4129dcd98e1 | S4/aula4-1.md | implementado e registrado |
+| 4.2 | HTTP e HTTPS | lesson | http-e-https | c97af471-eb71-4239-8687-1a8288e2b8c5 | S4/aula4-2.md | implementado e registrado |
+| 4.3 | Detetive digital | lab (investigacao) | detetive-digital | 002ca2f6-5188-4a95-aa6a-4466e12a5f6a | S4/lab4-3.md | implementado e registrado |
+| 4.4 | Missão: navegação segura | lab (decisoes) | missao-navegacao-segura | 3a21810a-44f3-4ecd-ad77-a60bff685c83 | S4/lab4-4.md | implementado e registrado |
 
 As pastas dos .md:
 - S1 = `G1 - Internet e Web/S1 - Dispositivos e conexão/`
@@ -97,7 +97,7 @@ Props: `{ scene, say, setCanAdvance, next, setHint, reducedMotion }`.
 Props: `{ attempt, maxScore, say, feedback, setStep, mistake, finish, reducedMotion, Stage, Interaction }`.
 - Tudo precisa ser renderizado dentro de `<Stage>` (palco 16:9; ponha um `<SceneCanvas>` dentro) e/ou de `<Interaction>` (painel "Área de interação"). O que ficar fora não aparece.
 - O motor é remontado a cada "Jogar de novo" (`EngineBoundary key={attempt}`, com attempt + 1).
-- Pontos: `labPoints = max(ceil(50% de max), max − 10 × erros)`. Medalha: ouro ≥ 90%, prata ≥ 70%, bronze abaixo (`frontend/lib/progress.ts`).
+- Pontos: `labScore(erros, segundos, {min, avg}, max)` em `frontend/lib/progress.ts` (fórmula da equipe, 22/10/2026): 1.000 por concluir + até 4.000 pelos erros (−1.000 cada) + até 5.000 pelo tempo (1ª metade de 2.500 cai de `min` até `avg`; 2ª metade cai de `avg` até 2 × `avg`). Total máximo 10.000 por lab (= `labs.max_score`), 80.000 por galáxia. Os tempos de cada lab ficam em `frontend/config/labTiming.ts` (estimativas: calibrar). Medalha: ouro ≥ 90%, prata ≥ 70%, bronze abaixo. Ao criar um lab novo, cadastre os tempos dele em `labTiming.ts`.
 - `feedback({tone: "success"|"error"|"info"|"hint", message})` preenche o painel Feedback.
 
 ### Regras comuns
@@ -116,7 +116,7 @@ Props: `{ attempt, maxScore, say, feedback, setStep, mistake, finish, reducedMot
   - Botão: `ActionButton` (`label`, `element`/`sprite`, `variant`, `attention`, `focusOnAttention`).
   - Arrastar e soltar: `DragProvider`/`DragPiece`/`DropZone`/`POOL_ZONE`. `onMove(itemId, zoneId)`; retornar false recusa a peça. `onSelect` avisa a seleção.
   - Página: `BrowserFrame` (`url`, `secure`, `highlight`, `loading`, `tabTitle`, `actionLabel`/`onAction`) e `PagePreview`/`Block` (`BlockKind`: title, text, image, button, input, link; `BLOCK_TAGS` e `BLOCK_LABELS`). Feitos sob medida para o S3 e o S4.
-  - Ainda não usados por nenhum motor: `ChoiceGrid`, `OrderCards`, `AnswerInput`, `DragBoard` (versão alta), `FlowChain` (só no 1.3 e no 2.4).
+  - Ainda não usados por nenhum motor: `ChoiceGrid`, `AnswerInput`, `DragBoard` (versão alta). `OrderCards` estreou na 3.1 (e, desde então, leva o foco ao cartão marcado depois de um "Verificar" errado); `FlowChain` aparece no 1.3, 2.4 e 3.1.
   - Tempo: `useSequence(steps, {onStep, onDone, reducedMotion, play})`. Um número é ANIMAÇÃO e vira 0 ms com movimento reduzido; `{hold: ms}` é pausa de LEITURA e fica. `useTimers()` dá `after(ms, fn, {hold})` e `clearAll`, tudo cancelado no unmount.
   - Aleatoriedade: `useSeededRandom(attempt, {salt, perSession})`, com `float/int/pick/shuffle(list, key, avoidIdentity)/chance`. Nunca `Math.random` no render.
   - Geometria: `lerpPoint`, `sceneDistance`, `pathLength`, `midpoint`.
@@ -151,12 +151,12 @@ Props: `{ attempt, maxScore, say, feedback, setStep, mistake, finish, reducedMot
 7. Encerramento: o pacote anda de parte em parte, com botão "Ver de novo" (remonta `ClosingRun` via key).
 
 ### 6.3 Lab 1.3 `conectando-uma-rede` (lab1-3.md)
-**Arquivos:** `index.tsx` (1096 linhas; a máquina de estados toda está aqui, exceção ao padrão), `network.ts` (NODES pc, phone, wifi, router, internet com `rank`; VARIANTS; SLOTS em hexágono; `FORWARD` (ligações válidas); `evaluate`; `mainBlock`; CONCEPT_HINTS), `NetworkPanel.tsx` (LinkList, SuccessRoutes com FlowChain), CSS module.
+**Arquivos:** `index.tsx` (1096 linhas; a máquina de estados toda está aqui, exceção ao padrão), `network.ts` (NODES pc, phone, wifi, router, internet com `rank`; VARIANTS; `layoutFor` (colunas do caminho); `FORWARD` (ligações válidas); `evaluate`; `mainBlock`; CONCEPT_HINTS), `NetworkPanel.tsx` (LinkList, SuccessRoutes com FlowChain), CSS module.
 
 **Etapas:** Arrastar, Ligar, Testar, Funcionou!
 
 **Fluxo:**
-- Arrastar as peças da bandeja (DragProvider/DropZone) para os espaços da área "Monte a rede". A posição não importa, só a relação lógica.
+- Arrastar as peças da bandeja (DragProvider/DropZone) para os espaços da área "Monte a rede". A área é o caminho: uma coluna por lugar (aparelho → Wi-Fi → roteador → internet), com setas durante o arraste. Peça na coluna errada volta para a bandeja com o aviso "Essa peça não vai aí" (sem penalidade).
 - Ligar tocando em duas peças ou arrastando de uma até a outra. A linha amarela de prévia é o `PreviewWire`.
 - Cada ligação tem um X para apagar.
 - Testar:
@@ -167,11 +167,12 @@ Props: `{ attempt, maxScore, say, feedback, setStep, mistake, finish, reducedMot
 
 **Pontuação e variação:**
 - `mistake()` só em teste reprovado.
-- A variação gira a partir de um início sorteado na visita: `VARIANTS[(sessionRand.int(...)+attempt) % 3]`, com as variantes computador, celular e dois-dispositivos, as três do .md.
+- A variação gira a partir de um início sorteado na visita: `VARIANTS[(sessionRand.int(...)+attempt) % 2]`: computador ou celular, SEMPRE com Wi-Fi, roteador e internet (4 peças, 4 colunas). Decisão da equipe (23/10/2026): as variantes do .md "computador + roteador + internet" e "dois dispositivos" confundiam as crianças e saíram.
 - A ordem da bandeja é `rand.shuffle(..., true)`.
 
 **Interpretações próprias:**
-- O PC pode ir por cabo ao roteador OU pelo Wi-Fi.
+- O caminho é sempre aparelho → Wi-Fi → roteador → internet: o PC também vai pelo Wi-Fi (`FORWARD.pc = ["wifi"]`; antes podia ir por cabo ao roteador).
+- A ordem do caminho é exigida na montagem (colunas); o .md diz "não exige uma posição geométrica exata" — a posição dentro da coluna continua livre (23/10/2026, feedback de testes).
 - O celular só vai pelo Wi-Fi.
 - A peça colocada não volta para a bandeja (`handleMove` só aceita bandeja → área).
 
@@ -185,7 +186,7 @@ Props: `{ attempt, maxScore, say, feedback, setStep, mistake, finish, reducedMot
 **Phase:** start, testing, investigate, acting, ready, done.
 
 **Fluxo:**
-1. "Ligar conexão" faz o pacote parar no ponto da falha, com o balão "Parou aqui!".
+1. "Ligar conexão" faz o pacote parar no ponto da falha, com o balão "Parou aqui!". Na falha "target" o pacote vai até a impressora, mas o balão ("Caminho errado!") fica no COMPUTADOR e a impressora não fica vermelha: é no computador que se conserta (23/10/2026; na impressora as crianças achavam que ela estava quebrada). Texto e lugar em `STOP_CALLOUT`.
 2. Tocar nas 4 peças (computador, Wi-Fi, roteador, internet) dispara a animação curta e marca correct ou wrong.
 3. As ações ficam TRANCADAS até o aluno achar a peça com falha. Depois aparecem as 4 ações embaralhadas: "Ligar o Wi-Fi", "Encaixar o cabo", "Trazer o roteador para casa", "Ligar o PC no Wi-Fi".
 4. Novo teste.
@@ -265,12 +266,76 @@ Props: `{ attempt, maxScore, say, feedback, setStep, mistake, finish, reducedMot
 3. Ao chegar na Internet aparece o IP. O aluno escolhe o servidor pelo IP; servidor errado também volta ao ponto seguro.
 4. O servidor responde e a página aparece; `finish` após 4,2 s.
 
-**Ajuda do .md:** com 2 erros ou mais (`HELP_AFTER`), o Bonzi mostra a seta do próximo passo, falada uma vez só (`helpSaid`).
+**Ajuda do .md:** com 2 erros ou mais no total (`HELP_AFTER`), o Bonzi mostra a seta do próximo passo, mas SÓ no cruzamento em que a criança acabou de errar (algum caminho sem saída daquela camada já foi tentado). Num cruzamento novo ela sempre tenta sozinha primeiro. A fala de ajuda é dita uma vez por cruzamento (`helpSaidAt`).
 
 **Variação:**
 - O destino e o IP do servidor certo avançam com o `attempt` a partir de um início sorteado na visita, então sempre mudam no "Jogar de novo".
 - Aparelho de partida, distratores, fileiras e IPs vêm de `rand`, por tentativa.
 - Cada camada é ordenada por y (`byRow`), para que a ordem do DOM e do Tab não entregue a resposta.
+
+### 6.9 Aula 3.1 `o-que-acontece-quando-acesso-um-site` (aula3-1.md)
+**Arquivos:** `index.tsx`, `model.ts` (falas LITERAIS, textos criados, PARTS, ORDER_STEPS, geometria, `phases()`/`speechMs()`), `World.tsx` (Client = BrowserFrame + computador, InternetNode, ServerNode, ResponseNode, Wires, Traveler, FilesPanel, MiniPage, BrowserIcon), `JourneyScenes.tsx` (cenas 1 a 5), `SceneExplore.tsx` (cena 6), `SceneClosing.tsx` (cena 7), CSS module.
+
+**Cenas:** as 7 do stub. Cena 1 interativa (tocar em "Acessar" na barra do navegador; libera após o toque + 1400 ms E o fim da fala). Cenas 2–5 passivas (pedido = carta `mail`, resposta = caixa `boxGold`; o servidor ganha a placa SERVIDOR ao receber o pedido; painel "Arquivos de jogos.com"; a página aparece em blocos). Cena 6: (a) tocar nas 4 partes (textos LITERAIS do .md num Callout); depois da 4ª o botão "Continuar" aparece (canto inferior direito) quando a fala acaba, sem avanço automático (revisão de UX de 20/10); (b) `OrderCards` Pedido/Resposta/Página embaralhado sem identidade por visita; só o acerto libera (após a fala do acerto). Cena 7: animação completa com `FlowChain` no alto e "Ver de novo".
+
+**Interpretações:** falas da Microinteração criadas; site-exemplo "Jogos" criado; na cena 6 a Resposta fica abaixo do fio (na mesma linha, no celular, as legendas se sobrepunham).
+
+### 6.10 Aula 3.2 `html-os-blocos-de-uma-pagina` (aula3-2.md)
+**Arquivos:** `index.tsx`, `model.ts` (SITE planetas.com, PAGE_ORDER, TRAY_ORDER, LINES, WRONG_LINES, QUIZ_SITES, QUIZ_ORDERS), `parts.tsx` (PageWindow = BrowserFrame + PagePreview/Block; Tray = bandeja 2x2 dos blocos soltos), `PageScenes.tsx` (cenas 1 a 4), `SceneQuiz.tsx`, CSS module.
+
+**Cenas:** Página pronta (passiva) · Separação (os blocos saem um a um e caem FORA de ordem numa bandeja à direita; no fim, a fala LITERAL "Esses blocos formam a estrutura da página.") · HTML visual (cada bloco da bandeja ganha a etiqueta `<h1>`, `<p>`, `<img>`, `<button>`, uma por vez, sem página de código) · Montagem (passiva: os blocos voltam à página na ordem título, texto, imagem, botão, com as etiquetas) · Microteste (tocar no bloco que é o título; página e ordem sorteadas por visita, o título nem sempre em cima; o erro diz o que é o bloco tocado sem apontar o título).
+
+**Interpretações:** o .md só define a fala da Cena 2, as demais foram criadas; a Montagem foi lida como passiva (voz passiva no .md; o aluno age só no Microteste); a bandeja fora de ordem dá sentido à "ordem correta" da cena 4.
+
+### 6.11 Lab 3.3 `monte-sua-pagina` (lab3-3.md)
+**Arquivos:** `index.tsx` (estado), `model.ts` (THEMES, COLORS, `buildPlan`, `codeLine`, TEXT, BANNER, TIMING), `BuildScene.tsx` (palco: Blocos à esquerda, Área de edição ao centro, Prévia à direita, como a "Tela" do .md), `BuildPanel.tsx` (escolha da imagem e da cor + "Ver página"), CSS module.
+
+**Etapas:** Estrutura, Conteúdo, Elemento visual, Ação, Visualização. **Phase:** build, ready, view, done.
+
+**Fluxo:** o sistema pede um bloco por vez ("Coloque um título." LITERAL; os outros pedidos foram criados). Arrastar (DragProvider/DragPiece/DropZone) ou tocar no bloco e depois na área. Bloco errado: recusado, `mistake()` só uma vez por par (bloco pedido, bloco solto). A prévia mostra esboços; "Ver página" transforma a estrutura em página de verdade (com a cor escolhida) e depois mostra o código HTML linha a linha como recompensa (nada é digitado). `finish` após a fala do código.
+
+**Variação:** tema (título/texto/botão/opções de imagem) avança com o `attempt` a partir de um início sorteado na visita; ordem dos blocos na coluna embaralhada sem identidade. Escolhas visuais livres (imagem e cor), nunca dão erro.
+
+### 6.12 Lab 3.4 `conserte-a-pagina` (lab3-4.md)
+**Arquivos:** `index.tsx` (estado), `model.ts` (`Layout` = page + outside; `findProblems` com prioridade missing > duplicate > floating > title > order; `problemSlots`; COMBOS; THEMES; `describe`/`howTo`/`effect`; `insertInPlace`), `FixScene.tsx` (página quebrada + Estrutura em blocos com etiquetas e "Fora da página"), `FixPanel.tsx` (instrução + Testar; no celular, ≤ 600 px, também botões grandes Subir/Descer/Remover/Encaixar/Colocar para o bloco tocado), CSS module.
+
+**Etapas:** Observar, Tocar no erro, Corrigir, Testar. **Phase:** observe, find, fix, testing, done.
+
+**Fluxo (os 8 passos do .md):** Bonzi mostra a página; o aluno toca no elemento quebrado (tocar num bloco certo só informa, sem penalidade); o bloco correspondente fica marcado na estrutura; o aluno move/troca (subir/descer), remove, encaixa (imagem sem posição) ou recoloca (botão ausente); "Testar" redesenha a página; se ainda houver problema, o sistema marca SÓ o próximo ponto; no fim, a versão final.
+
+**Revisão de UX (20/10):** o fluxo marcar-bloco + painel travado até achar o erro foi achado "travado e pouco intuitivo". Agora cada bloco da Estrutura tem os próprios botões (setas Subir/Descer e Remover; "Encaixar" na imagem solta; "Colocar" nos blocos fora da página), SEMPRE liberados, e "Testar" também. Tocar no erro da página continua marcando o bloco (passos 2 e 3 do .md viram ajuda, não trava). O "Quase!" sem penalidade vale para qualquer bloco ligado a um problema que ainda existe.
+
+**Feedback:** `effect()` explica o efeito da correção ("Agora o título está no lugar certo." é o exemplo LITERAL do .md; os outros seguem o modelo).
+
+**Pontuação:** `mistake()` quando o teste mostra o mesmo problema sem que o aluno tenha mexido no bloco marcado, ou quando aparece um problema novo. Testar no meio do conserto (mexeu no bloco certo, ainda não terminou) dá "Quase!" sem penalidade. Testar sem mudar nada só pede uma mudança.
+
+**Variação:** 5 páginas quebradas com 2 problemas cada (título no lugar errado, imagem sem posição, botão ausente, ordem incorreta e bloco repetido, este para o "remove" do Fluxo), avançando com o `attempt`; tema sorteado por tentativa. As 5 foram resolvidas no navegador com 100 pontos por um solucionador automático.
+
+### 6.13 Aula 4.1 `como-as-informacoes-viajam` (aula4-1.md)
+**Arquivos:** `index.tsx`, `model.ts` (falas LITERAIS, PARTS, ORDER_STEPS, geometria, `phases()`), `parts.tsx` (LoginWindow = BrowserFrame com o login e o resultado; InternetNode, ServerNode, MessageNode, Wires, Traveler, CheckPanel), `JourneyScenes.tsx` (cenas 1 a 5), `SceneExplore.tsx`, `SceneClosing.tsx`, CSS module.
+
+**Cenas:** as 7 do stub. Cena 1: o aluno toca em "Entrar" e, 1400 ms depois e com a fala terminada, a aula avança sozinha para a cena 2 (revisão de UX: antes era preciso tocar também em "Próxima cena"). Cenas 2–4: REQUISIÇÃO (carta) e RESPOSTA (caixa dourada) viajam um pouco acima do fio, com o nome em caixa alta na fonte do CORPO (a display deforma "Ç"/"Ã"); o servidor mostra o painel "Verificando" (usuário e senha). Cena 5: "Login realizado!" e o botão "Ver outra tentativa" (interpretação do "em outra tentativa, a resposta pode indicar que os dados estão incorretos": mostra "Usuário ou senha incorretos."). Cena 6: tocar nas 4 partes (textos LITERAIS) e, com a fala terminada, tocar em "Continuar" (sem avanço automático); depois ordenar os 3 cartões do .md; depois do acerto a comunicação completa é reproduzida e só então libera. Cena 7: cadeia "Clique em Entrar / Requisição / Servidor / Resposta / Resultado na tela" + animação + "Ver de novo" (logo abaixo da cadeia, mais visível; o mesmo na cena 7 da 3.1).
+
+### 6.14 Aula 4.2 `http-e-https` (aula4-2.md)
+**Arquivos:** `index.tsx` (guarda a informação digitada, que atravessa as cenas), `model.ts`, `parts.tsx` (Window, SendForm, Message aberta/protegida, Hacker com balão, Server, Wire), `Scenes.tsx` (as 5 cenas), CSS module.
+
+**Cenas (revisão de UX de 20/10: as antigas cenas 1 "Enviando" e 2 "Sem proteção" viraram uma só; o .md continua com 6 cenas):** 1 o aluno digita um apelido INVENTADO (o rótulo diz "inventado"; nada sai do navegador) e envia; na mesma cena, com HTTP, a carta aberta ("Apelido: X") viaja destacada, o hacker intercepta e o balão mostra o conteúdo; falas LITERAIS encadeadas pelo FIM REAL do áudio (`useSpeech`): "No HTTP...", "Essa não!..." e "Vamos mudar...". 2 HTTPS: a carta vira pacote fechado com cadeado, o hacker intercepta e não consegue ler, o servidor recebe (também encadeado pela fala). 3 tela dividida HTTP | HTTPS com o protocolo destacado nos dois endereços. 4 endereço https com cadeado + legendas "Cadeado: conexão protegida" e "não quer dizer que o site é confiável". 5 Encerramento com as duas faixas e os rótulos LITERAIS ("comunicação sem criptografia" / "comunicação protegida por criptografia"), sem o caractere "→".
+
+### 6.15 Lab 4.3 `detetive-digital` (lab4-3.md)
+**Arquivos:** `index.tsx` (estado), `model.ts` (8 CASES com pistas, categoria, fala de revelação, pista-chave e sinais; `buildCases`; TEXT; BANNER), `CaseScene.tsx` (quadro de casos, investigação com pistas + DragPiece/3 DropZones, indícios, painel final), CSS module.
+
+**Etapas:** Analisar as evidências, Classificar, Descobrir os indícios, Revisar os casos. **Phase:** board, examine, wrong, reveal, result.
+
+**Fluxo:** fala de abertura LITERAL; o aluno escolhe um cartão; toca nas pistas (endereço, remetente, conteúdo, informações pedidas, finalidade da permissão) e o painel mostra o que o detetive percebe; o Bonzi também NARRA cada pista ("Rótulo: o que o detetive percebe"; revisão de UX). Nas pistas de endereço e de permissão o Bonzi faz antes as perguntas LITERAIS do .md e a explicação entra na fila (`say(..., {afterCurrent:true})`). Em telas ≥ 481 px de palco a investigação tem mais espaço (fontes, espaçamentos e zonas maiores). Depois arrasta (ou toca e escolhe) o cartão para Seguro / Precisa verificar / Suspeito. Certo: os indícios aparecem coloridos (alerta, tudo certo, falta informação) e o Bonzi diz a fala do caso (LITERAL nos 3 exemplos do .md). Errado: `mistake()`, a resposta NÃO é revelada e o caso vai para a revisão. Depois de todos os cartões, a revisão marca a pista-chave e permite classificar de novo (cada erro conta). No fim, o painel: situações analisadas, classificações corretas de primeira e sinais de risco identificados; "Concluir" chama `finish`.
+
+**Variação:** por tentativa, 5 casos (2 suspeitos, 2 seguros e 1 "precisa verificar") sorteados entre 8 (os 6 exemplos do .md + "jogo pede localização", do Etapa 3, + "amigo com número novo", criado) e embaralhados.
+
+### 6.16 Lab 4.4 `missao-navegacao-segura` (lab4-4.md)
+**Arquivos:** `index.tsx` (estado), `model.ts` (5 SCENARIOS com opções, resultados, fala LITERAL de acerto, prática e dica; `buildOrder`), `MissionScene.tsx` (situação/resultado à esquerda, escolhas à direita, resumo), CSS module.
+
+**Etapas:** os 5 cenários do .md. **Phase:** play, solved, summary.
+
+**Fluxo:** fala de abertura LITERAL. Em cada cenário a escolha mostra "o que acontece" (sprites com animação curta + texto criado). Escolha arriscada: `mistake()` (uma vez por opção) e tenta de novo. Escolha segura: fala LITERAL e "Próxima situação"; depois do acerto o aluno pode tocar nas outras opções para ver o que aconteceria, sem perder pontos ("observar resultados diferentes"). Resumo final: práticas aplicadas (cenários acertados de primeira) e decisões para rever, cada uma com a dica (no tablet e no celular as escolhas riscadas são escondidas para caber). "Concluir" chama `finish`; "Jogar de novo" repete com as opções em outra ordem.
 
 ## 7. Padrões que se repetem (seguir nos novos motores)
 - **Pasta:** `engines/<chave>/`. O `index.tsx` começa com `"use client"`, traz `export const meta` e `export default function <PascalCase>(props)`. Comentário-doc no default: `/** Aula X.Y — Título (G1 - Internet e Web/S.../arquivo.md) */`.
@@ -310,25 +375,14 @@ Props: `{ attempt, maxScore, say, feedback, setStep, mistake, finish, reducedMot
   - Os comentários citam conferência com o palco a 560 e 900 px.
 - **Visual:** só sprites de `ELEMENTS` / `SPRITES`, mais formas em CSS (fios, blocos). Proibido ícone de biblioteca, emoji ou SVG no lugar de sprite.
 
-## 8. Estado do S3/S4 (stubs)
-As 8 pastas existem com um único `index.tsx` que exporta `meta` e um default que renderiza `PlaceholderLessonEngine` ou `PlaceholderLabEngine` com `meta` e `code`. O comentário diz `STUB X.Y — substituir pelo motor real (<caminho do .md>)`. As listas de cenas e etapas já espelham os .md:
+## 8. Estado dos stubs
+Não há mais stubs: os 16 planetas da Galáxia 1 estão implementados e registrados (S3 em §6.9–6.12 e S4 em §6.13–6.16, ambos de 20/10/2026). Para um planeta novo, crie a pasta com um stub que use `PlaceholderLessonEngine`/`PlaceholderLabEngine` (de `runtime/placeholders`) e só registre quando o motor for real.
 
-| Planeta | Cenas / etapas no stub |
-|---|---|
-| 3.1 | Quero acessar um site, Fazendo o pedido, Conhecendo o servidor, Enviando a resposta, O site aparece!, Microinteração, Fechamento |
-| 3.2 | Página pronta, Separação, HTML visual, Montagem, Microteste |
-| 3.3 | Estrutura, Conteúdo, Elemento visual, Ação, Visualização |
-| 3.4 | Observar, Tocar no erro, Corrigir, Testar |
-| 4.1 | Entrando em uma conta, Enviando a requisição, O servidor recebe o pedido, O servidor responde, O resultado aparece, Microinteração, Fechamento |
-| 4.2 | Enviando uma informação, Sem proteção, Protegendo a comunicação, HTTP e HTTPS, O cadeado, Encerramento |
-| 4.3 | Analisar as evidências, Classificar, Descobrir os indícios, Revisar os casos |
-| 4.4 | Senha, Permissão, Perfil público, Computador compartilhado, Pedir ajuda |
-
-Como NÃO estão em `ENGINES`, a tela usa `PREVIEW_*_META`, e não o meta do stub.
+**Armadilha aprendida no S3/S4:** não ponha a classe de animação de entrada (`pop`, keyframes com `transform` e `fill-mode: both`) no MESMO elemento que recebe `transform: scale()` no celular: o fim da animação (`transform: none`) anula a escala. Use dois wrappers (escala por fora, animação por dentro).
 
 ## 9. Passo a passo para criar um motor novo (exemplo: 3.1)
 1. Ler o .md inteiro (`G1 - Internet e Web/S3 - Navegador e páginas Web/aula3-1.md`). Listar as cenas ou etapas, as falas do Bonzi (entre aspas no .md), os textos de feedback, as variações e o que "não pode revelar".
-2. Conferir a chave no banco (servidor já no ar): `curl -s http://127.0.0.1:5000/api/lessons/o-que-acontece-quando-acesso-um-site`. O `data.content.engine` precisa ser igual ao nome da pasta e à chave do registro. Para labs: `curl -s http://127.0.0.1:5000/api/labs/<slug>` → `data.config.engine`.
+2. Conferir a chave no banco (servidor já no ar): `curl -s http://127.0.0.1:9001/api/lessons/o-que-acontece-quando-acesso-um-site`. O `data.content.engine` precisa ser igual ao nome da pasta e à chave do registro. Para labs: `curl -s http://127.0.0.1:9001/api/labs/<slug>` → `data.config.engine`.
    - Se for preciso mudar, mude nos DOIS seeds: `supabase/seed.sql` e `backend/app/data/seed.json`.
    - Hoje as 8 chaves do S3/S4 já batem com as pastas.
 3. Reescrever `frontend/components/learning/engines/<chave>/index.tsx`:
@@ -368,6 +422,6 @@ Como NÃO estão em `ENGINES`, a tela usa `PREVIEW_*_META`, e não o meta do stu
 - Não faça `setState` a cada pointermove no componente grande: isole num subcomponente com `forwardRef` + `useImperativeHandle` e agrupe com `requestAnimationFrame` (PreviewWire no 1.3). O DragBoard já usa um hover store com `useSyncExternalStore`.
 - Regra de UI do `prompt_base (1).md`: só sprites/imagens (`ELEMENTS`/`SPRITES` em `frontend/config/assets.ts`, arquivos em `frontend/public/sprites/elements`). Proibido ícone de biblioteca, emoji, Unicode ou SVG no lugar de sprite; formas simples em CSS (fios, blocos do PagePreview) são permitidas.
 - O bloqueio é por sistema: o planeta N exige o N-1 concluído (`computePlanetState`). Como S3/S4 são prévias e prévias nunca concluem, para testar 3.2+ antes de o 3.1 existir use `settings.unlockAll` (Configurações → "Liberar todos os planetas").
-- Interpretações das especificações a conhecer: no microteste da 1.1 só "dois aparelhos ligados" é certo (o .md diz "exemplos" no plural; a conexão solta conta como errada — decisão pendente com a equipe); no 1.3 o PC pode ir ao roteador por cabo OU pelo Wi-Fi e peças colocadas não voltam para a bandeja; no 1.4 as ações ficam travadas até achar a peça com falha; a 2.1 não tem cena de encerramento (o .md não tem); as falas do Bonzi na cena 6 da 2.2 foram criadas (o .md não define).
+- Interpretações das especificações a conhecer: no microteste da 1.1 só "dois aparelhos ligados" é certo (o .md diz "exemplos" no plural; a conexão solta conta como errada — decisão pendente com a equipe); no 1.3 o caminho é sempre aparelho → Wi-Fi → roteador → internet (um aparelho só) e peças colocadas não voltam para a bandeja; no 1.4 as ações ficam travadas até achar a peça com falha; a 2.1 não tem cena de encerramento (o .md não tem); as falas do Bonzi na cena 6 da 2.2 foram criadas (o .md não define).
 - Componentes do kit ainda não usados por nenhum motor e prontos para S3/S4: `ChoiceGrid`, `OrderCards`, `AnswerInput`, `DragBoard` (alto nível), `PagePreview`/`Block`/`BLOCK_TAGS`, `BrowserFrame` (`secure`/`highlight="protocol"` para a 4.2).
 - Windows: caminhos com espaços e acentos (OneDrive …/Área de Trabalho) — use aspas nos comandos; `frontend/.next` tem muitos chunks que poluem o grep, então exclua `.next` e `node_modules`.

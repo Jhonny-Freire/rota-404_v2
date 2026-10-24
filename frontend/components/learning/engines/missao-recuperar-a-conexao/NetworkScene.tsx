@@ -280,7 +280,6 @@ export function NetworkScene({
           alt={printerAlt}
           onClick={() => onTap("printer")}
           highlighted={printerLinked && look === "pc"}
-          wrong={printerLinked && (stopped || markOf("pc") === "wrong")}
           mark={false}
         />
       </Node>
@@ -365,7 +364,7 @@ export function NetworkScene({
       {test?.status === "failed" && (
         <Place key={`stop-${test.run}`} x={callout.at.x} y={callout.at.y} anchor={callout.anchor} z={5}>
           <Callout tone="danger" tail={callout.tail} size="md" className={styles.stop}>
-            Parou aqui!
+            {callout.text}
           </Callout>
         </Place>
       )}

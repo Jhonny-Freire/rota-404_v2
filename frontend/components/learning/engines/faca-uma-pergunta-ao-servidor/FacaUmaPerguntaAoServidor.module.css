@@ -1,0 +1,93 @@
+/* Laboratório 1.3 (Galáxia 2) — Faça uma pergunta ao servidor */
+
+.canvas {
+  --u: var(--kit-u, 1cqw);
+  background:
+    radial-gradient(ellipse 70% 45% at 50% 92%, rgba(107, 63, 160, 0.22), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 20% 35%, rgba(58, 214, 255, 0.06), transparent 70%);
+}
+
+.arrow {
+  display: block;
+  width: max(14px, calc(2.4 * var(--u)));
+  height: auto;
+  image-rendering: pixelated;
+}
+
+/* Etapa 4: lugares das etiquetas no palco */
+.zone {
+  min-height: calc(6 * var(--u));
+  padding: 2px;
+}
+
+.zoneHint {
+  color: var(--text-dim);
+  font-size: max(10px, calc(1.2 * var(--u)));
+  font-weight: 600;
+}
+
+.tag {
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+/* Área de interação */
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.lead {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.lead strong {
+  color: var(--yellow);
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* rótulos longos ("Ver a pontuação de um jogador") quebram linha: no celular o painel não pode alargar a página */
+.options button {
+  max-width: 100%;
+  white-space: normal;
+  text-align: left;
+}
+
+.pool {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* etiquetas do monte pulsam até irem para o palco (só transform) */
+.cue {
+  display: inline-flex;
+  animation: faca-cue 1.3s ease-in-out infinite;
+}
+
+@container (max-width: 560px) {
+  .zone {
+    min-height: 26px;
+  }
+
+  .zoneHint {
+    font-size: 8px;
+  }
+}
+
+@keyframes faca-cue {
+  50% {
+    transform: translateY(-3px);
+  }
+}

@@ -6,14 +6,23 @@ import { ProgressBar } from "@/components/progress/ProgressBar";
 import { Sprite } from "@/components/ui/Sprite";
 import { SpriteButton } from "@/components/ui/SpriteButton";
 import { cx } from "@/components/ui/cx";
+import { useBonziSpeaking } from "@/hooks/useBonziSpeaking";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { whenIdle } from "@/services/narrationService";
+import { useBonziLine } from "./useBonziLine";
 import { CompletionPanel, type CompletionAction } from "./CompletionPanel";
-import { EMPTY_LINE, Narrator, type NarratorLine } from "./Narrator";
+import { ListenButton, useGuideVoice } from "./GuideVoice";
+import { Narrator } from "./Narrator";
 import { SceneStage } from "./SceneStage";
+import { playSceneIn } from "./sceneTransition";
 import { ShellHeader } from "./ShellHeader";
 import { EngineBoundary } from "./runtime/EngineBoundary";
 import type { LessonEngineMeta, LessonEngineProps, NextPlanetLink, Say } from "./runtime/types";
+import type { BonziState } from "@/types/domain";
 import styles from "./LessonShell.module.css";
+
+/** quantas falas da cena o "Repetir" guarda (as últimas) */
+const MAX_REPEAT_LINES = 6;
 
 export type LessonShellProps = {
   title: string;
@@ -45,6 +54,7 @@ export function LessonShell({
   onComplete,
 }: LessonShellProps) {
   const reducedMotion = useReducedMotion();
+  const speaking = useBonziSpeaking();
   // Desempenho: o motor só re-renderiza quando as props dele mudam (cena, movimento reduzido) ou pelo próprio estado.
   // Sem isto, cada fala do Bonzi, dica, "pronto" ou troca de cena do shell re-renderizava a cena inteira.
   // Todas as funções passadas ao motor já são estáveis (useCallback).
@@ -56,29 +66,55 @@ export function LessonShell({
   const [ready, setReady] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [run, setRun] = useState(0);
-  const [line, setLine] = useState<NarratorLine>(EMPTY_LINE);
+  const bonzi = useBonziLine();
+  const { line } = bonzi;
   const [hint, setHintState] = useState<string | null>(null);
   const trackId = useId();
   const guideId = useId();
   const stageRef = useRef<HTMLElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const onCompleteRef = useRef(onComplete);
   const positionRef = useRef({ scene, total });
   const last = scene >= total - 1;
   const isOpen = (index: number) => allScenesOpen || index <= visited;
-  const canNext = ready || allScenesOpen || scene < visited;
+  /* o avanço só libera quando o Bonzi termina de falar (a não ser revendo cenas já vistas) */
+  const canNext = (ready && !speaking) || allScenesOpen || scene < visited;
+  const waitingSpeech = ready && speaking && !allScenesOpen && scene >= visited;
   const nextLabel = last ? "Concluir" : "Próxima cena";
   const sceneHint = hint ?? meta.hints?.[scene] ?? DEFAULT_HINT;
-  const guideText = ready ? `Muito bem! Agora toque em "${nextLabel}".` : sceneHint;
+  const guideText = waitingSpeech ? "Muito bem! Escute o Bonzi até o fim." : ready ? `Muito bem! Agora toque em "${nextLabel}".` : sceneHint;
+  /** falas do Bonzi nesta cena, na ordem: o "Repetir" fala todas (antes só a última) */
+  const sceneLines = useRef<Array<{ message: string; state: BonziState }>>([]);
+  // a instrução "O que fazer" também é lida em voz alta, depois da fala do Bonzi ("Escute o Bonzi" não é lida)
+  const listen = useGuideVoice(completed || waitingSpeech ? null : guideText, line.message);
 
   useEffect(() => {
     onCompleteRef.current = onComplete;
     positionRef.current = { scene, total };
   });
 
-  const say = useCallback<Say>((message, state = "speaking") => {
-    setLine((prev) => ({ message, state, key: prev.key + 1 }));
-  }, []);
+  // a cena nova entra deslizando e aparecendo (antes trocava de uma vez)
+  useEffect(() => {
+    playSceneIn(contentRef.current, reducedMotion);
+  }, [scene, run, reducedMotion]);
+
+  const { say: queueLine, reset: resetLine, sayAll } = bonzi;
+
+  /** toda fala entra na fila do Bonzi (nunca corta a atual; `afterCurrent` virou o padrão) e fica guardada para o "Repetir" */
+  const say = useCallback<Say>(
+    (message, state = "speaking") => {
+      const lines = sceneLines.current;
+      if (lines[lines.length - 1]?.message !== message) sceneLines.current = [...lines, { message, state }].slice(-MAX_REPEAT_LINES);
+      queueLine(message, state);
+    },
+    [queueLine],
+  );
+
+  /** "Repetir": o Bonzi fala de novo todas as falas da cena, uma depois da outra */
+  const repeatScene = useCallback(() => {
+    if (sceneLines.current.length > 0) sayAll(sceneLines.current);
+  }, [sayAll]);
 
   const setCanAdvance = useCallback((value: boolean) => setReady(Boolean(value)), []);
 
@@ -86,22 +122,32 @@ export function LessonShell({
 
   const goTo = useCallback((index: number) => {
     const target = Math.max(0, Math.min(positionRef.current.total - 1, index));
+    // cena nova: nada da cena anterior continua sendo falado nem fica na fila
+    sceneLines.current = [];
+    resetLine();
     setScene(target);
     setReady(false);
     setHintState(null);
     setVisited((v) => Math.max(v, target));
-  }, []);
+  }, [resetLine]);
 
   const complete = useCallback(() => {
     setCompleted(true);
-    setLine((prev) => ({ message: "Aula concluída! Você mandou muito bem.", state: "happy", key: prev.key + 1 }));
+    resetLine();
+    // só escrito, como o fim do laboratório (pedido da equipe, 24/10/2026)
+    queueLine("Aula concluída! Você mandou muito bem.", "happy", { silent: true });
     onCompleteRef.current?.();
-  }, []);
+  }, [resetLine, queueLine]);
 
+  /** Avanço pedido pelo motor: espera o Bonzi terminar a fala para não cortá-la. */
   const next = useCallback(() => {
-    const { scene: current, total: count } = positionRef.current;
-    if (current >= count - 1) complete();
-    else goTo(current + 1);
+    const from = positionRef.current.scene;
+    whenIdle().then(() => {
+      const { scene: current, total: count } = positionRef.current;
+      if (current !== from) return;
+      if (current >= count - 1) complete();
+      else goTo(current + 1);
+    });
   }, [complete, goTo]);
 
   /**
@@ -115,6 +161,8 @@ export function LessonShell({
   };
 
   const review = () => {
+    sceneLines.current = [];
+    resetLine();
     setCompleted(false);
     setScene(0);
     setReady(false);
@@ -147,7 +195,7 @@ export function LessonShell({
               {nextPlanet && <p className={styles.nextName}>Próximo: {nextPlanet.name}</p>}
             </CompletionPanel>
           ) : (
-            <SceneStage label={`Cena ${scene + 1} de ${total}: ${scenes[scene]}`} ready={ready} frameRef={stageRef}>
+            <SceneStage label={`Cena ${scene + 1} de ${total}: ${scenes[scene]}`} ready={ready} frameRef={stageRef} contentRef={contentRef}>
               <EngineBoundary key={run}>
                 <EngineView
                   scene={scene}
@@ -163,7 +211,7 @@ export function LessonShell({
         </div>
 
         <aside className={styles.side} aria-label="Guia da aula">
-          <Narrator line={line} />
+          <Narrator line={line} onRepeat={repeatScene} />
 
           {!completed && (
             <section className={cx(styles.guide, ready && styles.guideReady)} aria-labelledby={guideId}>
@@ -177,12 +225,13 @@ export function LessonShell({
                 />
                 <div className={styles.todoBody}>
                   <h2 id={guideId} className={styles.todoLabel}>
-                    {ready ? "Cena concluída" : "O que fazer"}
+                    {ready && !waitingSpeech ? "Cena concluída" : "O que fazer"}
                   </h2>
                   <p className={styles.todoText} role="status" aria-live="polite">
                     {guideText}
                   </p>
                 </div>
+                {!waitingSpeech && <ListenButton onListen={listen} className={styles.todoListen} />}
               </div>
 
               <nav ref={navRef} className={styles.controls} aria-label="Navegação da aula">
@@ -200,7 +249,7 @@ export function LessonShell({
                   onClick={last ? complete : () => navigate(scene + 1)}
                   disabled={!canNext}
                   variant="primary"
-                  attention={ready}
+                  attention={ready && !speaking}
                   focusOnAttention
                   size={22}
                   className={styles.primary}

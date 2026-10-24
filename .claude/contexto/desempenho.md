@@ -66,6 +66,9 @@ Supabase) para ~3 ms (pré-aquecimento no boot + cache de 1 h). Tela "Carregando
 7. Motor não chama a API (usa só o contexto que o shell já carregou). Nunca faça polling de `/api/health` (não usa cache).
 8. Navegação entre planetas sempre por `planetHref(type, planet.id, system.slug)` (id do planeta + `?sistema=`), que é
    exatamente o que o pré-aquecimento do backend cobre.
+9. Animação infinita perto da borda da tela não cresce para fora (`scale` > 1, `translate` para fora): o transform conta
+   na área de rolagem; a página ganha alguns px a cada ciclo, a barra de rolagem aparece e some e a tela "treme" de
+   lado (anel do `SpriteButton attention`, 24/10/2026). Pulse com `opacity`.
 
 ## Feira
 - Rode `npm run build` (com internet, por causa das fontes) e `npm start`. Backend com `FLASK_DEBUG=0`.

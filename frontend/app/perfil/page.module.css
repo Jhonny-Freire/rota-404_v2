@@ -14,12 +14,15 @@
   height: 280px;
 }
 
+/* moldura tracejada quadrada, parada, 20 px em volta do quadro do avatar (176 px): acompanha o quadro, que é quadrado */
 .orbit {
   position: absolute;
-  inset: 6%;
+  left: 50%;
+  top: 50%;
+  width: 216px;
+  height: 216px;
   border: 2px dashed rgba(58, 214, 255, 0.35);
-  border-radius: 50%;
-  animation: spin 40s linear infinite;
+  transform: translate(-50%, -50%);
 }
 
 .pad {
@@ -123,11 +126,39 @@
   line-height: 1.5;
 }
 
-.columns {
+/* a pontuação (número grande) ocupa a linha toda quando os dados viram grade */
+.facts > .scoreFact {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+
+/* ficha, personagem, progresso e conquistas: uma coluna; em telas largas, dois a dois (a tela cabe na janela) */
+.board {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "hero"
+    "picker"
+    "progress"
+    "achievements";
   align-items: start;
   gap: 28px;
+}
+
+.hero {
+  grid-area: hero;
+}
+
+.picker {
+  grid-area: picker;
+}
+
+.progress {
+  grid-area: progress;
+}
+
+.achievements {
+  grid-area: achievements;
 }
 
 .galaxies {
@@ -215,9 +246,108 @@
   }
 }
 
-@media (max-width: 1023px) {
-  .columns {
-    grid-template-columns: minmax(0, 1fr);
+/* 9 personagens de 64px em duas fileiras (5 + 4) ao lado das conquistas */
+@media (min-width: 1024px) {
+  .picker .avatarRow {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+  }
+}
+
+/* tablet deitado: os mesmos dois a dois do desktop (empilhado, nem encolhendo cabia na janela) */
+@media (min-width: 1024px) and (max-width: 1179px) {
+  .board {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    grid-template-areas:
+      "hero progress"
+      "picker achievements";
+    align-items: stretch;
+    gap: 18px;
+  }
+
+  .portrait {
+    width: 200px;
+    height: 220px;
+  }
+
+  .hero {
+    gap: 16px;
+    padding: 0;
+  }
+
+  .identity,
+  .facts {
+    gap: 10px;
+  }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+
+  .fact {
+    padding: 8px 10px;
+  }
+}
+
+@media (min-width: 1180px) {
+  .board {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    grid-template-areas:
+      "hero progress"
+      "picker achievements";
+    /* os painéis lado a lado terminam na mesma linha */
+    align-items: stretch;
+    gap: 18px 22px;
+  }
+
+  .hero {
+    gap: 24px;
+    padding: 0;
+  }
+
+  .portrait {
+    width: 220px;
+    height: 220px;
+  }
+
+  .identity,
+  .facts {
+    gap: 12px;
+  }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+
+  .fact {
+    gap: 4px;
+    padding: 8px 12px;
+  }
+
+  .galaxies {
+    gap: 12px;
+  }
+
+  .galaxySprite {
+    width: 56px;
+  }
+
+  .board .picker,
+  .board .progress,
+  .board .achievements {
+    padding: 18px 20px;
+  }
+
+  .badges {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  /* à esquerda: o canto direito de baixo é onde o Bonzi flutua */
+  .more {
+    justify-content: flex-start;
+    margin-top: 12px;
   }
 }
 
@@ -254,4 +384,17 @@
   .more {
     justify-content: center;
   }
+}
+
+.account {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatarError {
+  margin: 12px 0 0;
+  color: #ff8a8a;
+  font-weight: 700;
 }

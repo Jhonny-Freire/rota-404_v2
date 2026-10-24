@@ -1,11 +1,11 @@
 /** NEXT_PUBLIC_API_URL (fixado no build) tem prioridade; vazio = não definido. */
 const CONFIGURED_API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").trim().replace(/\/+$/, "");
-const API_PORT = 5000;
+const API_PORT = 9001;
 
 /**
  * URL padrão da API fora do navegador (SSR) ou quando nada foi configurado. No navegador, sem
- * NEXT_PUBLIC_API_URL, a API é procurada no MESMO host da página, na porta 5000: num tablet da feira que
- * abre http://192.168.0.10:3000, as chamadas vão para http://192.168.0.10:5000/api (e não para o
+ * NEXT_PUBLIC_API_URL, a API é procurada no MESMO host da página, na porta 9001: num tablet da feira que
+ * abre http://192.168.0.10:9000, as chamadas vão para http://192.168.0.10:9001/api (e não para o
  * "localhost" do próprio tablet).
  */
 export const API_URL = CONFIGURED_API_URL || `http://localhost:${API_PORT}/api`;
@@ -36,7 +36,14 @@ export class ApiError extends Error {
 
 export type QueryParams = Record<string, string | number | boolean | null | undefined>;
 
-type Method = "GET" | "POST" | "PUT" | "PATCH";
+type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
+/** Token da sessão do aluno (definido por SessionProvider); vai no cabeçalho Authorization. */
+let authToken: string | null = null;
+
+export function setAuthToken(token: string | null): void {
+  authToken = token;
+}
 
 /** Caminho relativo à base da API + query string normalizada (também é a chave do cache de GET). */
 function relativeUrl(path: string, params?: QueryParams): string {
@@ -53,6 +60,7 @@ function relativeUrl(path: string, params?: QueryParams): string {
 async function request<T>(method: Method, path: string, params?: QueryParams, body?: unknown): Promise<T> {
   const headers: Record<string, string> = { Accept: "application/json" };
   if (body !== undefined) headers["Content-Type"] = "application/json";
+  if (authToken) headers.Authorization = `Bearer ${authToken}`;
 
   let response: Response;
   try {
@@ -154,6 +162,10 @@ export function apiPatch<T>(path: string, body?: unknown): Promise<T> {
   return request<T>("PATCH", path, undefined, body ?? {});
 }
 
+export function apiDelete<T>(path: string): Promise<T> {
+  return request<T>("DELETE", path);
+}
+
 export function isApiError(error: unknown): error is ApiError {
   return error instanceof ApiError;
 }
@@ -164,6 +176,15 @@ export function isNotImplemented(error: unknown): boolean {
 
 export function isNotFound(error: unknown): boolean {
   return isApiError(error) && error.status === 404;
+}
+
+export function isUnauthorized(error: unknown): boolean {
+  return isApiError(error) && error.status === 401;
+}
+
+/** Banco ou servidor fora do ar (sem conexão, 503 ou 500): o login oferece jogar sem conta. */
+export function isServiceDown(error: unknown): boolean {
+  return isApiError(error) && (error.status === 0 || error.status >= 500);
 }
 
 export function isNetworkError(error: unknown): boolean {

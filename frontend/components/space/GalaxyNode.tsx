@@ -10,9 +10,10 @@ export type GalaxyNodeProps = {
   progress?: number;
   onLockedClick?: () => void;
   size?: number;
+  highlight?: boolean;
 };
 
-export function GalaxyNode({ galaxy, state, href, progress, onLockedClick, size = 220 }: GalaxyNodeProps) {
+export function GalaxyNode({ galaxy, state, href, progress, onLockedClick, size = 220, highlight = false }: GalaxyNodeProps) {
   return (
     <MapNode
       kind="galaxy"
@@ -24,6 +25,7 @@ export function GalaxyNode({ galaxy, state, href, progress, onLockedClick, size 
       href={href}
       onLockedClick={onLockedClick}
       eyebrow="Galáxia"
+      highlight={highlight}
       footer={progress !== undefined ? <ProgressBar value={progress} label="Progresso" segments={8} /> : undefined}
     />
   );

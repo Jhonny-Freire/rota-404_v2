@@ -1,0 +1,464 @@
+/* Laboratório 4.3 — Detetive digital (palco conferido a ~320, ~680 e ~900 px de largura) */
+
+.canvas {
+  --u: var(--kit-u, 1cqw);
+  background:
+    linear-gradient(180deg, rgba(247, 181, 0, 0.04), transparent 40%),
+    radial-gradient(ellipse 70% 45% at 50% 95%, rgba(107, 63, 160, 0.22), transparent 70%);
+}
+
+.fit {
+  transform-origin: 0 0;
+}
+
+/* Quadro de casos */
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: max(8px, calc(1.6 * var(--u)));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.caseCard {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: max(6px, calc(1 * var(--u)));
+  width: 100%;
+  min-height: max(56px, calc(10 * var(--u)));
+  padding: max(6px, calc(1 * var(--u)));
+  border: 0;
+  background: var(--space-800);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  box-shadow:
+    0 0 0 3px var(--panel-border),
+    inset -3px -3px 0 0 rgba(0, 0, 0, 0.3);
+}
+
+.caseCard[aria-disabled="true"] {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.caseOpen:hover,
+.caseCard:focus-visible {
+  background: var(--space-700);
+}
+
+.caseCard:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 4px;
+}
+
+.caseDone {
+  box-shadow: 0 0 0 3px var(--green);
+}
+
+.caseReview {
+  box-shadow: 0 0 0 3px var(--yellow);
+}
+
+.caseIcon {
+  flex: none;
+  width: max(26px, calc(4.4 * var(--u)));
+  max-width: none;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.caseText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.caseKind {
+  display: block;
+  color: var(--text-dim);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(10px, calc(1.15 * var(--u)));
+  font-weight: 600;
+}
+
+.caseTitle {
+  display: block;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(12px, calc(1.5 * var(--u)));
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.caseChip {
+  position: absolute;
+  right: -6px;
+  bottom: -10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(10px, calc(1.1 * var(--u)));
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.caseChip img {
+  width: 14px;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.chipDone {
+  background: #0f2a1d;
+  color: #b9f5cd;
+  box-shadow: 0 0 0 2px var(--green);
+}
+
+.chipReview {
+  background: #2a2208;
+  color: #ffe9a8;
+  box-shadow: 0 0 0 2px var(--yellow);
+}
+
+/* Investigação: o caso em tamanho maior */
+
+.casePanel {
+  display: flex;
+  flex-direction: column;
+  gap: max(6px, calc(0.9 * var(--u)));
+  padding: max(8px, calc(1.2 * var(--u)));
+  background: rgba(13, 11, 43, 0.92);
+  box-shadow: 0 0 0 3px var(--cyan);
+}
+
+.casePanelDone {
+  box-shadow: 0 0 0 3px var(--green);
+}
+
+.caseHead {
+  display: flex;
+  align-items: center;
+  gap: max(6px, calc(1 * var(--u)));
+  color: var(--text);
+}
+
+.caseHead img {
+  width: max(26px, calc(4.4 * var(--u)));
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.clueTitle {
+  margin: 0;
+  color: var(--yellow);
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: max(9px, calc(1.1 * var(--u)));
+}
+
+.clues {
+  display: flex;
+  flex-direction: column;
+  gap: max(5px, calc(0.7 * var(--u)));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.clue {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: max(5px, calc(0.7 * var(--u))) max(28px, calc(4 * var(--u))) max(5px, calc(0.7 * var(--u))) max(8px, calc(1 * var(--u)));
+  border: 0;
+  background: #fbfaff;
+  color: #1b1640;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 0 0 2px #8f87b8;
+}
+
+.clue:hover {
+  background: #f0ecff;
+}
+
+.clue:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.clueSeen {
+  box-shadow: 0 0 0 2px var(--cyan);
+}
+
+/* pista marcada na revisão (Etapa 4): anel estático */
+.clueKey {
+  box-shadow:
+    0 0 0 3px var(--yellow),
+    0 0 calc(1.4 * var(--u)) 3px rgba(247, 181, 0, 0.45);
+}
+
+.clue-risk {
+  background: #ffe9ea;
+  box-shadow: 0 0 0 2px var(--red);
+}
+
+.clue-ok {
+  background: #e8f9ee;
+  box-shadow: 0 0 0 2px var(--green);
+}
+
+.clue-doubt {
+  background: #fff6d6;
+  box-shadow: 0 0 0 2px var(--yellow);
+}
+
+.clueLabel {
+  color: #5b5487;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(10px, calc(1.1 * var(--u)));
+  font-weight: 700;
+}
+
+.clueValue {
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(12px, calc(1.4 * var(--u)));
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.clueMark {
+  position: absolute;
+  top: 50%;
+  right: max(6px, calc(0.8 * var(--u)));
+  width: max(16px, calc(2.4 * var(--u)));
+  height: auto;
+  image-rendering: pixelated;
+  transform: translateY(-50%);
+}
+
+/* Categorias */
+
+.sort {
+  display: flex;
+  flex-direction: column;
+  gap: max(6px, calc(1 * var(--u)));
+}
+
+.pieceRow {
+  display: flex;
+  justify-content: center;
+}
+
+.piece {
+  flex-direction: row;
+}
+
+.pieceFace {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(12px, calc(1.4 * var(--u)));
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.pieceFace img,
+.placed img {
+  width: max(20px, calc(3 * var(--u)));
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.zone {
+  min-height: max(48px, calc(7.5 * var(--u)));
+}
+
+.zone-seguro {
+  --edge: rgba(60, 207, 110, 0.75);
+}
+
+.zone-verificar {
+  --edge: rgba(247, 181, 0, 0.75);
+}
+
+.zone-suspeito {
+  --edge: rgba(214, 32, 42, 0.8);
+}
+
+.zoneInfo {
+  font-size: max(10px, calc(1.1 * var(--u)));
+}
+
+.placed {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(12px, calc(1.3 * var(--u)));
+  font-weight: 700;
+}
+
+/* Painel final */
+
+.result {
+  display: flex;
+  flex-direction: column;
+  gap: max(6px, calc(1 * var(--u)));
+  padding: max(10px, calc(1.6 * var(--u)));
+  background: rgba(13, 11, 43, 0.94);
+  color: var(--text);
+  box-shadow: 0 0 0 3px var(--green);
+}
+
+.resultTitle {
+  margin: 0;
+  color: var(--yellow);
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: max(11px, calc(1.6 * var(--u)));
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: max(6px, calc(1 * var(--u)));
+  margin: 0;
+}
+
+.stats div {
+  padding: max(6px, calc(0.8 * var(--u)));
+  background: var(--space-800);
+}
+
+.stats dt {
+  color: var(--text-dim);
+  font-size: max(11px, calc(1.2 * var(--u)));
+}
+
+.stats dd {
+  margin: 0;
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: max(12px, calc(1.8 * var(--u)));
+}
+
+.signalsTitle {
+  margin: 0;
+  font-size: max(12px, calc(1.4 * var(--u)));
+}
+
+.signals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: max(11px, calc(1.3 * var(--u)));
+  font-weight: 700;
+}
+
+.signals li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.signals img {
+  width: 14px;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+/* Área de interação */
+
+.panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 18px;
+}
+
+.progress {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 15px;
+}
+
+.progress strong {
+  color: var(--yellow);
+}
+
+/* celular (~320 px de palco): desenha mais largo e encolhe por transform */
+@container (max-width: 480px) {
+  .fit {
+    width: 180%;
+    margin-top: 8px;
+    transform: scale(0.53);
+  }
+
+  .zone {
+    min-height: 40px;
+  }
+}
+
+/*
+ * Revisão de UX ("respiro visual e clareza"): em palcos de tablet/notebook os elementos ficam maiores e mais
+ * espaçados, ocupando a altura do palco (antes ficavam espremidos no meio, com sobra embaixo).
+ */
+@container (min-width: 481px) {
+  .board {
+    gap: calc(2.6 * var(--u)) calc(2.2 * var(--u));
+  }
+
+  .caseCard {
+    min-height: calc(13 * var(--u));
+    padding: calc(1.4 * var(--u));
+  }
+
+  .casePanel {
+    gap: calc(1.4 * var(--u));
+    padding: calc(1.8 * var(--u));
+  }
+
+  .clues {
+    gap: calc(1.3 * var(--u));
+  }
+
+  .clue {
+    gap: calc(0.4 * var(--u));
+    padding: calc(1.1 * var(--u)) calc(5 * var(--u)) calc(1.1 * var(--u)) calc(1.4 * var(--u));
+  }
+
+  .clueLabel {
+    font-size: calc(1.3 * var(--u));
+  }
+
+  .clueValue {
+    font-size: calc(1.7 * var(--u));
+  }
+
+  .sort {
+    gap: calc(1.6 * var(--u));
+  }
+
+  .pieceRow {
+    margin-bottom: calc(0.6 * var(--u));
+  }
+
+  .zone {
+    min-height: calc(10 * var(--u));
+  }
+
+  .zoneInfo {
+    font-size: calc(1.3 * var(--u));
+  }
+}

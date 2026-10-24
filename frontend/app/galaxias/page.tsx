@@ -3,12 +3,11 @@
 import { useState, type ReactNode } from "react";
 import type { BonziBuddyProps } from "@/components/bonzi/BonziBuddy";
 import { AppShell } from "@/components/layout/AppShell";
+import { FitToHeight } from "@/components/layout/FitToHeight";
 import { StatusView } from "@/components/layout/StatusView";
 import { ProgressStateBadge } from "@/components/progress/ProgressStateBadge";
 import { GalaxyNode } from "@/components/space/GalaxyNode";
 import { SpaceMap, type SpaceMapNode } from "@/components/space/SpaceMap";
-import { SpriteButton } from "@/components/ui/SpriteButton";
-import { SPRITES } from "@/config/assets";
 import { ROUTES } from "@/config/routes";
 import { useAsync } from "@/hooks/useAsync";
 import { useExplorer } from "@/hooks/useExplorer";
@@ -19,6 +18,9 @@ import { getErrorMessage } from "@/services/apiClient";
 import { getAgeRanges, getGalaxies, getGalaxyDetails } from "@/services/catalogService";
 import type { ProgressState } from "@/types/domain";
 import styles from "./page.module.css";
+
+/** vaga da nave à esquerda de cada galáxia (sprite de 220 px) */
+const GALAXY_DOCK = { x: -164, y: 72, size: 48, tilt: 30 };
 
 const BREADCRUMBS = [{ label: "Início", href: ROUTES.home }, { label: "Galáxias" }];
 const LEGEND: ProgressState[] = ["available", "locked", "in_progress", "completed"];
@@ -50,8 +52,8 @@ export default function GalaxiesPage() {
 
   let bonzi: BonziBuddyProps;
   if (error && !notImplemented) bonzi = { state: "warning", message: "Perdi o contato com a base. Vamos tentar de novo?" };
-  else if (lockedHint) bonzi = { state: "warning", message: "Esta galáxia é de outra faixa etária." };
-  else if (needsRange) bonzi = { state: "help", message: "Escolha primeiro a sua faixa etária para achar o seu universo." };
+  else if (lockedHint) bonzi = { state: "warning", message: "Esta galáxia é de outro universo: o quanto você já sabe escolheu a sua." };
+  else if (needsRange) bonzi = { state: "help", message: "Não consegui achar a sua faixa etária, então todas as galáxias estão abertas." };
   else bonzi = { state: "speaking", message: "Escolha uma galáxia e vamos decolar!" };
 
   let content: ReactNode;
@@ -79,6 +81,9 @@ export default function GalaxiesPage() {
       x,
       y,
       locked: state === "locked",
+      title: galaxy.name,
+      kicker: "Galáxia",
+      href: ROUTES.galaxy(galaxy.slug),
       content: (
         <div className={styles.galaxy}>
           <GalaxyNode
@@ -87,6 +92,7 @@ export default function GalaxiesPage() {
             href={ROUTES.galaxy(galaxy.slug)}
             progress={galaxyProgress(galaxy.id)}
             onLockedClick={() => setLockedHint(true)}
+            highlight={hydrated && !needsRange && state !== "locked"}
           />
           {galaxy.description && <p className={styles.description}>{galaxy.description}</p>}
         </div>
@@ -95,14 +101,18 @@ export default function GalaxiesPage() {
 
     content = (
       <>
-        <SpaceMap
-          nodes={nodes}
-          edges={[]}
-          rocketAt={firstAvailable?.galaxy.id}
-          aspectRatio={2.2}
-          ariaLabel="Mapa das galáxias"
-          className={styles.map}
-        />
+        <FitToHeight>
+          <SpaceMap
+            nodes={nodes}
+            edges={[]}
+            rocketAt={firstAvailable?.galaxy.id}
+            mapId="galaxias"
+            dock={GALAXY_DOCK}
+            aspectRatio={2.2}
+            ariaLabel="Mapa das galáxias"
+            className={styles.map}
+          />
+        </FitToHeight>
         <ul className={styles.legend} aria-label="Legenda dos estados">
           {LEGEND.map((state) => (
             <li key={state}>
@@ -115,7 +125,7 @@ export default function GalaxiesPage() {
   }
 
   return (
-    <AppShell breadcrumbs={BREADCRUMBS} bonzi={bonzi}>
+    <AppShell breadcrumbs={BREADCRUMBS} bonzi={bonzi} fit>
       <header className={styles.header}>
         <h1 className={styles.heading}>Mapa das galáxias</h1>
         <div className={styles.universe}>
@@ -125,13 +135,6 @@ export default function GalaxiesPage() {
               {currentRange.name}
             </span>
           )}
-          <SpriteButton
-            sprite={SPRITES.ui.profile}
-            label={currentRange ? "Trocar faixa" : "Escolher faixa etária"}
-            href={ROUTES.ageRanges}
-            variant={lockedHint || needsRange ? "primary" : "default"}
-            size={24}
-          />
         </div>
       </header>
 

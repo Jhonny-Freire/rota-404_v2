@@ -10,6 +10,7 @@ import { Sprite } from "@/components/ui/Sprite";
 import { SpriteButton } from "@/components/ui/SpriteButton";
 import { cx } from "@/components/ui/cx";
 import { explorerDisplayName, useExplorer } from "@/hooks/useExplorer";
+import { useJourney } from "@/hooks/useJourney";
 import styles from "./MainNav.module.css";
 
 export function MainNav() {
@@ -17,12 +18,14 @@ export function MainNav() {
   const { explorer, hydrated } = useExplorer();
   const name = explorerDisplayName(explorer);
   const profileActive = pathname === ROUTES.profile || pathname.startsWith(`${ROUTES.profile}/`);
+  // "Mapa" abre direto a galáxia da criança (ela só tem uma liberada)
+  const { mapHref } = useJourney();
 
   return (
     <header className={styles.hud}>
       <div className={styles.inner}>
         <Link href={ROUTES.home} className={styles.logo} aria-label="Rota 404, voltar ao início">
-          <Sprite src={SPRITES.brand.logoSmall} alt="" decorative size={306} height={54} className={styles.logoImage} />
+          <Sprite src={SPRITES.brand.logoBar} alt="" decorative size={314} height={62} className={styles.logoImage} />
           <Sprite src={SPRITES.brand.mark} alt="" decorative size={50} height={54} className={styles.logoMark} />
         </Link>
 
@@ -33,7 +36,7 @@ export function MainNav() {
                 <SpriteButton
                   sprite={item.sprite}
                   label={item.label}
-                  href={item.href}
+                  href={item.href === ROUTES.galaxies ? mapHref : item.href}
                   size={28}
                   variant="ghost"
                   active={isNavItemActive(item, pathname)}

@@ -1,0 +1,165 @@
+/* Aula 1.2 (Galáxia 2) — Cliente, servidor e API */
+
+.canvas {
+  --u: var(--kit-u, 1cqw);
+  background:
+    radial-gradient(ellipse 70% 45% at 50% 92%, rgba(107, 63, 160, 0.22), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 20% 35%, rgba(58, 214, 255, 0.06), transparent 70%);
+}
+
+/* Cena 4: o caminho completo */
+.tripFit {
+  display: flex;
+  justify-content: center;
+  transform-origin: 50% 50%;
+}
+
+/* Cena 5: o papel em destaque */
+.note {
+  padding: max(5px, calc(0.7 * var(--u))) max(10px, calc(1.4 * var(--u)));
+  background: rgba(13, 11, 43, 0.94);
+  box-shadow: 0 0 0 3px var(--yellow);
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(11px, calc(1.6 * var(--u)));
+  font-weight: 700;
+  white-space: nowrap;
+  animation: csa-pop 400ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* Microinteração: o motivo do acerto, escrito (o Bonzi só diz "Isso mesmo!") */
+.reason {
+  display: flex;
+  align-items: center;
+  gap: max(6px, calc(0.8 * var(--u)));
+  max-width: min(46em, 80cqw);
+  margin: 0;
+  padding: max(6px, calc(0.8 * var(--u))) max(12px, calc(1.6 * var(--u)));
+  background: rgba(13, 11, 43, 0.96);
+  box-shadow: 0 0 0 3px var(--green);
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(13px, calc(1.8 * var(--u)));
+  font-weight: 700;
+  line-height: 1.3;
+  animation: csa-pop 400ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.reason img {
+  flex: none;
+  width: max(16px, calc(2.4 * var(--u)));
+  height: auto;
+  image-rendering: pixelated;
+}
+
+/* Microinteração: direção de cada mensagem */
+.direction {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.direction img {
+  width: max(14px, calc(2.2 * var(--u)));
+  height: auto;
+  image-rendering: pixelated;
+}
+
+/* a seta fica do lado para onde a mensagem vai */
+.directionRight {
+  flex-direction: row-reverse;
+}
+
+/* Fechamento: resumo */
+.summary {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: calc(1.2 * var(--u));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.summaryItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: max(4px, calc(0.7 * var(--u)));
+  padding: max(10px, calc(2 * var(--u))) max(4px, calc(0.6 * var(--u)));
+  background: rgba(13, 11, 43, 0.9);
+  box-shadow: 0 0 0 3px #3b3478;
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(12px, calc(1.9 * var(--u)));
+  text-align: center;
+  animation: csa-pop 400ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.summaryItem img {
+  width: max(20px, calc(6.4 * var(--u)));
+  max-width: none;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.summaryItem strong {
+  color: var(--cyan);
+}
+
+.summaryHidden {
+  visibility: hidden;
+  animation: none;
+}
+
+@container (max-width: 560px) {
+  .tripFit {
+    width: 150%;
+    margin-left: -25%;
+    transform: scale(0.66);
+  }
+
+  .note {
+    font-size: 9px;
+  }
+
+  /* as duas legendas quebram em 2 linhas para não se encostarem */
+  .direction {
+    gap: 3px;
+    white-space: normal;
+  }
+
+  .direction > span {
+    max-width: 78px;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .direction img {
+    width: 12px;
+  }
+
+  .summary {
+    gap: 4px;
+  }
+
+  .summaryItem {
+    padding: 4px 2px;
+    font-size: 8px;
+  }
+
+  .summaryItem img {
+    width: 16px;
+  }
+}
+
+@keyframes csa-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

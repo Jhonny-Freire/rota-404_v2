@@ -53,13 +53,20 @@
   color: var(--text);
 }
 
+/* ações no pé do painel: as de voltar/repetir à esquerda, a principal (avançar) no canto inferior direito */
 .actions {
   position: relative;
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  align-items: center;
   gap: 14px;
-  margin-top: 6px;
+  width: 100%;
+  margin-top: auto;
+  padding-top: 18px;
+}
+
+.forward {
+  margin-left: auto;
 }
 
 @keyframes spin {

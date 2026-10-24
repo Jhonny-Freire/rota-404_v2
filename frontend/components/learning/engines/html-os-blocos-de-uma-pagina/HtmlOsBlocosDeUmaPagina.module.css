@@ -1,0 +1,170 @@
+/* Aula 3.2 — HTML: os blocos de uma página (palco conferido a ~560 e ~900 px de largura) */
+
+.canvas {
+  --u: var(--kit-u, 1cqw);
+  background:
+    radial-gradient(ellipse 70% 45% at 50% 92%, rgba(107, 63, 160, 0.22), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 75% 30%, rgba(58, 214, 255, 0.06), transparent 70%);
+}
+
+.starfield {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-repeat: repeat;
+  background-size: 512px 512px;
+  image-rendering: pixelated;
+  opacity: 0.45;
+}
+
+.ghost {
+  visibility: hidden;
+}
+
+/* Navegador com a página */
+
+.windowFit {
+  display: flex;
+  justify-content: center;
+  transform-origin: 50% 0;
+}
+
+/* a moldura do kit tem width: 100% + margem */
+.browser {
+  flex: 1;
+  min-width: 0;
+}
+
+.page {
+  gap: max(5px, calc(0.9 * var(--u)));
+}
+
+/* o botão do kit ocupa a linha inteira; sozinho na linha ele fica do tamanho do texto */
+.buttonRow {
+  align-self: flex-start;
+}
+
+.blockIn {
+  animation: blocks-pop 360ms steps(4) both;
+}
+
+/* Bandeja: os blocos separados (2 colunas, fora de ordem) */
+
+.trayFit {
+  display: flex;
+  justify-content: center;
+  transform-origin: 50% 0;
+}
+
+.tray {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: max(10px, calc(2 * var(--u))) max(8px, calc(1.6 * var(--u)));
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.piece {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: max(3px, calc(0.5 * var(--u)));
+  min-width: 0;
+  transition:
+    opacity 400ms steps(4),
+    transform 400ms steps(4);
+}
+
+.pieceLabel {
+  padding: 0.15em 0.55em 0.2em;
+  background: rgba(7, 7, 22, 0.85);
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(10px, calc(1.35 * var(--u)));
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  box-shadow: 0 0 0 2px var(--panel-border);
+}
+
+/* cada bloco solto é um "pedaço" da página: fundo claro como o da página */
+.pieceCard {
+  position: relative;
+  width: 100%;
+  padding: max(4px, calc(0.6 * var(--u)));
+  background: #fbfaff;
+  color: #1b1640;
+  box-shadow:
+    0 0 0 3px #1b1640,
+    5px 5px 0 2px rgba(0, 0, 0, 0.4);
+}
+
+/* etiqueta que acabou de aparecer: anel estático */
+.pieceCurrent {
+  box-shadow:
+    0 0 0 3px var(--yellow),
+    0 0 calc(1.6 * var(--u)) 3px rgba(247, 181, 0, 0.45);
+}
+
+/* sai da página e cai na bandeja */
+.flyIn {
+  animation: blocks-fly 520ms steps(5) both;
+}
+
+/* voltou para a página: fica só o lugar vazio */
+.placed {
+  opacity: 0.18;
+  transform: scale(0.9);
+}
+
+@container (max-width: 700px) {
+  .tray {
+    gap: max(8px, calc(1.6 * var(--u))) max(6px, calc(1.2 * var(--u)));
+  }
+}
+
+/* celular (~340 px de palco): os tamanhos mínimos dos blocos não cabem; desenha mais largo e encolhe por transform */
+@container (max-width: 480px) {
+  .windowFit {
+    width: 150%;
+    margin-left: -25%;
+    transform: scale(0.6);
+  }
+
+  .windowSplit {
+    width: 164%;
+    margin-left: -32%;
+    transform: scale(0.56);
+  }
+
+  .trayFit {
+    width: 136%;
+    margin-left: -18%;
+    transform: scale(0.68);
+  }
+}
+
+@keyframes blocks-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes blocks-fly {
+  from {
+    opacity: 0;
+    transform: translateX(calc(-30 * var(--u))) scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

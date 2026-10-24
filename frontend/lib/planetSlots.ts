@@ -5,7 +5,8 @@ export type PlanetSlot = {
   id: string;
   name: string;
   type: PlanetType;
-  spriteKey: string | null;
+  /** slug do planeta: escolhe a arte (PLANET_SPRITES); null nas prévias */
+  slug: string | null;
   preview: boolean;
   href: string;
   state: ProgressState;
@@ -36,7 +37,7 @@ export function buildPlanetSlots(system: PlanetarySystemDetail, stateOf?: Planet
       id: planet.id,
       name: planet.name,
       type: planet.type,
-      spriteKey: planet.sprite_key,
+      slug: planet.slug,
       preview: false,
       href: planetHref(planet.type, planet.id, system.slug),
       state: stateOf ? stateOf(planet.id, orderedIds) : "available",
@@ -49,7 +50,7 @@ export function buildPlanetSlots(system: PlanetarySystemDetail, stateOf?: Planet
       id,
       name: `Planeta ${i + 1}`,
       type,
-      spriteKey: null,
+      slug: null,
       preview: true,
       href: planetHref(type, id, system.slug),
       state: "available",

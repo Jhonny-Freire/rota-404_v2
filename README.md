@@ -29,8 +29,14 @@ Com a Supabase CLI (projeto já vinculado), use `supabase db push` e depois rode
   - `CATALOG_CACHE_SECONDS`: validade do cache do catálogo em memória, em segundos (padrão `3600`; `0` desliga). Vencido, o dado é servido na hora e atualizado em segundo plano
   - `FALLBACK_TO_LOCAL`: `1` (padrão) mantém o catálogo no ar se o Supabase falhar, servindo o cache e `backend/app/data/seed.json`; `0` responde 503
 - `frontend/.env.local` (opcional; copie de `frontend/.env.example`):
-  - `NEXT_PUBLIC_API_URL`: só se a API estiver em outro endereço. Sem ela, o navegador usa `http://<host da página>:5000/api`,
+  - `NEXT_PUBLIC_API_URL`: só se a API estiver em outro endereço. Sem ela, o navegador usa `http://<host da página>:9001/api`,
     o que já funciona no próprio computador e nos tablets da rede. Não use `localhost` aqui se houver tablets.
+
+## Rodar com um clique (Windows)
+
+Dê dois cliques em `rodar.bat` (na raiz). Ele cria o `backend\.venv` e instala as dependências se faltarem, faz o
+`npm install` na primeira vez, abre o backend e o frontend em duas janelas e abre o navegador em `http://localhost:9000`.
+Na feira, use `rodar.bat feira` (num terminal): faz `npm run build` e sobe com `npm start`. Para parar, feche as duas janelas.
 
 ## Backend
 
@@ -39,7 +45,7 @@ cd backend
 python -m venv .venv
 .venv\Scripts\activate        # Windows (Linux/macOS: source .venv/bin/activate)
 pip install -r requirements.txt
-python run.py                 # http://127.0.0.1:5000/api/health
+python run.py                 # http://127.0.0.1:9001/api/health
 ```
 
 Modo local sem Supabase: use `DATA_SOURCE=local`, ou deixe `DATA_SOURCE=auto` sem `SUPABASE_URL`/`SUPABASE_KEY`.
@@ -53,52 +59,34 @@ então o primeiro visitante não espera o Supabase. Para publicar conteúdo novo
 O navegador do tablet chama a API direto, e `localhost` nele é o próprio tablet. No notebook que roda tudo
 (troque `192.168.0.10` pelo IP dele, visto com `ipconfig`):
 
-- `backend/.env`: `FLASK_DEBUG=0`, `HOST=0.0.0.0` e `CORS_ORIGINS=http://localhost:3000,http://192.168.0.10:3000`
-- frontend: não precisa de `NEXT_PUBLIC_API_URL` (o tablet abre `http://192.168.0.10:3000` e chama `http://192.168.0.10:5000/api` sozinho)
+- `backend/.env`: `FLASK_DEBUG=0`, `HOST=0.0.0.0` e `CORS_ORIGINS=http://localhost:9000,http://192.168.0.10:9000`
+- frontend: não precisa de `NEXT_PUBLIC_API_URL` (o tablet abre `http://192.168.0.10:9000` e chama `http://192.168.0.10:9001/api` sozinho)
 - frontend com `npm run build` e `npm run start` (o `next dev` bloqueia outros dispositivos sem `allowedDevOrigins`)
-- Firewall do Windows: liberar as portas 3000 e 5000 na rede privada
+- Firewall do Windows: liberar as portas 9000 e 9001 na rede privada
 
 Com `HOST` fora do loopback, a API ignora `FLASK_DEBUG=1`: o debugger do Werkzeug executa código e não pode ficar exposto na rede.
 
 ## Publicar no Render (versão online grátis)
 
-O `render.yaml` na raiz cria dois serviços grátis no [Render](https://render.com):
+No ar em https://rota404.onrender.com (API em https://rota404-api.onrender.com). O `render.yaml` na raiz cria, pelo
+Render > New > Blueprint, dois serviços grátis a partir do GitHub (`Jhonny-Freire/rota-404_v2`):
 
-- `rota404-api`: a API Flask (gunicorn, `backend/gunicorn.conf.py`). No plano grátis ela **dorme após 15 min sem
-  acesso** e leva cerca de 1 min para acordar.
-- `rota404`: o frontend como **site estático** (`STATIC_EXPORT=1` gera `frontend/out/`). Fica num CDN e não dorme.
-  Cada galáxia, sistema e planeta vira um HTML a partir de `backend/app/data/seed.json`: planeta novo exige novo deploy
-  (o que já acontece, porque o motor dele é código).
+- `rota404-api`: a API Flask com gunicorn (`backend/gunicorn.conf.py`). No plano grátis ela **dorme após 15 min sem
+  acesso** e leva cerca de 1 min para acordar. Variáveis no painel: `SUPABASE_URL`, `SUPABASE_KEY`,
+  `CORS_ORIGINS=https://rota404.onrender.com`.
+- `rota404`: o frontend como **site estático** (`STATIC_EXPORT=1` gera `frontend/out/`; não dorme). Variável:
+  `NEXT_PUBLIC_API_URL=https://rota404-api.onrender.com/api` (fixada no build). Cada galáxia, sistema e planeta vira
+  um HTML a partir de `backend/app/data/seed.json`: planeta novo exige novo deploy.
 
-Passo a passo:
-
-1. Suba o projeto para um repositório **privado** no GitHub (o Render só publica a partir de um repositório Git).
-   O `.gitignore` já deixa de fora `.env`, `node_modules`, `.next`, `out` e as venvs. Antes do primeiro push,
-   confira que `backend/.env` não aparece em `git status`.
-2. No Render: **New > Blueprint**, escolha o repositório. Ele lê o `render.yaml` e pede os valores marcados
-   `sync: false`:
-   - `SUPABASE_URL` e `SUPABASE_KEY` (a mesma chave do `backend/.env`; fica guardada só no Render)
-   - `CORS_ORIGINS`: `https://rota404.onrender.com` (o endereço do site; se o nome estiver ocupado, o Render
-     acrescenta um sufixo, então confira o endereço real no painel)
-   - `NEXT_PUBLIC_API_URL`: `https://rota404-api.onrender.com/api` (o endereço real da API + `/api`)
-3. Se algum endereço mudou depois de criados os serviços, corrija as variáveis em **Environment** e faça
-   **Manual Deploy** do site (o `NEXT_PUBLIC_API_URL` é fixado no build).
-4. Teste: `https://<api>/api/health` deve responder `"status": "ok"`; depois abra o site.
-
-No dia da feira:
-
-- Abra o site uns 2 minutos antes para acordar a API. Para mantê-la acordada durante o evento, use um monitor grátis
-  (UptimeRobot, cron-job.org) chamando `https://<api>/api/health` a cada 10 min **só nas horas da feira**: o plano
-  grátis dá 750 h/mês por conta, e o ping também evita que o Supabase grátis pause por inatividade.
-- O progresso fica no navegador de cada aparelho (como no modo local).
-- Tenha o notebook com a versão local pronta como plano B (Wi-Fi de evento costuma falhar).
+Cada `git push` na `main` republica os dois. Na feira, mantenha a API acordada com um monitor grátis (UptimeRobot)
+chamando `https://rota404-api.onrender.com/api/health` a cada 10 min, só nas horas do evento (750 h grátis/mês).
 
 ## Frontend
 
 ```bash
 cd frontend
 npm install
-npm run dev                   # http://localhost:3000
+npm run dev                   # http://localhost:9000
 ```
 
 ## Testes

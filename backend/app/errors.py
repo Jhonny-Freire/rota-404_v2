@@ -28,6 +28,24 @@ class NotFoundError(AppError):
     default_message = "Recurso não encontrado."
 
 
+class UnauthorizedError(AppError):
+    status_code = 401
+    code = "unauthorized"
+    default_message = "Entre na sua conta para continuar."
+
+
+class ConflictError(AppError):
+    status_code = 409
+    code = "conflict"
+    default_message = "Esse registro já existe."
+
+
+class TooManyRequestsError(AppError):
+    status_code = 429
+    code = "too_many_requests"
+    default_message = "Muitas tentativas. Espere um pouco e tente de novo."
+
+
 class NotImplementedFeatureError(AppError):
     status_code = 501
     code = "not_implemented"
@@ -38,6 +56,10 @@ class ServiceUnavailableError(AppError):
     status_code = 503
     code = "service_unavailable"
     default_message = "Banco de dados indisponível no momento. Tente novamente em instantes."
+
+
+class MissingColumnError(ServiceUnavailableError):
+    """O banco ainda não tem uma coluna (migration não rodada)."""
 
 
 HTTP_ERRORS = {

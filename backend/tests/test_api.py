@@ -37,8 +37,8 @@ SEED_SQL = ROOT_DIR / "supabase" / "seed.sql"
 MIGRATION_SQL = ROOT_DIR / "supabase" / "migrations" / "20261009000000_init_schema.sql"
 
 NOT_IMPLEMENTED_MESSAGE = "Recurso ainda não disponível nesta versão do Rota 404."
-ALLOWED_ORIGIN = "http://localhost:3000"
-SEED_TABLES = ("age_ranges", "galaxies", "planetary_systems", "planets", "lessons", "labs")
+ALLOWED_ORIGIN = "http://localhost:9000"
+SEED_TABLES = ("age_ranges", "galaxies", "planetary_systems", "planets", "lessons", "labs", "achievements")
 
 SPEC_IDS = {
     "age_ranges": {
@@ -81,6 +81,27 @@ G1_ENGINES = [
     ("comunicacao-e-seguranca", "4.4", "lab", "missao-navegacao-segura"),
 ]
 
+# Galáxia 2 "API REST" (faixa 14+): os 16 planetas de faixa14-completa.md.
+G2_ENGINES = [
+    ("conhecendo-uma-api", "1.1", "lesson", "sistemas-que-conversam"),
+    ("conhecendo-uma-api", "1.2", "lesson", "cliente-servidor-e-api"),
+    ("conhecendo-uma-api", "1.3", "lab", "faca-uma-pergunta-ao-servidor"),
+    ("conhecendo-uma-api", "1.4", "lab", "o-servidor-respondeu"),
+    ("requisicoes-http", "2.1", "lesson", "como-pedir-uma-informacao"),
+    ("requisicoes-http", "2.2", "lesson", "get-post-put-e-delete"),
+    ("requisicoes-http", "2.3", "lab", "qual-metodo-devo-usar"),
+    ("requisicoes-http", "2.4", "lab", "encontre-o-problema"),
+    ("entendendo-os-dados", "3.1", "lesson", "o-que-e-json"),
+    ("entendendo-os-dados", "3.2", "lesson", "lendo-uma-resposta"),
+    ("entendendo-os-dados", "3.3", "lab", "caca-ao-dado"),
+    ("entendendo-os-dados", "3.4", "lab", "monte-a-resposta"),
+    ("api-em-situacoes-reais", "4.1", "lesson", "api-em-um-aplicativo"),
+    ("api-em-situacoes-reais", "4.2", "lesson", "quando-algo-da-errado"),
+    ("api-em-situacoes-reais", "4.3", "lab", "diagnostico-da-api"),
+    ("api-em-situacoes-reais", "4.4", "lab", "desafio-final-missao-api"),
+]
+ALL_ENGINES = G1_ENGINES + G2_ENGINES
+
 LESSON = {
     "id": "95a3636d-25e3-4d45-b604-5bba2bce0897",
     "slug": "o-que-e-uma-rede",
@@ -92,18 +113,10 @@ LAB = {
     "planet_id": "d8a76f7c-f8a8-4485-a562-a1f56f66eaa9",
 }
 
+# contas, progresso, ranking e conquistas já funcionam (tests/test_accounts.py); estes continuam 501
 FUTURE_ENDPOINTS = [
-    ("GET", "/api/progress"),
-    ("PUT", "/api/progress/qualquer-planeta"),
     ("GET", "/api/scores"),
     ("POST", "/api/scores"),
-    ("GET", "/api/achievements"),
-    ("GET", "/api/achievements/me"),
-    ("GET", "/api/rankings/galaxies/internet-e-web"),
-    ("GET", "/api/rankings/systems/requisicoes-http"),
-    ("GET", "/api/users/me"),
-    ("POST", "/api/users"),
-    ("PATCH", "/api/users/me"),
 ]
 
 AGE_RANGE_FIELDS = {"id", "name", "slug", "min_age", "max_age", "description", "created_at", "updated_at"}
@@ -223,7 +236,13 @@ class CatalogApiTest(ApiTestCase):
             [system["name"] for system in api_rest["systems"]],
             ["Conhecendo uma API", "Requisições HTTP", "Entendendo os dados", "API em situações reais"],
         )
-        self.assertEqual([system["planets"] for system in api_rest["systems"]], [[], [], [], []])
+        self.assertEqual(
+            [p["slug"] for s in api_rest["systems"] for p in s["planets"]],
+            [engine for _, _, _, engine in G2_ENGINES],
+        )
+        for system in api_rest["systems"]:
+            with self.subTest(system=system["slug"]):
+                self.assertEqual([planet["type"] for planet in system["planets"]], ["lesson", "lesson", "lab", "lab"])
 
     def test_systems_list_and_galaxy_filter(self):
         systems = self.get_data("/api/systems")
@@ -245,7 +264,10 @@ class CatalogApiTest(ApiTestCase):
         self.assertEqual(system["name"], "Requisições HTTP")
         self.assertIsNone(system["description"])
         self.assertEqual(system["galaxy"]["slug"], "api-rest")
-        self.assertEqual(system["planets"], [])
+        self.assertEqual(
+            [planet["slug"] for planet in system["planets"]],
+            [engine for slug, _, _, engine in G2_ENGINES if slug == "requisicoes-http"],
+        )
         self.assertEqual(system, self.get_data(f"/api/systems/{SPEC_IDS['planetary_systems']['requisicoes-http']}"))
 
         first = self.get_data("/api/systems/dispositivos-e-conexao")
@@ -267,13 +289,13 @@ class LearningApiTest(ApiTestCase):
     def test_list_lessons_and_labs(self):
         lessons = self.get_data("/api/lessons")
         labs = self.get_data("/api/labs")
-        self.assertEqual(len(lessons), 8)
-        self.assertEqual(len(labs), 8)
+        self.assertEqual(len(lessons), 16)
+        self.assertEqual(len(labs), 16)
         for lesson in lessons:
             self.assertEqual(set(lesson), LESSON_FIELDS)
         for lab in labs:
             self.assertEqual(set(lab), LAB_FIELDS)
-            self.assertEqual(lab["max_score"], 100)
+            self.assertEqual(lab["max_score"], 10000)
         for items in (lessons, labs):
             order = [item["order_index"] for item in items]
             self.assertEqual(order, sorted(order))
@@ -289,7 +311,10 @@ class LearningApiTest(ApiTestCase):
                 by_slug = self.get_data(f"{path}?system=dispositivos-e-conexao")
                 self.assertEqual([item["slug"] for item in by_slug], expected)
                 self.assertEqual(by_slug, self.get_data(f"{path}?system={system_id}"))
-                self.assertEqual(self.get_data(f"{path}?system=requisicoes-http"), [])
+                self.assertEqual(
+                    [item["slug"] for item in self.get_data(f"{path}?system=requisicoes-http")],
+                    [engine for system, _, item_kind, engine in G2_ENGINES if system == "requisicoes-http" and item_kind == kind],
+                )
                 error = self.assert_error(self.client.get(f"{path}?system=nao-existe"), 404, "not_found")
                 self.assertEqual(error["message"], "Sistema planetário não encontrado.")
                 self.assert_error(self.client.get(f"{path}?system="), 400, "bad_request")
@@ -300,7 +325,7 @@ class LearningApiTest(ApiTestCase):
                 items = self.get_data(f"/api/lessons?system={system_slug}") + self.get_data(
                     f"/api/labs?system={system_slug}"
                 )
-                expected = [engine for system, _, _, engine in G1_ENGINES if system == system_slug]
+                expected = [engine for system, _, _, engine in ALL_ENGINES if system == system_slug]
                 self.assertEqual(sorted(item["slug"] for item in items), sorted(expected))
 
     def test_lesson_detail_by_every_kind_of_ref(self):
@@ -334,14 +359,14 @@ class LearningApiTest(ApiTestCase):
             self.assertEqual(detail, details[0])
         lab = details[0]
         self.assertEqual(set(lab), LAB_FIELDS | {"planet", "system"})
-        self.assertEqual(lab["max_score"], 100)
+        self.assertEqual(lab["max_score"], 10000)
         self.assertEqual(lab["config"], {"code": "1.3", "type": "montagem", "engine": "conectando-uma-rede"})
         self.assertEqual(lab["planet"]["type"], "lab")
         self.assertEqual(lab["planet"]["id"], LAB["planet_id"])
         self.assertEqual(lab["system"]["slug"], "dispositivos-e-conexao")
 
-    def test_all_sixteen_engines_resolve_by_planet_slug(self):
-        for system_slug, code, kind, engine in G1_ENGINES:
+    def test_all_engines_resolve_by_planet_slug(self):
+        for system_slug, code, kind, engine in ALL_ENGINES:
             with self.subTest(engine=engine):
                 path = "/api/lessons/" if kind == "lesson" else "/api/labs/"
                 detail = self.get_data(path + engine)
@@ -514,7 +539,7 @@ class CorsTest(ApiTestCase):
         self.assertIn("Origin", response.headers.get("Vary", ""))
 
     def test_error_responses_also_receive_header(self):
-        for path, status in (("/api/progress", 501), ("/api/lessons/nao-existe", 404)):
+        for path, status in (("/api/progress", 401), ("/api/scores", 501), ("/api/lessons/nao-existe", 404)):
             with self.subTest(path=path):
                 response = self.client.get(path, headers={"Origin": ALLOWED_ORIGIN})
                 self.assertEqual(response.status_code, status)
@@ -546,7 +571,7 @@ class CorsTest(ApiTestCase):
         self.assertEqual(settings.cors_origins, ("http://feira.test", "http://outra.test"))
         self.assertEqual(
             Settings.from_env({}).cors_origins,
-            ("http://localhost:3000", "http://127.0.0.1:3000"),
+            ("http://localhost:9000", "http://127.0.0.1:9000"),
         )
         client = local_app(cors_origins=("http://feira.test",)).test_client()
         response = client.get("/api/health", headers={"Origin": "http://feira.test"})
@@ -889,19 +914,19 @@ class CachedDataSourceTest(unittest.TestCase):
     def test_only_catalog_tables_are_cached(self):
         self.assertEqual(
             CATALOG_TABLES,
-            {"age_ranges", "galaxies", "planetary_systems", "planets", "lessons", "labs"},
+            {"age_ranges", "galaxies", "planetary_systems", "planets", "lessons", "labs", "achievements"},
         )
         for table in CATALOG_TABLES:
             self.cache.list(table)
             self.cache.list(table)
         self.assertEqual(len(self.inner.calls), len(CATALOG_TABLES))
         self.inner.calls.clear()
-        for table in ("users", "user_progress", "scores"):
+        for table in ("users", "user_progress", "scores", "user_achievements"):
             self.cache.list(table)
             self.cache.list(table)
             self.cache.get(table, "id", "1")
             self.cache.get(table, "id", "1")
-        self.assertEqual(len(self.inner.calls), 12)
+        self.assertEqual(len(self.inner.calls), 16)
 
     def test_ping_is_never_cached(self):
         self.assertTrue(self.cache.ping())
@@ -1090,7 +1115,7 @@ class SeedConsistencyTest(unittest.TestCase):
                     self.assertEqual(list(sql_row), list(json_row))
 
     def test_jsonb_values_are_cast(self):
-        self.assertEqual(self.sql_text.count("'::jsonb"), 16)
+        self.assertEqual(self.sql_text.count("'::jsonb"), 32 + 19)
         self.assertTrue(all(isinstance(row["content"], dict) for row in self.sql["lessons"]))
         self.assertTrue(all(isinstance(row["config"], dict) for row in self.sql["labs"]))
 
@@ -1109,7 +1134,7 @@ class SeedConsistencyTest(unittest.TestCase):
                 self.assertLess(order.index(parent), order.index(table))
                 self.assertTrue({row[column] for row in self.json[table]} <= ids[parent])
 
-    def test_snapshot_matches_the_g1_engines(self):
+    def test_snapshot_matches_the_engines(self):
         planets = {row["id"]: row for row in self.json["planets"]}
         systems = {row["id"]: row["slug"] for row in self.json["planetary_systems"]}
         found = []
@@ -1120,10 +1145,10 @@ class SeedConsistencyTest(unittest.TestCase):
                 self.assertEqual(planet["slug"], row["slug"])
                 self.assertEqual(row[payload_key]["engine"], row["slug"])
                 found.append((systems[planet["planetary_system_id"]], row[payload_key]["code"], kind, row["slug"]))
-        self.assertEqual(sorted(found), sorted(G1_ENGINES))
-        self.assertEqual(len(planets), 16)
-        self.assertEqual({row["max_score"] for row in self.json["labs"]}, {100})
-        self.assertEqual(len({row["planet_id"] for row in self.json["lessons"] + self.json["labs"]}), 16)
+        self.assertEqual(sorted(found), sorted(ALL_ENGINES))
+        self.assertEqual(len(planets), 32)
+        self.assertEqual({row["max_score"] for row in self.json["labs"]}, {10000})
+        self.assertEqual(len({row["planet_id"] for row in self.json["lessons"] + self.json["labs"]}), 32)
 
 
 class MigrationStructureTest(unittest.TestCase):

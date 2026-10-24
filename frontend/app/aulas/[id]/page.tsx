@@ -12,7 +12,7 @@ export default function LessonPage() {
   return (
     <Suspense
       fallback={
-        <AppShell>
+        <AppShell easterEgg={false}>
           <StatusView kind="loading" title="Preparando a aula" />
         </AppShell>
       }

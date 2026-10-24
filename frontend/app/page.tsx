@@ -2,14 +2,17 @@
 
 import type { CSSProperties } from "react";
 import type { BonziBuddyProps } from "@/components/bonzi/BonziBuddy";
+import { FinishJourney } from "@/components/auth/FinishJourney";
 import { AppShell } from "@/components/layout/AppShell";
 import { Rocket } from "@/components/space/Rocket";
 import { Sprite } from "@/components/ui/Sprite";
 import { SpriteButton } from "@/components/ui/SpriteButton";
 import { cx } from "@/components/ui/cx";
-import { PLANET_PLACEHOLDERS, SPRITES, galaxySprite, systemSprite } from "@/config/assets";
+import { SPRITES, galaxySprite, planetSprite, systemSprite } from "@/config/assets";
 import { NAV_ITEMS } from "@/config/navigation";
 import { ROUTES } from "@/config/routes";
+import { useJourney } from "@/hooks/useJourney";
+import { useSession } from "@/hooks/useSession";
 import styles from "./page.module.css";
 
 const QUICK_LINKS = [
@@ -20,7 +23,7 @@ const QUICK_LINKS = [
 const JOURNEY = [
   { key: "galaxy", sprite: galaxySprite("api-rest"), term: "Galáxias", meaning: "módulos" },
   { key: "system", sprite: systemSprite("conhecendo-uma-api", 0), term: "Sistemas", meaning: "assuntos" },
-  { key: "planet", sprite: PLANET_PLACEHOLDERS.lesson, term: "Planetas", meaning: "aulas e laboratórios" },
+  { key: "planet", sprite: planetSprite("o-que-e-uma-rede", "lesson"), term: "Planetas", meaning: "aulas e laboratórios" },
 ] as const;
 
 /** Sprite dos pontos da trilha para o ::before animado (ver .trail em page.module.css). */
@@ -32,8 +35,14 @@ const BONZI: BonziBuddyProps = {
 };
 
 export default function HomePage() {
+  const { status, user } = useSession();
+  const aboard = status === "signed-in" || status === "guest";
+  const journey = useJourney({ withNext: aboard });
+  const bonzi: BonziBuddyProps =
+    status === "signed-in" && user ? { state: "happy", message: `Bem-vindo de volta, ${user.nickname}! Vamos decolar?` } : BONZI;
+
   return (
-    <AppShell variant="immersive" bonzi={BONZI}>
+    <AppShell variant="immersive" bonzi={bonzi} fit>
       <div className={styles.landing}>
         <nav aria-label="Atalhos" className={styles.quickNav}>
           <ul className={styles.quickList}>
@@ -64,14 +73,15 @@ export default function HomePage() {
             </span>
             <SpriteButton
               sprite={SPRITES.ui.play}
-              label="Iniciar viagem"
-              href={ROUTES.ageRanges}
+              label={aboard ? "Continuar viagem" : "Iniciar viagem"}
+              href={aboard ? journey.nextHref : ROUTES.login}
               variant="primary"
               size={30}
               className={styles.start}
             />
-            <SpriteButton sprite={SPRITES.ui.map} label="Ver mapa" href={ROUTES.galaxies} size={28} />
+            <SpriteButton sprite={SPRITES.ui.map} label="Ver mapa" href={journey.mapHref} size={28} />
           </div>
+          {aboard && <FinishJourney size={24} className={styles.finish} />}
         </section>
 
         <section className={styles.journey} aria-labelledby="journey-title">

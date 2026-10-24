@@ -22,9 +22,13 @@ export type CompletionPanelProps = {
   actions: CompletionAction[];
 };
 
-/** Tela de conclusão exibida no lugar do palco. O foco vai direto para a ação principal ("Próximo planeta"). */
+/**
+ * Tela de conclusão exibida no lugar do palco. O foco vai direto para a ação principal ("Próximo planeta"), que fica
+ * no canto inferior direito (avançar = para a direita, como na leitura); as outras ações ficam à esquerda.
+ */
 export function CompletionPanel({ sprite, spriteAlt, title, children, actions }: CompletionPanelProps) {
-  const primaryIndex = actions.findIndex((action) => action.primary);
+  const ordered = [...actions.filter((action) => !action.primary), ...actions.filter((action) => action.primary)];
+  const primaryIndex = ordered.findIndex((action) => action.primary);
 
   return (
     <section className={styles.panel} aria-labelledby="conclusao-titulo">
@@ -35,7 +39,7 @@ export function CompletionPanel({ sprite, spriteAlt, title, children, actions }:
       </h2>
       {children && <div className={styles.body}>{children}</div>}
       <div className={styles.actions}>
-        {actions.map((action, index) => (
+        {ordered.map((action, index) => (
           <SpriteButton
             key={action.label}
             sprite={action.sprite}
@@ -46,6 +50,7 @@ export function CompletionPanel({ sprite, spriteAlt, title, children, actions }:
             attention={index === primaryIndex}
             focusOnAttention
             size={22}
+            className={action.primary ? styles.forward : undefined}
           />
         ))}
       </div>

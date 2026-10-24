@@ -24,6 +24,8 @@ export type MapNodeProps = {
   preview?: boolean;
   orbit?: boolean;
   delay?: number;
+  /** próximo passo da viagem: anel amarelo pulsando e a etiqueta "Próximo" (um destino por mapa) */
+  highlight?: boolean;
 };
 
 export function MapNode({
@@ -40,16 +42,21 @@ export function MapNode({
   preview = false,
   orbit = false,
   delay = 0,
+  highlight = false,
 }: MapNodeProps) {
   const locked = state === "locked";
+  const next = highlight && !locked;
   const className = cx(
     styles.node,
     styles[kind],
     locked && styles.locked,
     preview && styles.preview,
+    next && styles.next,
     (href && !locked) || (locked && onLockedClick) ? styles.interactive : undefined,
   );
-  const ariaLabel = [label, name, PROGRESS_LABELS[state], preview ? "prévia" : null].filter(Boolean).join(", ");
+  const ariaLabel = [label, name, PROGRESS_LABELS[state], next ? "próximo passo" : null, preview ? "prévia" : null]
+    .filter(Boolean)
+    .join(", ");
   const style = { "--node-size": `${size}px`, "--node-delay": `${delay}s` } as CSSProperties;
 
   const content = (
@@ -64,6 +71,12 @@ export function MapNode({
         {preview && <span className={styles.previewTag}>Prévia</span>}
       </span>
       <span className={styles.caption}>
+        {next && (
+          <span className={styles.nextTag} aria-hidden="true">
+            <Sprite src={SPRITES.ui.next} alt="" decorative size={14} />
+            Próximo
+          </span>
+        )}
         {eyebrow && <span className={styles.eyebrow}>{eyebrow}</span>}
         <span className={styles.name}>{name}</span>
         <ProgressStateBadge state={state} size={16} />

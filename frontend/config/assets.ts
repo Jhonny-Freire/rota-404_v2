@@ -1,11 +1,12 @@
-import type { AchievementRarity, BonziState, PlanetType } from "@/types/domain";
+import type { BonziState, PlanetType } from "@/types/domain";
 
 const element = (name: string) => `/sprites/elements/${name}.png`;
 
 export const SPRITES = {
   brand: {
     logo: "/sprites/brand/logo.png",
-    logoSmall: "/sprites/brand/logo-small.png",
+    /** só o letreiro da logo (sem foguete e estrelas), arte nativa de 157x31: barra do topo */
+    logoBar: "/sprites/brand/logo-bar.png",
     mark: "/sprites/brand/compass.png",
   },
   ui: {
@@ -49,6 +50,8 @@ export const SPRITES = {
     vault: "/sprites/objects/vault.png",
     request: "/sprites/objects/request.png",
     deployUp: element("cloud-upload"),
+    /** easter egg (arte de 10x19): o suco de abacaxi que às vezes passa pelo espaço; tocar dá a conquista S-03 */
+    pineappleJuice: "/pineapple-juice.png",
   },
   placeholder: "/sprites/placeholder.png",
 } as const;
@@ -91,6 +94,14 @@ export const ELEMENTS = {
   person: element("person"),
   camera: element("camera"),
   microphone: element("microphone"),
+  /* Galáxia 2 "API REST" */
+  weather: element("weather"),
+  card: element("card"),
+  map: element("map"),
+  gamepad: element("gamepad"),
+  plug: element("plug"),
+  store: element("store"),
+  receipt: element("receipt"),
 } as const;
 
 export type ElementKey = keyof typeof ELEMENTS;
@@ -104,8 +115,12 @@ export const ROCKET_FRAMES: string[] = [0, 1, 2, 3, 4, 5].map((i) => `/sprites/r
 
 const bonzi = (n: number) => `/characters/bonzi/bonzi-${n}.png`;
 
+/**
+ * Poses do Bonzi por estado. São sprites parados, não uma animação: a primeira pose é a principal e as outras
+ * entram de vez em quando (troca direta a cada BONZI_POSE_MS, sem movimento). Pose repetida = fica mais tempo.
+ */
 export const BONZI_FRAMES: Record<BonziState, string[]> = {
-  idle: [bonzi(0)],
+  idle: [bonzi(0), bonzi(0), bonzi(1)],
   speaking: [bonzi(0), bonzi(4)],
   happy: [bonzi(3)],
   thinking: [bonzi(1), bonzi(2)],
@@ -113,29 +128,54 @@ export const BONZI_FRAMES: Record<BonziState, string[]> = {
   help: [bonzi(4)],
 };
 
+/** tempo de cada pose do Bonzi antes de trocar pela seguinte */
+export const BONZI_POSE_MS = 3000;
+
 export const AVATAR_NATIVE_SIZE = 32;
 
-export type AvatarOption = { slug: string; name: string; sprite: string; native?: number };
+/** `file`: nome do PNG quando difere do slug (o servidor só aceita a-z, 0-9 e hífen no slug) */
+export type AvatarOption = { slug: string; name: string; sprite: string; native?: number; file?: string };
 
 export const AVATARS: AvatarOption[] = [
   { slug: "castor", name: "Castor" },
-  { slug: "ghost-spec", name: "Fantasma" },
+  { slug: "ghost-spec", name: "Gustavo Pereira" },
   { slug: "piaba", name: "Piaba", native: 34 },
   { slug: "pucca", name: "Pucca" },
   { slug: "stormtrooper", name: "Trooper" },
   { slug: "tigrinho", name: "Tigrinho" },
-].map((a) => ({ ...a, sprite: `/characters/avatars/${a.slug}.png` }));
+  { slug: "amogus", name: "Amogus" },
+  { slug: "hello-kitty", name: "Hello Kitty", file: "hello_kitty" },
+  { slug: "six-seven", name: "Six Seven" },
+].map((a: Omit<AvatarOption, "sprite">) => ({ ...a, sprite: `/characters/avatars/${a.file ?? a.slug}.png` }));
 
-export type BadgeAsset = { slug: string; rarity: AchievementRarity; sprite: string };
+const badge = (name: string) => `/sprites/badges/${name}.png`;
 
-const BADGE_COUNTS: Record<AchievementRarity, number> = { comum: 7, rara: 5, lenda: 4 };
-
-export const BADGES: BadgeAsset[] = (Object.keys(BADGE_COUNTS) as AchievementRarity[]).flatMap((rarity) =>
-  Array.from({ length: BADGE_COUNTS[rarity] }, (_, i) => {
-    const slug = `${rarity}-${i + 1}`;
-    return { slug, rarity, sprite: `/sprites/badges/${slug}.png` };
-  }),
-);
+/**
+ * Arte das conquistas (32x32): só as medalhas originais de public/sprites/badges. Comum, rara e lendária usam cada
+ * original no máximo uma vez; Brutal (vermelha) e Secreta (verde-água) são originais com a cor trocada (as que sobraram e
+ * repetidas), geradas por scripts/gerar-conquistas.py (b-01.png, b-02.png, s-01..s-03.png).
+ */
+export const BADGE_ART: Record<string, string> = {
+  "c-01": badge("comum-2"),
+  "c-02": badge("comum-1"),
+  "c-03": badge("comum-3"),
+  "c-04": badge("comum-5"),
+  "c-05": badge("comum-6"),
+  "c-06": badge("comum-7"),
+  "r-02": badge("rara-1"),
+  "r-03": badge("rara-5"),
+  "r-04": badge("rara-3"),
+  "r-05": badge("rara-2"),
+  "l-01": badge("lenda-1"),
+  "l-02": badge("lenda-2"),
+  "l-03": badge("lenda-4"),
+  "l-04": badge("lenda-3"),
+  "b-01": badge("b-01"),
+  "b-02": badge("b-02"),
+  "s-01": badge("s-01"),
+  "s-02": badge("s-02"),
+  "s-03": badge("s-03"),
+};
 
 export const GALAXY_SPRITES: Record<string, string> = {
   "internet-e-web": "/galaxies/internet-e-web.png",
@@ -144,70 +184,59 @@ export const GALAXY_SPRITES: Record<string, string> = {
 
 export const DEFAULT_GALAXY_SPRITE = "/galaxies/default.png";
 
-const planet = (n: number) => `/planets/planet-${n}.png`;
+/**
+ * Arte de cada planeta, na ordem do catálogo: planet_g<galáxia>s<sistema>p<planeta>.png (G1 = Internet e Web,
+ * G2 = API REST; sistemas e planetas por order_index). Chave = slug do planeta.
+ */
+const PLANET_ORDER: string[][][] = [
+  [
+    ["o-que-e-uma-rede", "como-meu-dispositivo-chega-a-internet", "conectando-uma-rede", "missao-recuperar-a-conexao"],
+    ["todo-dispositivo-precisa-de-um-endereco", "ip-dominio-e-site", "encontrando-o-destino", "missao-encontrar-o-servidor"],
+    ["o-que-acontece-quando-acesso-um-site", "html-os-blocos-de-uma-pagina", "monte-sua-pagina", "conserte-a-pagina"],
+    ["como-as-informacoes-viajam", "http-e-https", "detetive-digital", "missao-navegacao-segura"],
+  ],
+  [
+    ["sistemas-que-conversam", "cliente-servidor-e-api", "faca-uma-pergunta-ao-servidor", "o-servidor-respondeu"],
+    ["como-pedir-uma-informacao", "get-post-put-e-delete", "qual-metodo-devo-usar", "encontre-o-problema"],
+    ["o-que-e-json", "lendo-uma-resposta", "caca-ao-dado", "monte-a-resposta"],
+    ["api-em-um-aplicativo", "quando-algo-da-errado", "diagnostico-da-api", "desafio-final-missao-api"],
+  ],
+];
 
-export const PLANET_SPRITES = {
-  api: planet(0),
-  deploy: planet(7),
-  dns: planet(4),
-  erro404: planet(8),
-  hashing: planet(3),
-  https: planet(1),
-  "planet-0": planet(0),
-  "planet-1": planet(1),
-  "planet-3": planet(3),
-  "planet-4": planet(4),
-  "planet-5": planet(5),
-  "planet-6": planet(6),
-  "planet-7": planet(7),
-  "planet-8": planet(8),
-  "planet-9": planet(9),
-  "planet-10": planet(10),
-} as const;
+/** Sol de cada sistema (centro do sistema e nó no mapa da galáxia): sun_g<galáxia>s<sistema>.png */
+const SYSTEM_ORDER: string[][] = [
+  ["dispositivos-e-conexao", "enderecos-e-sites", "navegador-e-paginas-web", "comunicacao-e-seguranca"],
+  ["conhecendo-uma-api", "requisicoes-http", "entendendo-os-dados", "api-em-situacoes-reais"],
+];
 
-export type PlanetSpriteKey = keyof typeof PLANET_SPRITES;
+export const PLANET_SPRITES: Record<string, string> = Object.fromEntries(
+  PLANET_ORDER.flatMap((systems, g) =>
+    systems.flatMap((planets, s) => planets.map((slug, p) => [slug, `/planets/planet_g${g + 1}s${s + 1}p${p + 1}.png`])),
+  ),
+);
+
+export const SYSTEM_SPRITES: Record<string, string> = Object.fromEntries(
+  SYSTEM_ORDER.flatMap((systems, g) => systems.map((slug, s) => [slug, `/suns/sun_g${g + 1}s${s + 1}.png`])),
+);
+
+const SYSTEM_SPRITE_CYCLE = Object.values(SYSTEM_SPRITES);
 
 export const PLANET_PLACEHOLDERS: Record<PlanetType, string> = {
   lesson: "/planets/placeholder-lesson.png",
   lab: "/planets/placeholder-lab.png",
 };
 
-// Sistemas usam planetas que nenhum dos seus planetas usa (planetas: api, https, deploy, erro404, dns, hashing).
-export const SYSTEM_SPRITES: Record<string, string> = {
-  "dispositivos-e-conexao": PLANET_SPRITES["planet-3"],
-  "enderecos-e-sites": PLANET_SPRITES["planet-9"],
-  "navegador-e-paginas-web": PLANET_SPRITES["planet-10"],
-  "comunicacao-e-seguranca": PLANET_SPRITES["planet-5"],
-  "conhecendo-uma-api": PLANET_SPRITES["planet-6"],
-  "requisicoes-http": PLANET_SPRITES["planet-5"],
-  "entendendo-os-dados": PLANET_SPRITES["planet-10"],
-  "api-em-situacoes-reais": PLANET_SPRITES["planet-9"],
-};
-
-const SYSTEM_SPRITE_CYCLE: PlanetSpriteKey[] = ["planet-3", "planet-9", "planet-10", "planet-5", "planet-6"];
-
-const isPlanetSpriteKey = (key: string): key is PlanetSpriteKey =>
-  Object.prototype.hasOwnProperty.call(PLANET_SPRITES, key);
-
 export function galaxySprite(slug: string): string {
   return GALAXY_SPRITES[slug] ?? DEFAULT_GALAXY_SPRITE;
 }
 
 export function systemSprite(slug: string, index: number): string {
-  const fallback = SYSTEM_SPRITE_CYCLE[Math.abs(Math.trunc(index)) % SYSTEM_SPRITE_CYCLE.length];
-  return SYSTEM_SPRITES[slug] ?? PLANET_SPRITES[fallback];
+  return SYSTEM_SPRITES[slug] ?? SYSTEM_SPRITE_CYCLE[Math.abs(Math.trunc(index)) % SYSTEM_SPRITE_CYCLE.length];
 }
 
-/** Aceita "planet-<n>", "planet-<nome>" (ex.: "planet-dns") e "<nome>". */
-export function planetSprite(spriteKey: string | null | undefined, type: PlanetType): string {
-  const raw = spriteKey?.trim().toLowerCase();
-  if (raw) {
-    const name = raw.replace(/^planet[-_]/, "");
-    for (const key of [raw.replace("_", "-"), name, `planet-${name}`]) {
-      if (isPlanetSpriteKey(key)) return PLANET_SPRITES[key];
-    }
-  }
-  return PLANET_PLACEHOLDERS[type];
+/** Arte do planeta pelo slug (ordem do catálogo); planeta desconhecido usa o marcador de aula/lab. */
+export function planetSprite(slug: string | null | undefined, type: PlanetType): string {
+  return (slug && PLANET_SPRITES[slug]) || PLANET_PLACEHOLDERS[type];
 }
 
 export function avatarSprite(slug: string): string {
@@ -215,5 +244,5 @@ export function avatarSprite(slug: string): string {
 }
 
 export function badgeSprite(slug: string | null | undefined): string {
-  return BADGES.find((b) => b.slug === slug)?.sprite ?? SPRITES.placeholder;
+  return (slug && BADGE_ART[slug]) || SPRITES.placeholder;
 }

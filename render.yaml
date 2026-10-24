@@ -56,6 +56,9 @@ services:
         source: /laboratorios/*
         destination: /laboratorios/*/index.html
       - type: rewrite
+        source: /entrar
+        destination: /entrar/index.html
+      - type: rewrite
         source: /faixas-etarias
         destination: /faixas-etarias/index.html
       - type: rewrite

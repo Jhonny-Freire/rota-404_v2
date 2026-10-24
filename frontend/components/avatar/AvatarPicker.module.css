@@ -1,12 +1,14 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+  /* todas as caixas da mesma altura, mesmo quando um nome quebra em duas linhas (Hello Kitty, Gustavo Pereira) */
+  grid-auto-rows: 1fr;
   gap: 16px;
 }
 
 .option {
   position: relative;
-  display: block;
+  display: flex;
   cursor: pointer;
 }
 
@@ -21,6 +23,8 @@
 }
 
 .card {
+  container-type: inline-size;
+  flex: 1;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -40,6 +44,13 @@
 
 .avatar {
   transition: transform 160ms steps(3);
+}
+
+/* cartão mais estreito que o avatar de 96px: 2/3 = 64px, escala inteira da arte de 32px */
+@container (max-width: 95px) {
+  .large {
+    scale: calc(2 / 3);
+  }
 }
 
 .name {

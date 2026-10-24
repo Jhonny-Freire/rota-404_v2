@@ -1,0 +1,633 @@
+/* Aula 3.1 — O que acontece quando acesso um site? (palco conferido a ~560 e ~900 px de largura) */
+
+.canvas {
+  --u: var(--kit-u, 1cqw);
+  background:
+    radial-gradient(ellipse 70% 45% at 50% 92%, rgba(107, 63, 160, 0.22), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 22% 30%, rgba(58, 214, 255, 0.06), transparent 70%);
+}
+
+.starfield {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-repeat: repeat;
+  background-size: 512px 512px;
+  image-rendering: pixelated;
+  opacity: 0.45;
+}
+
+/* sem caixa própria: as partes continuam posicionadas pelo SceneCanvas (serve para achar o foco da cena 6) */
+.layer {
+  display: contents;
+}
+
+.holder {
+  display: inline-flex;
+}
+
+.pop {
+  animation: site-pop 360ms steps(4) both;
+}
+
+.bump {
+  animation: site-bump 520ms steps(4) 1;
+}
+
+/* o próximo toque pulsa (só transform); some quando a parte é descoberta */
+.cue {
+  animation: site-cue 1.3s ease-in-out infinite;
+}
+
+.ghost {
+  visibility: hidden;
+}
+
+.dimLink {
+  opacity: 0.35;
+}
+
+/* Navegador + computador */
+
+.client {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  transition: opacity 250ms;
+}
+
+.dim {
+  opacity: 0.4;
+}
+
+.clientTop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.name {
+  margin-bottom: max(4px, calc(0.9 * var(--u)));
+  padding: 0.15em 0.55em 0.2em;
+  background: rgba(7, 7, 22, 0.85);
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(10px, calc(1.45 * var(--u)));
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  box-shadow: 0 0 0 2px var(--panel-border);
+}
+
+.frameWrap {
+  position: relative;
+  display: flex;
+  width: 100%;
+}
+
+/* a moldura do kit tem width: 100% + margem: no flex ela encolhe para caber */
+.browser {
+  flex: 1;
+  min-width: 0;
+}
+
+/* anéis estáticos (pintados uma vez) em volta da janela */
+.ringLit::after,
+.ringSelected::after,
+.ringDone::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  z-index: 1;
+  pointer-events: none;
+  box-shadow:
+    0 0 0 3px var(--ring),
+    0 0 calc(1.4 * var(--u)) 3px var(--glow);
+}
+
+.ringLit {
+  --ring: var(--cyan);
+  --glow: rgba(58, 214, 255, 0.5);
+}
+
+.ringSelected {
+  --ring: var(--yellow);
+  --glow: rgba(247, 181, 0, 0.45);
+}
+
+.ringDone {
+  --ring: var(--green);
+  --glow: rgba(60, 207, 110, 0.3);
+}
+
+.doneMark {
+  position: absolute;
+  top: calc(-1.2 * var(--u));
+  right: calc(-1.2 * var(--u));
+  z-index: 2;
+  width: max(18px, calc(3.2 * var(--u)));
+  max-width: none;
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.6));
+}
+
+/* cena 6: a janela inteira (com o nome) é o botão "Navegador" */
+.tapArea {
+  position: absolute;
+  inset: -4px;
+  z-index: 3;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tapArea:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 4px;
+}
+
+/* rabicho pixelado da janela até a tela do computador (cor do corpo da janela: o contorno escuro some no fundo) */
+.tail {
+  display: block;
+  width: max(14px, calc(3 * var(--u)));
+  height: max(8px, calc(1.6 * var(--u)));
+  background: #d9d4ee;
+  clip-path: polygon(0 0, 100% 0, 100% 34%, 80% 34%, 80% 67%, 60% 67%, 60% 100%, 40% 100%, 40% 67%, 20% 67%, 20% 34%, 0 34%);
+}
+
+.computer {
+  margin-top: max(2px, calc(0.3 * var(--u)));
+}
+
+/* Página carregando: uma animação só (no conjunto), não uma por linha */
+
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: max(4px, calc(0.8 * var(--u)));
+  width: 100%;
+}
+
+.skeleton span {
+  display: block;
+  height: max(5px, calc(0.9 * var(--u)));
+  background: #d9d4ee;
+}
+
+.skeleton span:nth-child(1) {
+  width: 60%;
+}
+
+.skeleton span:nth-child(2) {
+  width: 90%;
+}
+
+.skeleton span:nth-child(3) {
+  width: 75%;
+}
+
+.blink {
+  animation: site-blink 900ms steps(2) infinite;
+}
+
+/* Site em miniatura (navegador lateral) */
+
+.mini {
+  display: flex;
+  align-items: center;
+  gap: max(5px, calc(1 * var(--u)));
+  width: 100%;
+}
+
+.miniPic {
+  display: block;
+  flex: none;
+  width: max(22px, calc(5.2 * var(--u)));
+  max-width: none;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.miniCol {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: max(3px, calc(0.6 * var(--u)));
+  min-width: 0;
+}
+
+.miniTitle {
+  color: #1b1640;
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: max(7px, calc(1.15 * var(--u)));
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.miniLine {
+  display: block;
+  width: 90%;
+  height: max(3px, calc(0.6 * var(--u)));
+  background: #9b94c4;
+}
+
+.miniButton {
+  padding: max(2px, calc(0.35 * var(--u))) max(6px, calc(1 * var(--u)));
+  background: var(--blue);
+  color: #fff;
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: max(6px, calc(0.95 * var(--u)));
+  line-height: 1.3;
+  box-shadow: inset -2px -2px 0 0 rgba(0, 0, 0, 0.35);
+}
+
+/* Ícone de navegador em CSS (cadeias e explicação da cena 6) */
+
+.browserIcon {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  width: max(20px, calc(var(--s, 6) * var(--u)));
+  aspect-ratio: 5 / 4;
+  background: #fbfaff;
+  box-shadow:
+    0 0 0 2px #1b1640,
+    3px 3px 0 2px rgba(0, 0, 0, 0.4);
+}
+
+.browserIconBar {
+  display: flex;
+  align-items: center;
+  gap: 10%;
+  height: 26%;
+  padding: 0 10%;
+  background: #3a2f7a;
+}
+
+.browserIconBar i {
+  display: block;
+  width: 13%;
+  aspect-ratio: 1;
+  background: var(--red);
+}
+
+.browserIconBar i:nth-child(2) {
+  background: var(--yellow);
+}
+
+.browserIconBar i:nth-child(3) {
+  background: var(--green);
+}
+
+.browserIconPage {
+  flex: 1;
+  margin: 12% 14%;
+  background: repeating-linear-gradient(180deg, #9b94c4 0 20%, transparent 20% 40%);
+}
+
+/* Arquivos do servidor */
+
+.filesFit {
+  display: flex;
+  justify-content: center;
+  transform-origin: 50% 100%;
+}
+
+/* fechamento: o painel fica abaixo da cadeia do topo (com o tamanho normal ele cobria "Página na tela") */
+.filesSmall {
+  transform: scale(0.8);
+}
+
+.files {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: max(4px, calc(0.8 * var(--u)));
+  padding: max(6px, calc(1 * var(--u))) max(8px, calc(1.2 * var(--u)));
+  background: rgba(13, 11, 43, 0.94);
+  box-shadow:
+    0 -3px 0 0 var(--cyan),
+    0 3px 0 0 var(--cyan),
+    -3px 0 0 0 var(--cyan),
+    3px 0 0 0 var(--cyan),
+    6px 6px 0 0 rgba(0, 0, 0, 0.4);
+}
+
+/* rabicho apontando para o servidor (3% à direita do centro do painel) */
+.files::after {
+  content: "";
+  position: absolute;
+  left: calc(50% + 3 * var(--u) - 6px);
+  bottom: -15px;
+  width: 12px;
+  height: 12px;
+  background: var(--cyan);
+  clip-path: polygon(0 0, 100% 0, 100% 34%, 67% 34%, 67% 67%, 34% 67%, 34% 34%, 0 34%);
+}
+
+.filesTitle {
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(10px, calc(1.35 * var(--u)));
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.fileList {
+  display: flex;
+  justify-content: center;
+  gap: max(6px, calc(1.6 * var(--u)));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.file {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: max(2px, calc(0.4 * var(--u)));
+  transition:
+    transform 450ms steps(5),
+    opacity 450ms steps(5);
+}
+
+.fileIn {
+  animation: site-pop 320ms steps(4) both;
+}
+
+/* os arquivos descem para o servidor e somem: viram a resposta */
+.filePacked {
+  opacity: 0;
+  transform: translateY(calc(5 * var(--u))) scale(0.2);
+}
+
+.fileImg {
+  display: block;
+  width: max(18px, calc(3.8 * var(--u)));
+  max-width: none;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.doc {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: max(2px, calc(0.35 * var(--u)));
+  width: max(15px, calc(3 * var(--u)));
+  height: max(18px, calc(3.4 * var(--u)));
+  padding: 0 max(3px, calc(0.5 * var(--u)));
+  background: #fbfaff;
+  box-shadow: inset 0 0 0 2px #8f87b8;
+}
+
+.doc span {
+  display: block;
+  height: max(2px, calc(0.4 * var(--u)));
+  background: #6b63a0;
+}
+
+.doc span:nth-child(2) {
+  width: 80%;
+}
+
+.doc span:nth-child(3) {
+  width: 60%;
+}
+
+.fileName {
+  color: var(--text-dim);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(10px, calc(1.2 * var(--u)));
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* Pedido e resposta viajando: brilho estático, sprite pequeno */
+
+.traveler img {
+  filter: drop-shadow(0 0 calc(0.8 * var(--u)) rgba(247, 181, 0, 0.55)) drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.5));
+}
+
+/* Cena 5 — o site na tela */
+
+.siteStage {
+  position: relative;
+}
+
+.siteRow {
+  display: flex;
+  align-items: center;
+  gap: max(8px, calc(1.6 * var(--u)));
+}
+
+.siteCol {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: max(4px, calc(0.8 * var(--u)));
+  min-width: 0;
+}
+
+.blockIn {
+  animation: site-pop 320ms steps(4) both;
+}
+
+/* a resposta chega na página e se abre antes de os blocos aparecerem */
+.pageBox {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  pointer-events: none;
+  transform: translate(-50%, -30%);
+}
+
+.boxOpen {
+  animation: site-open 520ms steps(5) both;
+}
+
+/* Cena 6 — explicação das partes e ordenação */
+
+.explain {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+}
+
+.explainIcon {
+  display: block;
+  flex: none;
+  width: max(20px, calc(3.6 * var(--u)));
+  max-width: none;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.explainName {
+  color: var(--cyan);
+}
+
+.order {
+  width: 100%;
+  transform-origin: 50% 0;
+}
+
+/* Cadeias de etapas (cena 6 e fechamento) */
+
+.chainFit {
+  display: flex;
+  justify-content: center;
+  transform-origin: 50% 50%;
+}
+
+.chain {
+  flex-wrap: nowrap;
+}
+
+.replayFit {
+  display: flex;
+  transform-origin: 50% 0;
+}
+
+/* "Pedido pela internet" e "Página na tela" deixam a cadeia do fechamento com ~600 px: abaixo disso ela encolhe */
+@container (max-width: 700px) {
+  .chainFit {
+    transform: scale(0.88);
+  }
+
+  .filesSmall {
+    transform: scale(0.72);
+  }
+}
+
+@container (max-width: 480px) {
+  .chainFit {
+    transform: scale(0.62);
+  }
+
+  /* celular: a janela das cenas 1 e 5 fica mais larga (o !important vence o --w inline do Place) e encolhe por
+     transform; estreita, a coluna da página quebrava o texto em 5 linhas e o computador saía do palco */
+  .focusPlace {
+    --w: 84 !important;
+  }
+
+  .clientFocus {
+    transform: scale(0.78);
+    transform-origin: 50% 0;
+  }
+
+  /* cena 1: o "Acessar" compensa a escala de 0.78 (~40 px de alvo de toque e texto de ~9 px na tela) */
+  .clientFocus button {
+    min-height: 52px;
+    padding-inline: 14px;
+    font-size: 11px;
+  }
+
+  /* cena 5: com a página pronta a janela fica mais alta */
+  .clientFocus.clientTall {
+    transform: scale(0.6);
+  }
+
+  .clientSide {
+    transform: scale(0.84);
+    transform-origin: 50% 0;
+  }
+
+  /* mais larga antes de encolher: os 3 cartões ficam numa fileira só (sem quebrar e empurrar o Verificar) */
+  .order {
+    width: 136%;
+    margin-left: -18%;
+    transform: scale(0.72);
+  }
+
+  /* o painel fica maior que as 28 unidades (tamanhos mínimos): alinha pela direita para não sair do palco */
+  .filesFit {
+    justify-content: flex-end;
+    transform: scale(0.8);
+    transform-origin: 100% 100%;
+  }
+
+  /* fechamento no celular: sem o título (já visto na cena 3) o painel cabe entre a cadeia e a etiqueta do pedido */
+  .filesFit.filesSmall {
+    transform: scale(0.6);
+  }
+
+  .filesSmall .filesTitle {
+    display: none;
+  }
+
+  .replayFit {
+    transform: scale(0.72);
+  }
+}
+
+/* celular (~320 px de palco): a cadeia do fechamento ainda passava das bordas */
+@container (max-width: 380px) {
+  .chainFit {
+    transform: scale(0.52);
+  }
+}
+
+@keyframes site-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes site-bump {
+  0%,
+  100% {
+    transform: none;
+  }
+  40% {
+    transform: scale(1.18);
+  }
+}
+
+@keyframes site-cue {
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes site-blink {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes site-open {
+  0% {
+    opacity: 1;
+    transform: none;
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.35);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}

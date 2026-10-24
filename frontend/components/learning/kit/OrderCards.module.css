@@ -172,6 +172,39 @@
   flex-direction: column;
 }
 
+/* uniform: mesma largura, ícone numa faixa de altura fixa e nome logo abaixo (todos na mesma linha) */
+.uniform .list {
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
+.uniform .slot {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.uniform .card {
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+.uniform .img {
+  width: auto;
+  max-width: 100%;
+  height: calc(var(--s, 7) * var(--u));
+  object-fit: contain;
+}
+
+@media (max-width: 599px) {
+  .uniform .list {
+    flex-wrap: wrap;
+  }
+
+  .uniform .slot {
+    flex: 1 1 40%;
+  }
+}
+
 .move {
   display: grid;
   place-items: center;

@@ -1,0 +1,178 @@
+/* Laboratório 3.4 (Galáxia 2) — Monte a resposta */
+
+.canvas {
+  --u: var(--kit-u, 1cqw);
+  background:
+    radial-gradient(ellipse 70% 45% at 50% 92%, rgba(107, 63, 160, 0.22), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 70% 40%, rgba(255, 210, 63, 0.05), transparent 70%);
+}
+
+.pool {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-self: stretch;
+  min-height: 56px;
+}
+
+.cue {
+  display: inline-flex;
+  animation: mar-cue 1.3s ease-in-out infinite;
+}
+
+.value {
+  font-family: "Courier New", monospace;
+  font-weight: 700;
+}
+
+.hint {
+  color: var(--text-dim);
+  font-size: max(10px, calc(1.2 * var(--u, 8px)));
+}
+
+/* O cartão pronto, com os campos */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: max(6px, calc(0.9 * var(--u)));
+  padding-bottom: max(8px, calc(1.2 * var(--u)));
+  background: #fbfaff;
+  color: #1b1640;
+  box-shadow:
+    0 0 0 3px #2a2350,
+    inset -3px -3px 0 0 rgba(0, 0, 0, 0.12);
+}
+
+.cardDone {
+  box-shadow:
+    0 0 0 3px var(--green),
+    inset -3px -3px 0 0 rgba(0, 0, 0, 0.12);
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: max(4px, calc(0.6 * var(--u))) max(8px, calc(1 * var(--u)));
+  background: #2a2350;
+  color: #fff;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(11px, calc(1.5 * var(--u)));
+  font-weight: 700;
+}
+
+.cardHead img {
+  width: max(16px, calc(2.4 * var(--u)));
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 6.5em 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 0 max(8px, calc(1 * var(--u)));
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(11px, calc(1.5 * var(--u)));
+  font-weight: 700;
+}
+
+.slot {
+  min-height: calc(5.4 * var(--u));
+  padding: 2px;
+}
+
+/* Etapa 3: o cartão como o usuário vê */
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: max(8px, calc(1.2 * var(--u))) max(12px, calc(1.6 * var(--u)));
+  background: rgba(13, 11, 43, 0.94);
+  box-shadow: 0 0 0 3px var(--cyan);
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(11px, calc(1.5 * var(--u)));
+  animation: mar-pop 400ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.preview strong {
+  color: var(--yellow);
+}
+
+.previewDone {
+  box-shadow: 0 0 0 3px var(--green);
+}
+
+.previewWrong {
+  box-shadow: 0 0 0 3px var(--red);
+}
+
+.previewBad strong {
+  color: #ff8a8a;
+  text-decoration: underline wavy #ff6b6b;
+}
+
+/* Área de interação */
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.lead {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 15px;
+}
+
+.lead strong {
+  color: var(--yellow);
+}
+
+@container (max-width: 560px) {
+  /* celular: o cartão encolhe (as peças têm 44 px de altura para o dedo) e a prévia fica só no texto do cartão */
+  .card {
+    width: 160%;
+    margin-left: -60%;
+    transform: scale(0.6);
+    transform-origin: 100% 0;
+  }
+
+  .preview {
+    display: none;
+  }
+
+  .row,
+  .cardHead,
+  .preview {
+    font-size: 8px;
+  }
+
+  .hint {
+    font-size: 7px;
+  }
+
+  .slot {
+    min-height: 0;
+  }
+}
+
+@keyframes mar-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes mar-cue {
+  50% {
+    transform: translateY(-3px);
+  }
+}

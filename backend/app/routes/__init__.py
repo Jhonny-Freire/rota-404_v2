@@ -31,11 +31,14 @@ def register_routes(app: Flask, controllers: Controllers) -> None:
         ("/scores", "score_submit", gamification.submit_score, "POST"),
         ("/achievements", "achievements", gamification.list_achievements, "GET"),
         ("/achievements/me", "my_achievements", gamification.list_my_achievements, "GET"),
+        ("/achievements/me", "achievement_unlock", gamification.unlock_achievement, "POST"),
         ("/rankings/galaxies/<ref>", "galaxy_ranking", gamification.galaxy_ranking, "GET"),
         ("/rankings/systems/<ref>", "system_ranking", gamification.system_ranking, "GET"),
         ("/users/me", "current_user", users.me, "GET"),
         ("/users", "user_create", users.create, "POST"),
         ("/users/me", "current_user_update", users.update_me, "PATCH"),
+        ("/sessions", "session_create", users.login, "POST"),
+        ("/sessions/me", "session_delete", users.logout, "DELETE"),
     ]
     for rule, endpoint, view, method in routes:
         api.add_url_rule(rule, endpoint, view, methods=[method])

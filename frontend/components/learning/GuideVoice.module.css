@@ -1,0 +1,22 @@
+/* mesmo estilo do "Repetir" do Bonzi (Narrator.module.css) */
+.listen {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  min-height: 28px;
+  padding: 0 8px;
+  border: 0;
+  background: var(--space-800);
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 0 0 2px var(--panel-border);
+}
+
+.listen:hover,
+.listen:focus-visible {
+  background: var(--space-700);
+}

@@ -1,0 +1,66 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "backend",
+      "runtimeExecutable": "backend/.venv/Scripts/python.exe",
+      "runtimeArgs": [
+        "backend/run.py"
+      ],
+      "env": {
+        "CORS_ORIGINS": "http://localhost:9000,http://localhost:9002"
+      },
+      "port": 9001,
+      "url": "http://127.0.0.1:9001"
+    },
+    {
+      "name": "frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "frontend",
+        "run",
+        "dev"
+      ],
+      "port": 9000
+    },
+    {
+      "name": "g2-backend",
+      "runtimeExecutable": "backend/.venv/Scripts/python.exe",
+      "runtimeArgs": [
+        "backend/run.py"
+      ],
+      "env": {
+        "DATA_SOURCE": "local",
+        "PORT": "9012",
+        "FLASK_DEBUG": "0",
+        "CORS_ORIGINS": "http://localhost:9011"
+      },
+      "port": 9012,
+      "url": "http://127.0.0.1:9012"
+    },
+    {
+      "name": "g2-frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "frontend",
+        "run",
+        "dev",
+        "--",
+        "-p",
+        "9011"
+      ],
+      "env": {
+        "NEXT_PUBLIC_API_URL": "http://127.0.0.1:9012/api"
+      },
+      "port": 9011
+    },
+    {
+      "name": "frontend-prod",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "frontend", "run", "start", "--", "-p", "9002"],
+      "port": 9002
+    }
+  ]
+}

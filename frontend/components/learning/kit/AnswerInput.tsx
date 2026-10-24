@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { ELEMENTS, SPRITES } from "@/config/assets";
 import { SpriteButton } from "@/components/ui/SpriteButton";
 import { useTimers } from "./useSequence";
@@ -22,6 +22,8 @@ export type AnswerInputProps = {
   mono?: boolean;
   disabled?: boolean;
   autoFocus?: boolean;
+  /** escreve um texto no campo (ex.: tocar num item da lista para começar); `key` novo = escreve de novo */
+  fill?: { text: string; key: number } | null;
   className?: string;
 };
 
@@ -36,13 +38,25 @@ export function AnswerInput({
   mono = true,
   disabled = false,
   autoFocus = false,
+  fill = null,
   className,
 }: AnswerInputProps) {
   const id = useId();
   const timers = useTimers();
+  const inputRef = useRef<HTMLInputElement>(null);
   const [value, setValue] = useState("");
   const [status, setStatus] = useState<"idle" | "correct" | "wrong">("idle");
   const locked = disabled || status === "correct";
+
+  useEffect(() => {
+    if (!fill || locked) return;
+    setValue(fill.text.slice(0, maxLength));
+    const input = inputRef.current;
+    if (!input) return;
+    input.focus();
+    // cursor no fim: a criança continua digitando depois do texto escrito
+    timers.after(0, () => input.setSelectionRange(input.value.length, input.value.length), { hold: true });
+  }, [fill?.key]);
 
   const submit = () => {
     if (locked || !value.trim()) return;
@@ -68,6 +82,7 @@ export function AnswerInput({
       <div className={styles.row}>
         <span className={styles.field}>
           <input
+            ref={inputRef}
             id={id}
             type="text"
             className={cx(styles.input, mono && styles.mono)}

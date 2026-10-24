@@ -174,3 +174,21 @@
     font-size: 20px;
   }
 }
+
+.otherRange {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 15px;
+}
+
+/* tela que cabe na janela (AppShell fit): a página ocupa o resto da altura e os portais encolhem por igual */
+@media (min-width: 900px) {
+  .page {
+    flex: 1;
+    min-height: 0;
+  }
+}

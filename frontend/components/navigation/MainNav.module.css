@@ -36,7 +36,7 @@
   display: inline-flex;
   align-items: center;
   flex-shrink: 0;
-  padding: 4px;
+  padding: 2px 4px;
   transition: transform 160ms steps(3);
 }
 
@@ -45,17 +45,21 @@
   transform: translateY(-3px);
 }
 
-/* logo-small.png é 153x27 e compass.png 25x27: só escalas inteiras (×1, ×2) */
+/* logo-bar.png (letreiro da logo_enhanced) é a arte de 157x31: ×2 na barra, ×1 em telas médias. compass.png é 25x27 (×2) */
 .logoImage,
 .logoMark {
-  width: 306px;
-  height: 54px;
   filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.6));
+}
+
+.logoImage {
+  width: 314px;
+  height: 62px;
 }
 
 .logoMark {
   display: none;
   width: 50px;
+  height: 54px;
 }
 
 .nav {
@@ -140,13 +144,6 @@
 
 .chipActive .chipCaption {
   color: var(--yellow);
-}
-
-@media (max-width: 1199px) {
-  .logoImage {
-    width: 153px;
-    height: 27px;
-  }
 }
 
 @media (max-width: 1100px) {

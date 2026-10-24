@@ -1,0 +1,293 @@
+/* Laboratório 4.4 — Missão: navegação segura (palco conferido a ~320, ~680 e ~900 px de largura) */
+
+.canvas {
+  --u: var(--kit-u, 1cqw);
+  background:
+    linear-gradient(180deg, rgba(60, 207, 110, 0.04), transparent 40%),
+    radial-gradient(ellipse 70% 45% at 50% 95%, rgba(107, 63, 160, 0.22), transparent 70%);
+}
+
+.fit {
+  transform-origin: 0 0;
+}
+
+.pop {
+  animation: mission-pop 360ms steps(4) both;
+}
+
+/* A situação */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: max(6px, calc(0.9 * var(--u)));
+  padding: max(8px, calc(1.2 * var(--u)));
+  background: rgba(13, 11, 43, 0.92);
+  color: var(--text);
+  text-align: center;
+  box-shadow: 0 0 0 3px var(--cyan);
+}
+
+.cardGood {
+  box-shadow: 0 0 0 3px var(--green);
+}
+
+.cardBad {
+  box-shadow: 0 0 0 3px var(--red);
+}
+
+.cardStep {
+  align-self: flex-start;
+  color: var(--text-dim);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(10px, calc(1.15 * var(--u)));
+  font-weight: 700;
+}
+
+.art {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: max(8px, calc(1.6 * var(--u)));
+  min-height: max(48px, calc(8 * var(--u)));
+}
+
+.artImg {
+  width: max(34px, calc(6.4 * var(--u)));
+  max-width: none;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.artSecond {
+  width: max(24px, calc(4.4 * var(--u)));
+  animation-delay: 220ms;
+}
+
+/* resultado arriscado: tremida curta (finita) */
+.artBad .artSecond {
+  animation:
+    mission-pop 360ms steps(4) 220ms both,
+    mission-shake 420ms steps(4) 600ms 2;
+}
+
+.situation,
+.outcome {
+  margin: 0;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(12px, calc(1.45 * var(--u)));
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.outcome {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  text-align: left;
+}
+
+.outcome img {
+  flex: none;
+  width: max(16px, calc(2.2 * var(--u)));
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.question {
+  margin: 0;
+  color: var(--yellow);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(13px, calc(1.6 * var(--u)));
+  font-weight: 700;
+}
+
+/* As escolhas */
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: max(7px, calc(1.2 * var(--u)));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: max(44px, calc(7 * var(--u)));
+  padding: max(6px, calc(0.9 * var(--u))) max(10px, calc(1.3 * var(--u)));
+  border: 0;
+  background: #fbfaff;
+  color: #1b1640;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(12px, calc(1.45 * var(--u)));
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: left;
+  cursor: pointer;
+  box-shadow:
+    0 0 0 3px #1b1640,
+    5px 5px 0 1px rgba(0, 0, 0, 0.4);
+}
+
+.option:hover:not([aria-disabled="true"]) {
+  background: #f0ecff;
+}
+
+.option:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 4px;
+}
+
+.option[aria-disabled="true"] {
+  cursor: default;
+}
+
+.option img {
+  flex: none;
+  width: max(18px, calc(2.6 * var(--u)));
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.optionShown {
+  box-shadow:
+    0 0 0 3px var(--yellow),
+    5px 5px 0 1px rgba(0, 0, 0, 0.4);
+}
+
+.optionRight {
+  background: #e8f9ee;
+  box-shadow:
+    0 0 0 3px var(--green),
+    5px 5px 0 1px rgba(0, 0, 0, 0.4);
+}
+
+.optionWrong {
+  background: #ffe9ea;
+}
+
+/* Resumo */
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: max(10px, calc(1.6 * var(--u)));
+  padding: max(10px, calc(1.4 * var(--u)));
+  background: rgba(13, 11, 43, 0.94);
+  color: var(--text);
+  box-shadow: 0 0 0 3px var(--green);
+}
+
+.sumTitle {
+  margin: 0 0 max(6px, calc(0.8 * var(--u)));
+  color: var(--yellow);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(12px, calc(1.5 * var(--u)));
+  font-weight: 700;
+}
+
+.sumList {
+  display: flex;
+  flex-direction: column;
+  gap: max(5px, calc(0.7 * var(--u)));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(11px, calc(1.3 * var(--u)));
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.sumList li {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.sumList img {
+  flex: none;
+  width: 16px;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.sumList em {
+  display: block;
+  color: #ffe9a8;
+  font-style: normal;
+}
+
+/* Área de interação */
+
+.panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 18px;
+}
+
+.progress {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 15px;
+}
+
+/* tablet: o resumo do pior caso (muitas escolhas a rever) fica menor e sem as escolhas riscadas */
+@container (max-width: 760px) {
+  .summaryFit {
+    width: 128%;
+    transform: scale(0.76);
+  }
+
+  .choices {
+    display: none;
+  }
+}
+
+/* celular (~320 px de palco): desenha mais largo e encolhe por transform */
+@container (max-width: 480px) {
+  .fit {
+    width: 170%;
+    margin-top: 8px;
+    transform: scale(0.56);
+  }
+
+  /* resumo: duas colunas mais largas e menores */
+  .summaryFit {
+    width: 196%;
+    transform: scale(0.49);
+  }
+
+  /* no celular o resumo mostra só a situação e a dica (as escolhas riscadas não cabem) */
+  .choices {
+    display: none;
+  }
+}
+
+@keyframes mission-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes mission-shake {
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}

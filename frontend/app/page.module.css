@@ -76,6 +76,10 @@
   margin-top: 6px;
 }
 
+.finish {
+  margin-top: 4px;
+}
+
 .actions .start {
   padding: 14px 28px;
   font-size: 14px;
@@ -322,5 +326,24 @@
 
   .meaning {
     font-size: 15px;
+  }
+}
+
+/* AppShell fit (telas largas): a página ocupa a altura da janela, sem a reserva de 150 px do Bonzi */
+@media (min-width: 900px) {
+  .landing {
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* sobra para o logo a altura da janela menos ~560 px do resto da página */
+  .logo {
+    width: max(346px, round(down, clamp(260px, calc((100dvh - 560px) * 2.4), min(760px, 92vw)), 173px));
+  }
+}
+
+@media (min-width: 900px) and (max-height: 760px) {
+  .steps {
+    --art: 84px;
   }
 }

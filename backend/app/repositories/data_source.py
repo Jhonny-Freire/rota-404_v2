@@ -4,20 +4,29 @@ import json
 import logging
 import threading
 import time
+import uuid
 from collections.abc import Callable, Hashable
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Protocol
 
 from app.config.settings import DATA_SOURCES, Settings
-from app.errors import ServiceUnavailableError
+from app.errors import ConflictError, MissingColumnError, ServiceUnavailableError
 
 logger = logging.getLogger(__name__)
 
 Row = dict[str, Any]
 CATALOG_TABLES = frozenset(
-    {"age_ranges", "galaxies", "planetary_systems", "planets", "lessons", "labs"}
+    {"age_ranges", "galaxies", "planetary_systems", "planets", "lessons", "labs", "achievements"}
 )
 MULTI_VALUE_TYPES = (list, tuple)
+UNIQUE_VIOLATION = "23505"
+# coluna inexistente (Postgres) / coluna fora do cache de schema (PostgREST): migration de contas não rodou
+MISSING_COLUMN = ("42703", "PGRST204")
+
+
+def _now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
 
 
 class DataSource(Protocol):
@@ -33,6 +42,11 @@ class DataSource(Protocol):
     def get(self, table: str, column: str, value: Any) -> Row | None: ...
 
     def ping(self) -> bool: ...
+
+    # escrita: só para as tabelas de conta (users, user_progress, scores); o catálogo é só leitura
+    def insert(self, table: str, row: Row) -> Row: ...
+
+    def update(self, table: str, filters: dict[str, Any], values: Row) -> list[Row]: ...
 
 
 def _sort_key(column: str) -> Callable[[Row], tuple[bool, Any]]:
@@ -51,6 +65,7 @@ class LocalDataSource:
     def __init__(self, path: str | Path) -> None:
         with open(path, encoding="utf-8") as file:
             self._tables: dict[str, list[Row]] = json.load(file)
+        self._write_lock = threading.Lock()
 
     def list(
         self,
@@ -75,6 +90,23 @@ class LocalDataSource:
 
     def ping(self) -> bool:
         return True
+
+    def insert(self, table: str, row: Row) -> Row:
+        """Grava só em memória (some ao reiniciar): serve para testes e para rodar sem o Supabase."""
+        now = _now_iso()
+        stored = {"id": str(uuid.uuid4()), "created_at": now, "updated_at": now, **row}
+        with self._write_lock:
+            self._tables.setdefault(table, []).append(stored)
+        return dict(stored)
+
+    def update(self, table: str, filters: dict[str, Any], values: Row) -> list[Row]:
+        updated = []
+        with self._write_lock:
+            for row in self._tables.get(table, []):
+                if all(_matches(row, column, value) for column, value in filters.items()):
+                    row.update(values, updated_at=_now_iso())
+                    updated.append(dict(row))
+        return updated
 
 
 class SupabaseDataSource:
@@ -118,10 +150,36 @@ class SupabaseDataSource:
             return False
         return True
 
+    def insert(self, table: str, row: Row) -> Row:
+        rows = self._execute(table, self._client.table(table).insert(row))
+        if not rows:
+            raise ServiceUnavailableError()
+        return rows[0]
+
+    def update(self, table: str, filters: dict[str, Any], values: Row) -> list[Row]:
+        query = self._client.table(table).update(values)
+        for column, value in filters.items():
+            if isinstance(value, MULTI_VALUE_TYPES):
+                query = query.in_(column, list(value))
+            else:
+                query = query.eq(column, value)
+        return self._execute(table, query)
+
     def _execute(self, table: str, query: Any) -> list[Row]:
         try:
             data = query.execute().data
         except self._errors as error:
+            code = getattr(error, "code", None)
+            if code == UNIQUE_VIOLATION:
+                raise ConflictError() from error
+            if code in MISSING_COLUMN:
+                logger.error(
+                    "A tabela '%s' no Supabase não tem uma coluna esperada: rode "
+                    "supabase/migrations/20261022000000_accounts.sql e as migrations seguintes no SQL Editor (%s).",
+                    table,
+                    error,
+                )
+                raise MissingColumnError() from error
             logger.error(
                 "Falha ao consultar a tabela '%s' no Supabase (%s): %s",
                 table,
@@ -208,6 +266,12 @@ class CachedDataSource:
 
     def ping(self) -> bool:
         return self.source.ping()
+
+    def insert(self, table: str, row: Row) -> Row:
+        return self.source.insert(table, row)
+
+    def update(self, table: str, filters: dict[str, Any], values: Row) -> list[Row]:
+        return self.source.update(table, filters, values)
 
     def clear(self) -> None:
         with self._lock:

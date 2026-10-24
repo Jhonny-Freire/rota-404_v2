@@ -43,18 +43,15 @@ import {
   CONCEPT_HINTS,
   NODES,
   RING_CENTER,
-  SLOTS,
   VARIANTS,
   edgeEnds,
   edgeKey,
   evaluate,
-  fillOrder,
   isNodeId,
   isSlotId,
   isWireless,
+  layoutFor,
   mainBlock,
-  slotPoint,
-  slotsFor,
   type EdgeKey,
   type Fault,
   type NodeId,
@@ -75,6 +72,17 @@ type PointerDrag = { id: NodeId; pointerId: number; x: number; y: number; moved:
 /** um toque em Testar: o resultado já calculado e o id que reinicia os pacotes */
 type Trial = { id: number; verdict: Verdict };
 type BannerState = { text: string; tone: KitTone; icon: ElementKey };
+/** aviso na hora (sem penalidade): peça no lugar errado do caminho */
+type NoticeKind = "slot";
+
+/** faixa, fala do Bonzi e dica do painel de cada aviso */
+const NOTICES: Record<NoticeKind, { banner: string; say: string; tip: string }> = {
+  slot: {
+    banner: "Essa peça não vai aí",
+    say: "Essa peça não vai aí. Siga o caminho: do aparelho até a internet.",
+    tip: "As setas mostram o caminho: o aparelho fica no começo e a internet no fim. Cada peça tem o seu lugar.",
+  },
+};
 
 const HOP_MS = 850;
 const STAGGER_MS = 650;
@@ -115,8 +123,8 @@ const BONZI = {
 
 /** painel "O que fazer": completa a faixa do palco (como fazer, o que aconteceu) */
 const TIPS = {
-  place: "Arraste cada peça até um espaço vazio. Ou toque na peça e depois no espaço.",
-  placeTap: "Comece pela esquerda: arraste uma peça até um espaço vazio.",
+  place: "Monte o caminho da esquerda para a direita: do aparelho até a internet. Arraste cada peça até o seu lugar, ou toque na peça e depois no espaço.",
+  placeTap: "Arraste uma peça até o seu lugar no caminho: o aparelho no começo, a internet no fim.",
   linkStart: "Toque em uma peça e depois em outra para ligar as duas. Ou arraste de uma peça até a outra.",
   linkMore: "As peças que pulsam ainda estão soltas. Para apagar uma ligação, toque no X dela.",
   linkTap: "Toque em uma peça para começar uma ligação.",
@@ -151,7 +159,7 @@ function nameList(ids: NodeId[]): string {
 function missionText(devices: NodeId[]): string {
   return devices.length === 1
     ? `Ligue o ${NODES[devices[0]].label} até a Internet`
-    : `Ligue os ${devices.length} aparelhos à Internet`;
+    : "Ligue cada aparelho à Internet";
 }
 
 /* ---------- posição do balão de erro (x em % da largura, y em % da altura do palco) ---------- */
@@ -294,8 +302,8 @@ export default function ConectandoUmaRede({
     [sessionRand, attempt],
   );
   const palette = useMemo(() => rand.shuffle(variant.pieces, "palette", true), [rand, variant]);
-  const slots = useMemo(() => slotsFor(variant.pieces.length), [variant]);
-  const order = useMemo(() => fillOrder(slots), [slots]);
+  const layout = useMemo(() => layoutFor(variant.pieces), [variant]);
+  const slotById = useMemo(() => new Map(layout.slots.map((slot) => [slot.id, slot])), [layout]);
   const timers = useTimers({ reducedMotion });
 
   const [phase, setPhase] = useState<Phase>("idle");
@@ -318,6 +326,8 @@ export default function ConectandoUmaRede({
   /** toque no fundo sem efeito: dica curta enquanto a instrução do momento (`base`) não muda */
   const [tapTip, setTapTip] = useState<{ base: string; text: string } | null>(null);
   const [announcement, setAnnouncement] = useState("");
+  /** aviso na hora; `key` faz a faixa saltar de novo a cada repetição */
+  const [notice, setNotice] = useState<{ kind: NoticeKind; key: number } | null>(null);
   const surfaceRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<PointerDrag | null>(null);
   const clickGuardRef = useRef(0);
@@ -392,13 +402,15 @@ export default function ConectandoUmaRede({
 
   const pos = (id: NodeId): ScenePoint | null => {
     const slot = placement[id];
-    return slot ? slotPoint(slot) : null;
+    const spot = slot ? slotById.get(slot) : undefined;
+    return spot ? { x: spot.x, y: spot.y } : null;
   };
 
   /* ---------- faixa do palco, Bonzi e painel: uma instrução por momento ---------- */
 
   let banner: BannerState;
-  if (!allPlaced) banner = { text: `Arraste as peças: ${placedCount} de ${total}`, tone: "info", icon: "pin" };
+  if (notice && phase === "idle") banner = { text: NOTICES[notice.kind].banner, tone: "warning", icon: "error" };
+  else if (!allPlaced) banner = { text: `Arraste as peças: ${placedCount} de ${total}`, tone: "info", icon: "pin" };
   else if (phase === "success") banner = { text: "Conexão funcionando!", tone: "success", icon: "ok" };
   else if (phase === "testing") banner = { text: "Testando...", tone: "info", icon: "box" };
   else if (pending) banner = { text: "Agora toque em outra peça", tone: "warning", icon: "cable" };
@@ -410,7 +422,8 @@ export default function ConectandoUmaRede({
   else banner = { text: `Peças ligadas: ${block.size} de ${total}`, tone: "info", icon: "cable" };
 
   let tip: { tone: LabFeedbackTone; message: string };
-  if (!allPlaced) tip = { tone: "hint", message: TIPS.place };
+  if (notice && phase === "idle") tip = { tone: "hint", message: NOTICES[notice.kind].tip };
+  else if (!allPlaced) tip = { tone: "hint", message: TIPS.place };
   else if (phase === "testing") tip = { tone: "info", message: TIPS.testing };
   else if (phase === "success") tip = { tone: "success", message: routes.length > 1 ? TIPS.successMany : TIPS.success };
   else if (pending) tip = { tone: "hint", message: TIPS.pick };
@@ -529,10 +542,20 @@ export default function ConectandoUmaRede({
     clearPending();
   };
 
+  /** aviso na hora: a faixa salta, o Bonzi explica, nada é penalizado */
+  const showNotice = (kind: NoticeKind) => {
+    setNotice((prev) => ({ kind, key: (prev?.key ?? 0) + 1 }));
+    setTapTip(null);
+    lineRef.current = { text: NOTICES[kind].say, at: performance.now() };
+    say(NOTICES[kind].say, "warning");
+    setAnnouncement(NOTICES[kind].say);
+  };
+
   /** qualquer mudança na rede apaga o resultado do último teste e o aviso de peça solta */
   const touch = () => {
     setNudge(0);
     setTapTip(null);
+    setNotice(null);
     if (phase !== "failed") return;
     setPhase("idle");
     setTrial(null);
@@ -553,6 +576,7 @@ export default function ConectandoUmaRede({
     setPreviewSeed(seed);
     setTarget(null);
     setTapTip(null);
+    setNotice(null);
     setAnnouncement(`${NODES[id].label} escolhido. Agora escolha a peça para ligar.`);
   };
 
@@ -580,32 +604,40 @@ export default function ConectandoUmaRede({
     touch();
   };
 
-  /** espaço livre mais perto de `near` (ou o primeiro da ordem de preenchimento) */
-  const freeSlot = (near: ScenePoint | null): SlotId | null => {
-    const free = order.filter((slot) => !occupant.has(slot));
-    if (free.length === 0) return null;
-    if (!near) return free[0];
-    return free.reduce((best, slot) => (sceneDistance(slotPoint(slot), near) < sceneDistance(slotPoint(best), near) ? slot : best));
+  /** espaço mais perto de `near` (sem ponto: o primeiro livre, da esquerda para a direita) */
+  const nearestSlot = (near: ScenePoint | null): SlotId | null => {
+    const candidates = near ? layout.slots : layout.slots.filter((slot) => !occupant.has(slot.id));
+    if (candidates.length === 0) return null;
+    if (!near) return candidates[0].id;
+    return candidates.reduce((best, slot) => (sceneDistance(slot, near) < sceneDistance(best, near) ? slot : best)).id;
   };
 
-  /** só da bandeja para a área: a peça fica onde foi colocada (a posição não importa para o caminho) */
+  /**
+   * Da bandeja para a área: cada peça só entra no seu lugar do caminho (coluna). No lugar errado ela volta para a
+   * bandeja com um aviso, sem penalidade.
+   */
   const handleMove: DragMoveHandler = (itemId, zoneId) => {
     if (allPlaced || busy || !isNodeId(itemId) || !variant.pieces.includes(itemId) || placement[itemId]) return false;
     if (zoneId === POOL_ZONE) return;
     const id = itemId;
     let slot: SlotId | null = null;
-    if (isSlotId(zoneId) && slots.includes(zoneId)) {
+    if (isSlotId(zoneId) && slotById.has(zoneId)) {
       slot = zoneId;
     } else if (zoneId === AREA_ZONE) {
       const last = lastPointerRef.current;
-      slot = freeSlot(last && performance.now() - last.at < POINTER_MEMORY_MS ? last.point : null);
+      slot = nearestSlot(last && performance.now() - last.at < POINTER_MEMORY_MS ? last.point : null);
     }
-    /* espaço ocupado: vai para o livre mais perto */
-    if (slot && occupant.has(slot)) slot = freeSlot(slotPoint(slot));
-    if (!slot) return false;
+    const spot = slot ? slotById.get(slot) : undefined;
+    if (!spot) return false;
+    if (spot.stage !== NODES[id].rank) {
+      showNotice("slot");
+      return false;
+    }
+    if (occupant.has(spot.id)) return false;
     const next: Placement = { ...placement, [id]: slot };
     setPlacement(next);
     setTapTip(null);
+    setNotice(null);
     if (variant.pieces.every((piece) => next[piece])) {
       focusNodeRef.current = id;
       setAnnouncement(`Todas as peças estão na área. ${missionText(variant.devices)}: toque em uma peça e depois em outra.`);
@@ -936,7 +968,20 @@ export default function ConectandoUmaRede({
               <div className={styles.areaBox}>
                 <DropZone id={AREA_ZONE} label="Monte a rede" layout="free" className={cx(styles.fill, styles.areaZone)} />
               </div>
-              {SLOTS.filter((slot) => slots.includes(slot.id)).map((slot) => {
+              {/* setas do caminho: do aparelho (esquerda) até a internet (direita) */}
+              {!allPlaced &&
+                layout.columns.slice(1).map((column, index) => (
+                  <img
+                    key={`seta-${column.stage}`}
+                    src={SPRITES.ui.next}
+                    alt=""
+                    aria-hidden="true"
+                    draggable={false}
+                    className={styles.flowArrow}
+                    style={{ left: `${(layout.columns[index].x + column.x) / 2}%`, top: "58%" }}
+                  />
+                ))}
+              {layout.slots.map((slot) => {
                 const id = occupant.get(slot.id);
                 return (
                   <div

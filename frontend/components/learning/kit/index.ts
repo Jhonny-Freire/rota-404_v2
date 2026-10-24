@@ -57,6 +57,7 @@ export {
   type Timers,
   type TimerOptions,
 } from "./useSequence";
+export { useSpeech } from "./useSpeech";
 export { useSeededRandom, createSeededRandom, type SeededRandom, type SeededRandomOptions } from "./useSeededRandom";
 export { point, midpoint, lerpPoint, sceneDistance, sceneAngle, pathLength, resolveSprite } from "./util";
 export { DEFAULT_RATIO, type ScenePoint, type KitTone, type MarkStatus, type ElementKey } from "./types";

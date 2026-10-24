@@ -46,7 +46,7 @@ function AnimatedSpriteBase({ frames, fps = 6, playing = true, alt, size, classN
         frame = (frame + 1) % count;
         showFrame(stack, frame);
       },
-      1000 / Math.max(0.5, fps),
+      1000 / Math.max(0.1, fps),
     );
     return () => {
       window.clearInterval(id);

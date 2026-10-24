@@ -424,7 +424,7 @@ class WarmupTest(unittest.TestCase):
     def test_paths_match_what_the_frontend_requests(self):
         paths = catalog_paths(create_app(Settings(data_source="local")))
         planet_paths = [p for p in paths if p.startswith(("/api/lessons/", "/api/labs/"))]
-        self.assertEqual(len(planet_paths), 16)
+        self.assertEqual(len(planet_paths), 32)
         self.assertIn(f"/api/lessons/{LESSON_PLANET_ID}", planet_paths)
         for path in ("/api/age-ranges", "/api/systems", "/api/systems?galaxy=internet-e-web",
                      "/api/systems/enderecos-e-sites", "/api/systems/api-em-situacoes-reais"):

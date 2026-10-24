@@ -6,7 +6,7 @@ import styles from "./SceneSprite.module.css";
 export type SceneSpriteProps = {
   /** chave de ELEMENTS (preferida) */
   element?: ElementKey;
-  /** ou um caminho vindo de config/assets (SPRITES.*, PLANET_SPRITES.*) */
+  /** ou um caminho vindo de config/assets (SPRITES.*, PLANET_SPRITES[slug]) */
   src?: string;
   /** nome acessível; padrão = `label` */
   alt?: string;

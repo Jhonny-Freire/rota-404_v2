@@ -10,9 +10,11 @@ export type SystemNodeProps = {
   href?: string;
   progress?: number;
   size?: number;
+  highlight?: boolean;
+  onLockedClick?: () => void;
 };
 
-export function SystemNode({ system, index, state, href, progress, size = 150 }: SystemNodeProps) {
+export function SystemNode({ system, index, state, href, progress, size = 150, highlight = false, onLockedClick }: SystemNodeProps) {
   const number = String(system.order_index || index + 1).padStart(2, "0");
 
   return (
@@ -26,6 +28,8 @@ export function SystemNode({ system, index, state, href, progress, size = 150 }:
       href={href}
       eyebrow={`Sistema ${number}`}
       orbit
+      highlight={highlight}
+      onLockedClick={onLockedClick}
       delay={index * -0.9}
       footer={progress !== undefined ? <ProgressBar value={progress} label="Progresso" segments={6} /> : undefined}
     />

@@ -1,4 +1,4 @@
-import type { Achievement, ProgressEntry, ProgressState, Ranking, Score, UserAchievement } from "@/types/domain";
+import type { Achievement, ProgressEntry, Ranking, Score, UserAchievement } from "@/types/domain";
 import { apiGet, apiPost, apiPut } from "./apiClient";
 
 const enc = encodeURIComponent;
@@ -7,8 +7,13 @@ export function getProgress(): Promise<ProgressEntry[]> {
   return apiGet<ProgressEntry[]>("/progress");
 }
 
-export function updateProgress(planetId: string, status: ProgressState): Promise<ProgressEntry> {
-  return apiPut<ProgressEntry>(`/progress/${enc(planetId)}`, { status });
+/** Salva o progresso na conta; num laboratório concluído, `points` vira a melhor pontuação (ranking). */
+export function updateProgress(
+  planetId: string,
+  status: ProgressEntry["status"],
+  points?: number,
+): Promise<ProgressEntry> {
+  return apiPut<ProgressEntry>(`/progress/${enc(planetId)}`, points === undefined ? { status } : { status, points });
 }
 
 export function getScores(): Promise<Score[]> {
@@ -27,6 +32,11 @@ export function getMyAchievements(): Promise<UserAchievement[]> {
   return apiGet<UserAchievement[]>("/achievements/me");
 }
 
+/** Grava na conta (idempotente: se já tinha, devolve a data original). */
+export function unlockAchievement(slug: string): Promise<UserAchievement> {
+  return apiPost<UserAchievement>("/achievements/me", { slug });
+}
+
 export function getGalaxyRanking(ref: string): Promise<Ranking> {
   return apiGet<Ranking>(`/rankings/galaxies/${enc(ref)}`);
 }
@@ -42,6 +52,7 @@ export const gamificationService = {
   submitScore,
   getAchievements,
   getMyAchievements,
+  unlockAchievement,
   getGalaxyRanking,
   getSystemRanking,
 };

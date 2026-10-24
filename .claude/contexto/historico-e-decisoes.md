@@ -89,7 +89,10 @@ Pedido: publicar o Rota no Render (grátis) para usar na feira.
   pré-aquecimento do `run.py` em `post_worker_init`). No Windows continue com `python run.py`.
 - **Testado:** build estático e build normal passando; site estático servido localmente contra a API (navegação sem
   recarregar, aula 1.1 abrindo, nenhum 404); gunicorn no WSL com Python 3.12.3 (health ok, cache 28/28); 110 testes.
-  O deploy no Render em si ainda não foi feito (depende de repositório no GitHub e da conta).
+  **Deploy feito (24/10/2026):** código no GitHub `Jhonny-Freire/rota-404_v2` (público, sem `.env`), Blueprint
+  `rota404` no Render; site https://rota404.onrender.com, API https://rota404-api.onrender.com (lendo do Supabase).
+  O Render não completa a barra final das URLs: o `render.yaml` tem reescritas por rota (`/aulas/*` →
+  `/aulas/*/index.html` etc.). Rota nova = nova regra lá. Id de planeta inexistente em `/aulas/...` dá página em branco.
 - **Aviso:** `npm audit` aponta vulnerabilidades críticas no `next@16.4.0` (corrigidas no 16.4.3). Elas atingem o
   servidor do Next (otimização de imagem, server actions, `use cache`), que não existe no site estático; o
   `next start` do notebook é que fica exposto. Atualizar para 16.4.3 é recomendado.
@@ -120,8 +123,7 @@ Pedido: publicar o Rota no Render (grátis) para usar na feira.
   Se o `next dev` subir sem internet, serve fonte de reserva (Arial esticada) até ser reiniciado.
 - **Gamificação real:** `user_progress` no banco usa `entity_type/entity_id/progress_percent`; `scores` tem `galaxy_id`;
   `achievements` não tem `rarity` — os models/contratos do frontend precisam ser alinhados antes de implementar.
-- **Render:** fazer o deploy (repositório GitHub privado + Blueprint) e conferir o site no ar; atualizar o Next para
-  16.4.3; no celular (acesso por QR code) valem as pendências de layout ≤ 375 px acima.
+- **Render:** no ar; atualizar o Next para 16.4.3; configurar monitor (UptimeRobot) em `/api/health` nas horas da feira; no celular (acesso por QR code) valem as pendências de layout ≤ 375 px acima.
 - **S3 e S4:** 8 planetas com especificação pronta, motores ainda em stub (modo prévia).
 - **Segurança do fluxo por zip:** `backend/.env` (com a chave secreta do Supabase) viaja dentro do zip. Mantenha o
   zip só entre a equipe ou envie o `.env` por outro canal. Recomendação forte: usar git (mesmo local) para versionar

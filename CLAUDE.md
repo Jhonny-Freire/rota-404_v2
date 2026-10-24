@@ -110,7 +110,7 @@ G1 - Internet e Web/      especificações (.md) dos 16 planetas da galáxia 1
 | Progresso/pontuação | só local (`rota404.progress`), desbloqueio sequencial por sistema; "Liberar todos os planetas" em Ajustes |
 | Conquistas, ranking, usuários, progresso no servidor | endpoints respondem **501** (só estrutura) |
 | Desempenho | otimizado e medido (55–60 FPS em notebook fraco simulado) |
-| Versão online (Render) | preparada (`render.yaml`, site estático + API com gunicorn), testada localmente; deploy ainda não feito |
+| Versão online (Render) | **no ar**: https://rota404.onrender.com (API: https://rota404-api.onrender.com). Repositório GitHub `Jhonny-Freire/rota-404_v2` (público); cada push na `main` republica |
 
 ## Próximos passos prováveis
 1. Implementar o **S3** (3.1, 3.2, 3.3, 3.4) e depois o **S4** com `/implementar-planeta`, um planeta por vez,

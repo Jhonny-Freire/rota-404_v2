@@ -40,7 +40,39 @@ services:
         value: "1"
       - key: NEXT_PUBLIC_API_URL
         sync: false
+    # o Render não completa a barra final: /aulas/<id> precisa apontar para /aulas/<id>/index.html
+    # (regras só valem quando o arquivo pedido não existe; a última manda o resto para a página 404)
     routes:
+      - type: rewrite
+        source: /galaxias/*
+        destination: /galaxias/*/index.html
+      - type: rewrite
+        source: /sistemas/*
+        destination: /sistemas/*/index.html
+      - type: rewrite
+        source: /aulas/*
+        destination: /aulas/*/index.html
+      - type: rewrite
+        source: /laboratorios/*
+        destination: /laboratorios/*/index.html
+      - type: rewrite
+        source: /faixas-etarias
+        destination: /faixas-etarias/index.html
+      - type: rewrite
+        source: /galaxias
+        destination: /galaxias/index.html
+      - type: rewrite
+        source: /perfil
+        destination: /perfil/index.html
+      - type: rewrite
+        source: /conquistas
+        destination: /conquistas/index.html
+      - type: rewrite
+        source: /ranking
+        destination: /ranking/index.html
+      - type: rewrite
+        source: /configuracoes
+        destination: /configuracoes/index.html
       - type: rewrite
         source: /*
         destination: /404.html

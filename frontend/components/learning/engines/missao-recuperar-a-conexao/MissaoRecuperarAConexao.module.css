@@ -1,0 +1,361 @@
+/* ───────── Palco ───────── */
+
+.scene {
+  background: radial-gradient(ellipse 34% 40% at 80% 53.5%, rgba(58, 214, 255, 0.08), transparent 70%);
+}
+
+.zone {
+  position: absolute;
+  z-index: 0;
+  border: max(2px, calc(0.35 * var(--kit-u, 1cqw))) dashed rgba(58, 214, 255, 0.45);
+  background:
+    repeating-linear-gradient(0deg, rgba(58, 214, 255, 0.035) 0 2px, transparent 2px 6px),
+    rgba(36, 27, 92, 0.28);
+  pointer-events: none;
+}
+
+.off > span > img:first-child {
+  filter: grayscale(1) brightness(0.55) drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.45));
+}
+
+/* ação errada: a peça só treme ("nada mudou"), sem efeito de conserto */
+.nudge > span:first-child {
+  animation: rota-nudge 600ms steps(6) 1;
+}
+
+/* peça do palco: sprite + legenda + selo de resultado, empilhados para baixo */
+.node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(0.4 * var(--kit-u, 1cqw));
+}
+
+/* selo curto embaixo da legenda: mesma letra e tamanho da legenda do kit, só muda a cor */
+.chip {
+  display: block;
+  padding: 0.15em 0.55em 0.2em;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(10px, calc(1.45 * var(--kit-u, 1cqw)));
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.chipDanger {
+  background: #2a0d14;
+  color: #ffc2c6;
+  box-shadow: 0 0 0 2px var(--red);
+}
+
+.chipOk {
+  background: #0f2a1d;
+  color: #b9f5cd;
+  box-shadow: 0 0 0 2px var(--green);
+}
+
+.pop {
+  animation: rota-badge-in 280ms steps(4) both;
+}
+
+/* lugar vazio do roteador na fileira */
+.slot {
+  display: block;
+  border: max(2px, calc(0.3 * var(--kit-u, 1cqw))) dashed rgba(191, 243, 255, 0.55);
+  background: rgba(13, 11, 43, 0.55);
+}
+
+/* "Parou aqui!" em uma linha só */
+.stop {
+  white-space: nowrap;
+}
+
+.waves {
+  position: relative;
+  display: block;
+  width: calc(15 * var(--kit-u, 1cqw));
+  aspect-ratio: 1;
+  pointer-events: none;
+}
+
+.waves > span {
+  position: absolute;
+  inset: 0;
+  border: max(2px, calc(0.45 * var(--kit-u, 1cqw))) solid rgba(58, 214, 255, 0.9);
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0.3);
+  animation: rota-wave 1300ms steps(5, end) infinite;
+}
+
+.waves > span:nth-child(2) {
+  animation-delay: 430ms;
+}
+
+.waves > span:nth-child(3) {
+  animation-delay: 860ms;
+}
+
+/* ───────── Área de interação ───────── */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+/* "Ligar conexão" (ActionButton do kit): ocupa a largura do painel, alinhado às ações */
+.testBtn {
+  margin: var(--px);
+}
+
+.btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: calc(100% - 2 * var(--px));
+  min-height: 52px;
+  margin: var(--px);
+  padding: 8px 14px;
+  border: 0;
+  background: var(--space-800);
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: left;
+  box-shadow: var(--pixel-border), var(--pixel-bevel);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 120ms steps(2),
+    background-color 120ms;
+}
+
+.btn:hover:not(.inactive),
+.btn:focus-visible:not(.inactive) {
+  transform: translateY(-2px);
+  background: var(--space-700);
+  box-shadow: var(--pixel-border-cyan), var(--pixel-bevel), 0 6px 16px rgba(58, 214, 255, 0.25);
+}
+
+.btn:active:not(.inactive) {
+  transform: translateY(1px);
+}
+
+.btn:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 7px;
+}
+
+.btnIcon {
+  flex: none;
+  width: var(--icon-w, 28px);
+  max-width: none;
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.45));
+}
+
+.btnLabel {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.btnMark {
+  flex: none;
+  width: 22px;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.inactive {
+  cursor: not-allowed;
+  opacity: 0.5;
+  filter: grayscale(1);
+}
+
+.active {
+  background: var(--space-700);
+  box-shadow: var(--pixel-border-yellow), var(--pixel-bevel), 0 0 18px rgba(247, 181, 0, 0.3);
+}
+
+.active.inactive {
+  opacity: 1;
+  filter: none;
+  cursor: default;
+}
+
+.failed {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
+.failed.inactive {
+  opacity: 0.6;
+  filter: none;
+}
+
+.pulse {
+  animation: rota-press 1.3s ease-in-out infinite;
+}
+
+.tools {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.toolsTitle {
+  color: var(--yellow);
+  font-size: 11px;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.6);
+}
+
+.toolGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 6px 8px;
+}
+
+/* lugar das ações antes de achar a peça com problema (não é botão) */
+.locked {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  margin: 0;
+  padding: 8px 14px;
+  border: 3px dashed #4a4670;
+  background: rgba(13, 11, 43, 0.55);
+  color: var(--text-dim);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.lockedIcon {
+  flex: none;
+  width: 26px;
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.45));
+}
+
+/* ───────── Movimento reduzido ───────── */
+
+.reduced .pulse,
+.reduced .pop,
+.reduced .nudge > span:first-child {
+  animation: none;
+}
+
+.reduced .waves > span {
+  animation: none;
+  opacity: 0.6;
+}
+
+.reduced .waves > span:nth-child(1) {
+  transform: scale(0.45);
+}
+
+.reduced .waves > span:nth-child(2) {
+  transform: scale(0.7);
+}
+
+.reduced .waves > span:nth-child(3) {
+  transform: scale(0.95);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse,
+  .pop,
+  .nudge > span:first-child {
+    animation: none;
+  }
+
+  .waves > span {
+    animation: none;
+    opacity: 0.6;
+  }
+
+  .waves > span:nth-child(1) {
+    transform: scale(0.45);
+  }
+
+  .waves > span:nth-child(2) {
+    transform: scale(0.7);
+  }
+
+  .waves > span:nth-child(3) {
+    transform: scale(0.95);
+  }
+}
+
+@media (max-width: 480px) {
+  .btn,
+  .locked {
+    font-size: 16px;
+  }
+}
+
+@keyframes rota-wave {
+  0% {
+    opacity: 0.95;
+    transform: scale(0.3);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+@keyframes rota-nudge {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  17% {
+    transform: translateX(-8%);
+  }
+  33% {
+    transform: translateX(8%);
+  }
+  50% {
+    transform: translateX(-6%);
+  }
+  67% {
+    transform: translateX(6%);
+  }
+  83% {
+    transform: translateX(-3%);
+  }
+}
+
+@keyframes rota-badge-in {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes rota-press {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04);
+  }
+}

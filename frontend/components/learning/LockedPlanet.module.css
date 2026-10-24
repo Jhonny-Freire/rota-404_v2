@@ -1,0 +1,43 @@
+.locked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 360px;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.art {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 120px;
+}
+
+.lock {
+  width: 84px;
+  height: auto;
+  filter: drop-shadow(4px 4px 0 rgba(0, 0, 0, 0.45));
+}
+
+.title {
+  color: var(--yellow);
+  font-size: clamp(13px, 1.5vw, 18px);
+  text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
+}
+
+.name {
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.message {
+  max-width: 46ch;
+  margin-bottom: 8px;
+  color: var(--text-dim);
+  font-size: 19px;
+}

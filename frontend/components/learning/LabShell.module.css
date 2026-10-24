@@ -1,0 +1,595 @@
+/* Laboratório: cabeçalho (etiqueta + título | HUD + Voltar), palco com a faixa das etapas presa no topo
+   e, ao lado, o guia (Bonzi + resultado da ação) e a área de interação. Topos alinhados. */
+
+.shell {
+  /* espaço reservado ABAIXO do palco (a altura do cabeçalho já entra em --stage-top, medido pelo SceneStage):
+     margem do palco (4) + respiro do AppShell (48) + o que o padding do palco soma à altura (14 × 7/8 ≈ 12) = ~64px.
+     Com menos que isso a página rola alguns pixels em telas baixas (ex.: 1366×768).
+     66 (e não os 72 de antes) + o vão de 12px abaixo: o HUD deixou o cabeçalho ~15px mais alto, e assim o palco
+     continua pelo menos do tamanho que tinha antes em telas baixas (topo + reserva: 285 + 66 ≤ 280 + 72). */
+  --stage-bottom: 66px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ───────── HUD: pontos e erros em duas células alinhadas (mesmo desenho do HUD do sistema) ───────── */
+
+.hud {
+  --edge: var(--panel-border);
+  display: flex;
+  align-items: center;
+  margin: var(--px);
+  padding: 8px 14px;
+  background: var(--panel-bg);
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--edge),
+    0 var(--px) 0 0 var(--edge),
+    calc(var(--px) * -1) 0 0 0 var(--edge),
+    var(--px) 0 0 0 var(--edge),
+    var(--pixel-bevel);
+}
+
+/* laboratório concluído: moldura dourada com brilho suave */
+.hudDone {
+  --edge: var(--yellow);
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--edge),
+    0 var(--px) 0 0 var(--edge),
+    calc(var(--px) * -1) 0 0 0 var(--edge),
+    var(--px) 0 0 0 var(--edge),
+    var(--pixel-bevel),
+    0 0 24px rgba(247, 181, 0, 0.22);
+}
+
+.stat {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+}
+
+/* número (fonte pixel) com o rótulo embaixo: o mesmo estilo nas duas células */
+.statText {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.statValue {
+  color: var(--text);
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: 16px;
+  line-height: 1;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.6);
+}
+
+.pointsValue {
+  color: var(--yellow);
+}
+
+.statLabel {
+  color: var(--text-dim);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.hudStar {
+  height: auto;
+  filter: drop-shadow(0 0 6px rgba(247, 181, 0, 0.5));
+  animation: hud-twinkle 2.8s ease-in-out infinite;
+}
+
+/* divisória pontilhada entre as células (não encosta na moldura) */
+.hudDivider {
+  flex: none;
+  align-self: stretch;
+  width: var(--px);
+  margin: 0 14px;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--panel-border) 0 var(--px),
+    transparent var(--px) calc(var(--px) * 2)
+  );
+}
+
+/* sem erros o ícone fica apagado; no primeiro erro acende e o número fica vermelho */
+.mistakeIcon {
+  height: auto;
+  opacity: 0.45;
+  filter: grayscale(1);
+  transition: opacity 160ms;
+}
+
+.statWarn .mistakeIcon {
+  opacity: 1;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.5));
+}
+
+.statWarn .statValue {
+  color: #ff8a92;
+}
+
+/* ───────── área de trabalho ───────── */
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+.main {
+  min-width: 0;
+}
+
+/* ───────── etapas: faixa presa no topo da moldura do palco (nós numerados ligados por uma linha) ───────── */
+
+.stepper {
+  position: relative;
+  /* fica por cima da sombra do palco */
+  z-index: 1;
+  /* a largura vem do palco, nunca do texto das etapas */
+  container-type: inline-size;
+  display: flex;
+  align-items: center;
+  /* Altura fixa de 40px para nomes de até duas linhas (2 × 18px + 4px; o nó de 28px fica com 6px em volta).
+     O palco mede o próprio topo, logo abaixo desta faixa, e a largura dele depende disso: se a faixa mudasse de
+     altura (nome em 1 ou 2 linhas, nomes sumindo no palco estreito), o palco mudaria de tamanho a cada etapa e,
+     perto do limite em que os nomes somem, ficaria piscando (palco cresce → faixa alarga → nomes voltam → palco
+     encolhe → nomes somem...). */
+  min-height: 40px;
+  margin: var(--px) var(--px) 0;
+  padding: 2px 12px;
+  list-style: none;
+  background: linear-gradient(180deg, var(--space-800), var(--space-700));
+  /* borda em cima e dos lados; embaixo, a mesma linha da borda do palco (os cantos da junção ficam cheios) */
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--panel-border),
+    calc(var(--px) * -1) 0 0 0 var(--panel-border),
+    var(--px) 0 0 0 var(--panel-border),
+    0 var(--px) 0 0 var(--panel-border),
+    calc(var(--px) * -1) var(--px) 0 0 var(--panel-border),
+    var(--px) var(--px) 0 0 var(--panel-border),
+    inset 0 var(--px) 0 0 rgba(255, 255, 255, 0.06);
+}
+
+.step {
+  position: relative;
+  display: flex;
+  flex: 1 1 0;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-dim);
+}
+
+.step:last-child {
+  flex: 0 1 auto;
+}
+
+/* linha entre uma etapa e a próxima: tracejada até ser feita, verde depois */
+.step:not(:last-child)::after {
+  content: "";
+  flex: 1 1 12px;
+  min-width: 12px;
+  height: var(--px);
+  /* mesmo respiro dos dois lados: 8px do nome (gap) e 8px até o próximo nó */
+  margin-right: 8px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--panel-border) 0 var(--px),
+    transparent var(--px) calc(var(--px) * 2)
+  );
+}
+
+.stepDone:not(:last-child)::after {
+  background: var(--green);
+}
+
+.stepNode {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  background: var(--space-950);
+  color: var(--text-dim);
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: 10px;
+  line-height: 1;
+  box-shadow: inset 0 0 0 3px var(--panel-border);
+}
+
+.stepCheck {
+  height: auto;
+}
+
+.stepName {
+  flex: 0 1 auto;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.stepDone {
+  color: var(--text);
+}
+
+.stepDone .stepNode {
+  background: #123524;
+  box-shadow: inset 0 0 0 3px var(--green);
+}
+
+.stepCurrent {
+  color: var(--yellow);
+}
+
+.stepCurrent .stepNode {
+  background: var(--yellow);
+  color: var(--space-950);
+  box-shadow:
+    inset 0 0 0 3px #8a5a00,
+    0 0 12px rgba(247, 181, 0, 0.45);
+}
+
+.stepCurrent .stepName {
+  font-weight: 700;
+}
+
+/* Palco estreito: só a etapa atual mostra o nome (os outros continuam para leitores de tela); a faixa mantém
+   os 40px (ver .stepper). A etapa atual fica com o espaço que o nome pede e as outras dividem o resto; se não
+   couber, o nome quebra em vez de empurrar a faixa para fora do palco (ex.: "Computador compartilhado" com
+   5 etapas no celular). */
+@container (max-width: 679px) {
+  .step:not(.stepCurrent) .stepName {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .stepCurrent {
+    min-width: 0;
+  }
+
+  .stepCurrent:not(:last-child) {
+    flex: 1 1 auto;
+  }
+
+  .stepCurrent .stepName {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* 5 etapas ou mais precisam de mais largura para mostrar todos os nomes */
+@container (max-width: 759px) {
+  .stepperLong .step:not(.stepCurrent) .stepName {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .stepperLong .stepCurrent {
+    min-width: 0;
+  }
+
+  .stepperLong .stepCurrent:not(:last-child) {
+    flex: 1 1 auto;
+  }
+
+  .stepperLong .stepCurrent .stepName {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* celular: menos respiro entre nó, nome e linha, para os nós e o nome da etapa atual caberem até em 320px */
+@container (max-width: 399px) {
+  .step {
+    gap: 4px;
+  }
+
+  .step:not(:last-child)::after {
+    min-width: 4px;
+    margin-right: 4px;
+  }
+}
+
+/* concluído: a faixa (toda verde) fica solta, acima do painel de conclusão */
+.boardDone .stepper {
+  margin-bottom: 12px;
+  box-shadow: var(--pixel-border), var(--pixel-bevel);
+}
+
+/* Faixa e palco com a mesma largura: o quadro encolhe até a largura do palco e fica centralizado.
+   O palco usa a mesma conta do SceneStage, só que medida pela coluna (cqi) em vez de 100%.
+   Exige svh também: sem ele a conta seria descartada e o palco ficaria com 100% de um quadro que encolhe. */
+@supports (width: 1cqi) and (height: 1svh) {
+  .main {
+    container-type: inline-size;
+  }
+
+  .board {
+    width: fit-content;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+
+  .boardDone {
+    width: auto;
+  }
+
+  .board .stageFrame {
+    width: min(
+      100cqi - 2 * var(--px),
+      max(var(--stage-min, 320px), (100svh - var(--stage-top, 230px) - var(--stage-bottom, 72px)) * 16 / 9)
+    );
+    margin: var(--px);
+  }
+}
+
+/* ───────── coluna lateral ───────── */
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+/* guia: o Bonzi fala (texto principal) e, embaixo, o resultado da última ação */
+.guide {
+  --edge: var(--panel-border);
+  min-width: 0;
+  margin: var(--px);
+  padding: 12px 14px 14px;
+  background: var(--panel-bg);
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--edge),
+    0 var(--px) 0 0 var(--edge),
+    calc(var(--px) * -1) 0 0 0 var(--edge),
+    var(--px) 0 0 0 var(--edge),
+    var(--pixel-bevel);
+  transition: box-shadow 160ms;
+}
+
+.guideError {
+  --edge: #c23a46;
+}
+
+.guideSuccess {
+  --edge: var(--green);
+}
+
+/* região anunciada (aria-live): fica sempre montada, vazia quando não há mensagem */
+.feedbackSlot {
+  min-width: 0;
+}
+
+/* duas colunas no cartão inteiro: ícone embaixo do Bonzi (60px) e o texto alinhado com a fala dele */
+.feedback {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+  /* linha pontilhada separando a fala do Bonzi do resultado */
+  background: repeating-linear-gradient(
+      90deg,
+      var(--panel-border) 0 var(--px),
+      transparent var(--px) calc(var(--px) * 2)
+    )
+    top left / 100% var(--px) no-repeat;
+  animation: feedback-in 240ms steps(3) both;
+}
+
+.feedbackIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  /* mesma largura do retrato do Bonzi (Narrator size={60}) */
+  width: 60px;
+  height: 28px;
+}
+
+.feedbackSprite {
+  height: auto;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.5));
+}
+
+.feedbackBody {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding-top: 2px;
+}
+
+.feedbackLabel {
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: 9px;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.feedbackText {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.hint .feedbackLabel {
+  color: var(--yellow);
+}
+
+.hint .feedbackText {
+  color: #ffe08a;
+}
+
+.info .feedbackLabel {
+  color: var(--cyan);
+}
+
+.info .feedbackText {
+  color: #bff3ff;
+}
+
+.error .feedbackLabel {
+  color: #ff8a92;
+}
+
+.error .feedbackText {
+  color: #ffb3b8;
+}
+
+.success .feedbackLabel {
+  color: var(--green);
+}
+
+.success .feedbackText {
+  color: #8ff0b0;
+}
+
+/* área de interação: moldura simples e título discreto (os botões do motor são o destaque) */
+.controls {
+  min-width: 0;
+  margin: var(--px);
+  padding: 12px 14px 14px;
+  background: var(--panel-bg);
+  box-shadow: var(--pixel-border), var(--pixel-bevel);
+}
+
+.controlsTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: var(--text-dim);
+  font-family: var(--font-body), "Trebuchet MS", system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.controlsTitle::before {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  background: var(--yellow);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+}
+
+.interaction {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.interaction:empty::before {
+  content: "Use o palco para jogar.";
+  color: var(--text-dim);
+  font-size: 16px;
+}
+
+.engineHost {
+  display: none;
+}
+
+.medalName {
+  align-self: center;
+  color: var(--yellow);
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: 12px;
+}
+
+.best {
+  align-self: center;
+  color: var(--text-dim);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.best strong {
+  color: var(--text);
+}
+
+@keyframes hud-twinkle {
+  0%,
+  100% {
+    transform: scale(1) rotate(0);
+  }
+  50% {
+    transform: scale(1.12) rotate(8deg);
+  }
+}
+
+@keyframes feedback-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* desktop: palco à esquerda, coluna lateral à direita com o topo alinhado ao topo do quadro do palco */
+@media (min-width: 1180px) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 350px);
+    align-items: start;
+    gap: 16px 22px;
+  }
+}
+
+@media (max-width: 1179px) {
+  .shell {
+    --stage-bottom: 120px;
+  }
+
+  /* botões do laboratório logo abaixo do palco (à esquerda), visíveis junto com a cena; o guia ao lado.
+     Duas colunas iguais: em 768px cada uma ainda tem a largura da coluna do desktop */
+  .side {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 14px 20px;
+  }
+
+  .controls {
+    order: -1;
+  }
+
+  .guide:only-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* celular: uma coluna (botões primeiro, depois o guia) */
+@media (max-width: 767px) {
+  .side {
+    display: flex;
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,116 @@
+/* Cabeçalho: etiqueta + título à esquerda, HUD + "Voltar" à direita. Mesmo desenho do cabeçalho da página do sistema.
+   Empilha só quando falta espaço (o título ficaria com menos de 320px), e não numa largura fixa: a aula, que só
+   tem o "Voltar", continua em uma linha nos tablets e o palco não perde altura por causa do cabeçalho. */
+
+.header {
+  --kind: var(--green);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 32px;
+}
+
+.lesson {
+  --kind: var(--cyan);
+}
+
+.lab {
+  --kind: var(--green);
+}
+
+.intro {
+  display: flex;
+  flex: 1 1 320px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* etiqueta "LABORATÓRIO · PLANETA 1.3": uma linha só, com a cor do tipo na barrinha, no ícone e no nome */
+.eyebrow {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  max-width: 100%;
+  padding: 2px 10px 2px 7px;
+  background: rgba(7, 7, 22, 0.78);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow:
+    inset 3px 0 0 0 var(--kind),
+    3px 3px 0 rgba(0, 0, 0, 0.5);
+}
+
+.kindIcon {
+  height: auto;
+}
+
+.kindLabel {
+  color: var(--kind);
+}
+
+/* separador "·" desenhado como um pixel */
+.dot {
+  flex: none;
+  width: 4px;
+  height: 4px;
+  background: var(--text-dim);
+}
+
+.preview {
+  padding: 0 6px;
+  background: var(--bonzi);
+  color: #fff;
+}
+
+.title {
+  color: var(--text);
+  /* fonte pixel larga: um título comprido não pode empurrar o HUD para fora da linha */
+  font-size: clamp(16px, 1.45vw, 22px);
+  line-height: 1.35;
+  text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
+  overflow-wrap: anywhere;
+}
+
+/* HUD e "Voltar" lado a lado, com a mesma altura (align-items: stretch).
+   Ao lado do título o bloco tem a largura do conteúdo (fica à direita porque o título cresce); empilhado,
+   fica embaixo do título e alinhado à esquerda com ele */
+.aside {
+  display: flex;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 8px 12px;
+  min-width: 0;
+}
+
+.aside .back {
+  margin: var(--px);
+}
+
+/* celular: "Voltar" vira só o ícone, ao lado do HUD (o nome continua para leitores de tela) */
+@media (max-width: 599px) {
+  .aside .back {
+    min-width: 52px;
+    padding: 6px 10px;
+  }
+
+  .aside .back [data-sprite-label] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}

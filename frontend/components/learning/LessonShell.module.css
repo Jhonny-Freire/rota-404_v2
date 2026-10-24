@@ -1,0 +1,267 @@
+.shell {
+  /* espaço reservado ABAIXO do palco; a altura do cabeçalho já entra em --stage-top (medido pelo SceneStage).
+     Menos que ~64px (margem 4 + respiro do AppShell 48 + ~12 do padding do palco) faz a página rolar alguns
+     pixels em telas baixas (ex.: 1366×768). 66 e o vão de 14px de antes devolvem ao palco parte da altura que a
+     etiqueta acima do título ocupa. */
+  --stage-bottom: 66px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+}
+
+.main {
+  min-width: 0;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.track {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: var(--px);
+  padding: 12px 14px 14px;
+  background: var(--panel-bg);
+  box-shadow: var(--pixel-border), var(--pixel-bevel);
+}
+
+.trackHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+}
+
+.count {
+  color: var(--text-dim);
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+}
+
+.sceneTitle {
+  color: var(--yellow);
+  font-size: clamp(12px, 1.1vw, 14px);
+  line-height: 1.45;
+}
+
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  list-style: none;
+}
+
+.step {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin: 3px;
+  padding: 0;
+  border: 0;
+  background: var(--space-950);
+  color: var(--text-dim);
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: 11px;
+  box-shadow:
+    0 -3px 0 0 var(--panel-border),
+    0 3px 0 0 var(--panel-border),
+    -3px 0 0 0 var(--panel-border),
+    3px 0 0 0 var(--panel-border);
+  transition:
+    background-color 120ms,
+    transform 120ms steps(2);
+}
+
+.step:not(:disabled) {
+  cursor: pointer;
+}
+
+.step:not(:disabled):hover,
+.step:focus-visible {
+  transform: translateY(-2px);
+  background: var(--space-700);
+  color: var(--text);
+}
+
+.step:disabled {
+  cursor: default;
+}
+
+.done {
+  color: var(--text);
+  background: #123524;
+  box-shadow:
+    0 -3px 0 0 var(--green),
+    0 3px 0 0 var(--green),
+    -3px 0 0 0 var(--green),
+    3px 0 0 0 var(--green);
+}
+
+.current {
+  background: var(--yellow);
+  color: var(--space-950);
+  box-shadow:
+    0 -3px 0 0 #8a5a00,
+    0 3px 0 0 #8a5a00,
+    -3px 0 0 0 #8a5a00,
+    3px 0 0 0 #8a5a00;
+}
+
+/* "O que fazer": instrução da cena + botões de navegação, juntos */
+
+.guide {
+  --edge: var(--cyan);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: var(--px);
+  padding: 12px 14px 14px;
+  background: var(--panel-bg);
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--edge),
+    0 var(--px) 0 0 var(--edge),
+    calc(var(--px) * -1) 0 0 0 var(--edge),
+    var(--px) 0 0 0 var(--edge),
+    var(--pixel-bevel);
+  transition: box-shadow 160ms;
+}
+
+.guideReady {
+  --edge: var(--yellow);
+  background:
+    linear-gradient(180deg, rgba(247, 181, 0, 0.12), transparent 70%),
+    var(--panel-bg);
+}
+
+.todo {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.todoIcon {
+  flex: none;
+  height: auto;
+  margin-top: 2px;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.5));
+}
+
+.todoBody {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.todoLabel {
+  color: var(--cyan);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.6);
+}
+
+.guideReady .todoLabel {
+  color: var(--yellow);
+}
+
+.todoText {
+  min-height: 2.6em;
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.guideReady .todoText {
+  color: #ffe9a8;
+}
+
+.controls {
+  display: flex;
+  gap: 12px;
+}
+
+.primary {
+  flex: 1 1 auto;
+}
+
+.nextName {
+  color: var(--text-dim);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+@media (min-width: 1180px) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr) minmax(290px, 330px);
+    align-items: start;
+    gap: 20px 24px;
+  }
+}
+
+@media (max-width: 1179px) {
+  .shell {
+    /* 120 de antes − 10px que o cabeçalho de duas linhas ganhou (52px contra 44px + folga): o palco fica do
+       mesmo tamanho e os botões de "O que fazer" continuam visíveis junto com ele (precisam de ~90–106px) */
+    --stage-bottom: 110px;
+  }
+
+  .side {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    align-items: start;
+  }
+
+  /* logo abaixo do palco, ocupando a linha toda: instrução à esquerda, botões à direita */
+  .guide {
+    grid-column: 1 / -1;
+    order: -1;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .todo {
+    flex: 1 1 auto;
+    align-items: center;
+  }
+
+  .todoText {
+    min-height: 0;
+  }
+
+  .controls {
+    flex: 0 1 320px;
+  }
+}
+
+@media (max-width: 767px) {
+  .side {
+    display: flex;
+  }
+
+  .guide {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .controls {
+    flex: none;
+  }
+}

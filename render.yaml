@@ -1,0 +1,46 @@
+# Blueprint do Render (render.com > New > Blueprint). Dois serviços grátis:
+# - rota404-api: Flask (dorme após 15 min sem acesso; acorda em ~1 min)
+# - rota404: site estático do Next (CDN, não dorme)
+# Valores com sync: false são pedidos na criação; veja "Publicar no Render" no README.
+services:
+  - type: web
+    name: rota404-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -c gunicorn.conf.py run:app
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.11"
+      - key: FLASK_DEBUG
+        value: "0"
+      - key: DATA_SOURCE
+        value: auto
+      - key: FALLBACK_TO_LOCAL
+        value: "1"
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+
+  - type: web
+    name: rota404
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build && node scripts/flatten-export-segments.mjs
+    staticPublishPath: out
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: STATIC_EXPORT
+        value: "1"
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /404.html

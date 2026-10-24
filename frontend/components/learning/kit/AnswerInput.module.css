@@ -1,0 +1,106 @@
+.form {
+  --u: var(--kit-u, 8px);
+  --edge: var(--panel-border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.label {
+  color: var(--yellow);
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: max(10px, calc(1.2 * var(--u)));
+  letter-spacing: 0.03em;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+}
+
+.field {
+  position: relative;
+  display: flex;
+  flex: 1 1 180px;
+  min-width: 0;
+}
+
+.input {
+  width: 100%;
+  min-height: 48px;
+  margin: 4px;
+  padding: 8px 14px;
+  border: 0;
+  background: var(--space-950);
+  color: var(--text);
+  font-size: max(16px, calc(1.8 * var(--u)));
+  box-shadow:
+    0 -4px 0 0 var(--edge),
+    0 4px 0 0 var(--edge),
+    -4px 0 0 0 var(--edge),
+    4px 0 0 0 var(--edge);
+}
+
+.mono {
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: max(13px, calc(1.5 * var(--u)));
+  letter-spacing: 0.04em;
+}
+
+.input:focus-visible {
+  --edge: var(--cyan);
+  outline: 3px solid var(--focus);
+  outline-offset: 7px;
+}
+
+.input::placeholder {
+  color: #77729b;
+}
+
+.mark {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  width: 26px;
+  height: auto;
+  transform: translateY(-50%);
+  image-rendering: pixelated;
+}
+
+.correct {
+  --edge: var(--green);
+}
+
+.wrong {
+  --edge: var(--red);
+}
+
+.wrong .field {
+  animation: kit-input-shake 480ms steps(6) 1;
+}
+
+.hiddenSubmit {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes kit-input-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-6px);
+  }
+  75% {
+    transform: translateX(6px);
+  }
+}

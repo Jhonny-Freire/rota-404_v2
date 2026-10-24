@@ -1,0 +1,14 @@
+.stack {
+  display: inline-grid;
+  vertical-align: middle;
+  line-height: 0;
+}
+
+.frame {
+  grid-area: 1 / 1;
+  visibility: hidden;
+}
+
+.current {
+  visibility: visible;
+}

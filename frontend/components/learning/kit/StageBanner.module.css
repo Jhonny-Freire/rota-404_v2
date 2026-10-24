@@ -1,0 +1,36 @@
+.banner {
+  --u: var(--kit-u, 8px);
+  display: flex;
+  justify-content: center;
+  /* só informa: toques e arrastes passam para as peças/zonas que estiverem embaixo */
+  pointer-events: none;
+}
+
+/* textos maiores quebram em linhas centralizadas em vez de passar da largura do palco */
+.banner .tag {
+  max-width: max(220px, calc(var(--mw, 80) * var(--u)));
+  white-space: normal;
+  text-align: center;
+  box-shadow:
+    0 -3px 0 0 var(--edge),
+    0 3px 0 0 var(--edge),
+    -3px 0 0 0 var(--edge),
+    3px 0 0 0 var(--edge),
+    inset -2px -2px 0 0 rgba(0, 0, 0, 0.35),
+    4px 4px 0 0 rgba(0, 0, 0, 0.45);
+}
+
+.pop {
+  animation: kit-banner-pop 360ms steps(4) both;
+}
+
+@keyframes kit-banner-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

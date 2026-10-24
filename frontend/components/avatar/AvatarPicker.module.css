@@ -1,0 +1,100 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+  gap: 16px;
+}
+
+.option {
+  position: relative;
+  display: block;
+  cursor: pointer;
+}
+
+.input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: var(--px);
+  padding: 14px 10px 12px;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(58, 214, 255, 0.16), transparent 65%),
+    var(--space-800);
+  box-shadow: var(--pixel-border), var(--pixel-bevel);
+  transition:
+    transform 120ms steps(2),
+    background-color 120ms;
+  pointer-events: none;
+}
+
+.avatar {
+  transition: transform 160ms steps(3);
+}
+
+.name {
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: 10px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.5));
+}
+
+.option:hover .card {
+  transform: translateY(-3px);
+  background:
+    radial-gradient(circle at 50% 35%, rgba(58, 214, 255, 0.26), transparent 65%),
+    var(--space-700);
+  box-shadow: var(--pixel-border-cyan), var(--pixel-bevel);
+}
+
+.option:hover .avatar {
+  transform: scale(1.06);
+}
+
+.input:focus-visible + .card {
+  outline: 3px solid var(--focus);
+  outline-offset: 8px;
+}
+
+.selected .card {
+  background:
+    radial-gradient(circle at 50% 35%, rgba(247, 181, 0, 0.24), transparent 65%),
+    var(--space-700);
+  box-shadow: var(--pixel-border-yellow), var(--pixel-bevel), 0 0 20px rgba(247, 181, 0, 0.25);
+}
+
+.selected .name {
+  color: var(--yellow);
+}
+
+@media (max-width: 767px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 10px;
+  }
+
+  .card {
+    padding: 12px 6px 10px;
+  }
+
+  .name {
+    font-size: 9px;
+  }
+}

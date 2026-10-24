@@ -1,0 +1,52 @@
+.panel {
+  position: relative;
+  margin: var(--px);
+  padding: clamp(16px, 2.2vw, 28px);
+  background:
+    linear-gradient(180deg, rgba(58, 214, 255, 0.06), transparent 40%),
+    var(--panel-bg);
+  color: var(--text);
+  box-shadow: var(--pixel-border), var(--pixel-bevel), 0 18px 40px rgba(0, 0, 0, 0.35);
+  /* sem backdrop-filter (ver MainNav.module.css .hud): no Chrome nunca foi aplicado; no iPad custava a cada quadro */
+}
+
+.panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 12px;
+  right: 12px;
+  height: var(--px);
+  background: rgba(255, 255, 255, 0.07);
+  pointer-events: none;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  color: var(--yellow);
+  font-size: clamp(12px, 1.2vw, 15px);
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.6);
+}
+
+.title::after {
+  content: "";
+  flex: 1;
+  height: var(--px);
+  background: repeating-linear-gradient(90deg, var(--panel-border) 0 8px, transparent 8px 12px);
+}
+
+.highlight {
+  background:
+    linear-gradient(180deg, rgba(138, 92, 214, 0.22), transparent 60%),
+    var(--panel-bg);
+  box-shadow: var(--pixel-border-yellow), var(--pixel-bevel), 0 0 32px rgba(247, 181, 0, 0.18);
+}
+
+.muted {
+  background: rgba(13, 11, 43, 0.55);
+  box-shadow: var(--pixel-border);
+  color: var(--text-dim);
+}

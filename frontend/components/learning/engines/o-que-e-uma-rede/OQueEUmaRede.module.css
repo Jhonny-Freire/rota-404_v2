@@ -1,0 +1,269 @@
+.canvas {
+  --u: var(--kit-u, 1cqw);
+  background: radial-gradient(ellipse 70% 45% at 50% 88%, rgba(107, 63, 160, 0.2), transparent 70%);
+}
+
+.starfield {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-repeat: repeat;
+  background-size: 512px 512px;
+  image-rendering: pixelated;
+  opacity: 0.45;
+}
+
+.node {
+  display: flex;
+}
+
+.float {
+  display: flex;
+  animation: rede-float 3.2s ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.pop {
+  display: flex;
+  animation: rede-pop 360ms steps(4) both;
+}
+
+.blink {
+  animation: rede-blink 1.2s steps(2) infinite;
+}
+
+.draw {
+  animation: rede-draw 600ms steps(10);
+}
+
+/* Cena 4 — Celular → Computador */
+
+.route {
+  display: flex;
+  align-items: center;
+  gap: calc(1.2 * var(--u));
+  white-space: nowrap;
+}
+
+.routeArrow {
+  display: block;
+  width: calc(4.6 * var(--u));
+  min-width: 20px;
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.5));
+}
+
+/* Cena 5 — exemplos do microteste */
+
+.option {
+  --edge: var(--panel-border);
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(0.8 * var(--u));
+  width: 100%;
+  height: calc(26 * var(--u));
+  min-height: 72px;
+  margin: 0;
+  padding: 0 calc(1.2 * var(--u));
+  border: 0;
+  background: linear-gradient(180deg, rgba(36, 27, 92, 0.6), rgba(13, 11, 43, 0.9));
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow:
+    0 -4px 0 0 var(--edge),
+    0 4px 0 0 var(--edge),
+    -4px 0 0 0 var(--edge),
+    4px 0 0 0 var(--edge),
+    6px 6px 0 0 rgba(0, 0, 0, 0.4);
+  transition:
+    transform 120ms steps(2),
+    opacity 220ms;
+}
+
+.option:hover:not([aria-disabled="true"]),
+.option:focus-visible {
+  --edge: var(--cyan);
+  transform: translateY(-3px);
+}
+
+.option:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 8px;
+}
+
+.optionWrong,
+.optionWrong:hover:not([aria-disabled="true"]) {
+  --edge: var(--red);
+  animation: rede-shake 520ms steps(6) 1;
+}
+
+.optionRight,
+.optionRight:hover {
+  --edge: var(--green);
+  background: linear-gradient(180deg, rgba(30, 138, 70, 0.35), rgba(13, 11, 43, 0.9));
+}
+
+.optionLocked {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.optionRight[aria-disabled="true"] {
+  cursor: default;
+}
+
+.optionFloor {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: 20%;
+  z-index: -1;
+  height: calc(1.2 * var(--u));
+  background: rgba(138, 92, 214, 0.35);
+  box-shadow: 0 calc(0.6 * var(--u)) 0 0 rgba(138, 92, 214, 0.15);
+}
+
+.optionMark {
+  position: absolute;
+  top: calc(-2 * var(--u));
+  right: calc(-2 * var(--u));
+  width: calc(5 * var(--u));
+  min-width: 20px;
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.6));
+}
+
+.gap {
+  flex: none;
+  width: calc(var(--w, 6) * var(--u));
+}
+
+.plug {
+  position: relative;
+  flex: none;
+  width: calc(9.6 * var(--u));
+  min-width: 24px;
+  height: auto;
+  margin-left: calc(-1 * var(--u));
+  image-rendering: pixelated;
+  transform: translateY(-35%);
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.45));
+}
+
+.wire {
+  --thick: max(4px, calc(0.9 * var(--u)));
+  position: relative;
+  flex: none;
+  width: calc(var(--w, 7) * var(--u));
+  height: var(--thick);
+  background: var(--cyan);
+  box-shadow:
+    0 2px 0 0 rgba(0, 0, 0, 0.45),
+    0 0 10px rgba(58, 214, 255, 0.55);
+}
+
+.wireIdle {
+  background: #6a5cc4;
+  box-shadow:
+    0 2px 0 0 rgba(0, 0, 0, 0.45),
+    inset 0 2px 0 0 rgba(255, 255, 255, 0.12);
+}
+
+.wireTrack {
+  position: absolute;
+  inset: 0;
+  animation: rede-run 1300ms linear infinite;
+  animation-delay: calc(var(--i, 0) * -433ms);
+}
+
+.wireTrack::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: calc(var(--thick) * 1.8);
+  height: calc(var(--thick) * 1.8);
+  background: var(--yellow);
+  box-shadow:
+    0 0 0 2px var(--space-950),
+    0 0 8px rgba(247, 181, 0, 0.75);
+  transform: translate(-50%, -50%);
+}
+
+.wireStill {
+  animation: none;
+  transform: translateX(calc(var(--pos, 0.5) * 100%));
+}
+
+@keyframes rede-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(calc(-0.9 * var(--kit-u, 1cqw)));
+  }
+}
+
+@keyframes rede-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes rede-blink {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes rede-draw {
+  from {
+    clip-path: inset(-400% 100% -400% 0);
+  }
+  to {
+    clip-path: inset(-400% 0 -400% 0);
+  }
+}
+
+@keyframes rede-run {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes rede-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-4%);
+  }
+  40% {
+    transform: translateX(4%);
+  }
+  60% {
+    transform: translateX(-3%);
+  }
+  80% {
+    transform: translateX(3%);
+  }
+}

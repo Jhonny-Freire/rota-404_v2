@@ -1,0 +1,86 @@
+.panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: calc(100% - 2 * var(--px));
+  min-height: clamp(300px, 100svh - 320px, 520px);
+  margin: var(--px) auto;
+  padding: 28px 20px;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 60% 55% at 50% 30%, rgba(247, 181, 0, 0.18), transparent 70%),
+    linear-gradient(180deg, var(--space-700), var(--space-900));
+  text-align: center;
+  box-shadow: var(--pixel-border-yellow), var(--pixel-bevel), 0 24px 48px rgba(0, 0, 0, 0.4);
+}
+
+.rays {
+  position: absolute;
+  top: -40%;
+  left: 50%;
+  width: 140%;
+  aspect-ratio: 1;
+  transform: translateX(-50%);
+  background: repeating-conic-gradient(from 0deg, rgba(247, 181, 0, 0.08) 0 10deg, transparent 10deg 20deg);
+  pointer-events: none;
+  animation: spin 24s linear infinite;
+}
+
+.sprite {
+  position: relative;
+  width: clamp(72px, 12vw, 120px);
+  height: auto;
+  filter: drop-shadow(4px 4px 0 rgba(0, 0, 0, 0.5)) drop-shadow(0 0 18px rgba(247, 181, 0, 0.45));
+  animation: bounce 1.6s ease-in-out infinite;
+}
+
+.title {
+  position: relative;
+  color: var(--yellow);
+  font-size: clamp(16px, 2vw, 24px);
+  text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
+}
+
+.body {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px 24px;
+  color: var(--text);
+}
+
+.actions {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 6px;
+}
+
+@keyframes spin {
+  to {
+    transform: translateX(-50%) rotate(360deg);
+  }
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@media (max-width: 767px) {
+  .actions,
+  .actions > * {
+    width: 100%;
+  }
+}

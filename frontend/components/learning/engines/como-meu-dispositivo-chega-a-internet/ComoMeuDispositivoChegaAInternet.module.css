@@ -1,0 +1,339 @@
+/* Aula 1.2 — Como meu dispositivo chega à internet? */
+
+.holder {
+  display: inline-flex;
+}
+
+.pop {
+  animation: pop 320ms steps(4) both;
+}
+
+.beckon {
+  animation: beckon 1.2s steps(2) infinite;
+}
+
+.flash {
+  animation: flash 460ms steps(3) 1;
+}
+
+.tapTarget {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.traveler img {
+  filter: drop-shadow(0 0 calc(1 * var(--kit-u, 8px)) rgba(247, 181, 0, 0.85)) drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.5));
+}
+
+/* Ondas do Wi-Fi */
+
+.waves {
+  position: relative;
+  display: block;
+  width: calc(var(--d, 30) * var(--kit-u, 8px));
+  aspect-ratio: 1;
+  pointer-events: none;
+}
+
+.ring {
+  position: absolute;
+  inset: 0;
+  border: max(2px, calc(0.45 * var(--kit-u, 8px))) dashed rgba(58, 214, 255, 0.9);
+  border-radius: 50%;
+  opacity: 0.45;
+  animation: wave 2.1s steps(7) infinite;
+}
+
+.ring:nth-child(2) {
+  animation-delay: -0.7s;
+}
+
+.ring:nth-child(3) {
+  animation-delay: -1.4s;
+}
+
+.wavesStill .ring {
+  animation: none;
+}
+
+.wavesStill .ring:nth-child(1) {
+  transform: scale(0.35);
+  opacity: 0.85;
+}
+
+.wavesStill .ring:nth-child(2) {
+  transform: scale(0.65);
+  opacity: 0.6;
+}
+
+.wavesStill .ring:nth-child(3) {
+  opacity: 0.35;
+}
+
+/* Faixa do caminho */
+
+.strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: max(3px, calc(0.7 * var(--kit-u, 8px))) max(2px, calc(0.5 * var(--kit-u, 8px)));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stripItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  margin: 2px;
+  padding: 0.3em 0.6em 0.32em;
+  background: rgba(7, 7, 22, 0.9);
+  color: var(--text-dim);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(10px, calc(1.75 * var(--kit-u, 8px)));
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  box-shadow: 0 0 0 2px var(--panel-border);
+  transition:
+    opacity 220ms,
+    transform 220ms steps(3),
+    background-color 160ms,
+    color 160ms;
+}
+
+.stripIcon {
+  width: 1.5em;
+  height: 1.2em;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.stripArrow {
+  display: flex;
+  align-items: center;
+  transition: opacity 220ms;
+}
+
+.stripArrow img {
+  display: block;
+  width: max(12px, calc(2.6 * var(--kit-u, 8px)));
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.stripLit {
+  color: var(--text);
+  box-shadow: 0 0 0 2px var(--cyan);
+}
+
+.stripCurrent {
+  background: var(--yellow);
+  color: var(--space-950);
+  box-shadow: 0 0 0 2px #8a5a00;
+  transform: translateY(-10%);
+}
+
+.stripDim {
+  box-shadow: 0 0 0 2px #3d3a5c;
+}
+
+.stripDim img,
+.stripArrowDim img {
+  opacity: 0.4;
+  filter: grayscale(0.8);
+}
+
+.stripHidden {
+  opacity: 0;
+  transform: translateY(40%);
+}
+
+/* Cena 1: a tela do celular ampliada */
+
+.zoom {
+  position: relative;
+  display: flex;
+}
+
+.zoom::after {
+  content: "";
+  position: absolute;
+  left: 5%;
+  top: calc(100% - 4px);
+  width: max(12px, calc(3 * var(--kit-u, 8px)));
+  height: max(12px, calc(3 * var(--kit-u, 8px)));
+  background: #1b1640;
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+
+.screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: max(4px, calc(1 * var(--kit-u, 8px)));
+  min-height: max(36px, calc(7 * var(--kit-u, 8px)));
+}
+
+.screen .offlineTag {
+  font-size: max(9px, calc(1.9 * var(--kit-u, 8px)));
+}
+
+.offlineIcon {
+  display: block;
+  width: max(20px, calc(4 * var(--kit-u, 8px)));
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: max(4px, calc(0.8 * var(--kit-u, 8px)));
+  width: 100%;
+}
+
+.skeleton span {
+  display: block;
+  height: max(5px, calc(1 * var(--kit-u, 8px)));
+  background: #d9d4ee;
+  animation: blink 900ms steps(2) infinite;
+}
+
+.skeleton span:nth-child(1) {
+  width: 60%;
+}
+
+.skeleton span:nth-child(2) {
+  width: 90%;
+}
+
+.skeleton span:nth-child(3) {
+  width: 75%;
+}
+
+/* Cena 6: caminho com a parte que falta */
+
+.rowArrow {
+  display: block;
+  width: max(14px, calc(4 * var(--kit-u, 8px)));
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.45));
+}
+
+.gapLine {
+  display: block;
+  width: max(14px, calc(4.5 * var(--kit-u, 8px)));
+  height: max(4px, calc(0.6 * var(--kit-u, 8px)));
+  background: repeating-linear-gradient(90deg, var(--red) 0 6px, transparent 6px 11px);
+}
+
+.slotBox {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: calc(10 * var(--kit-u, 8px));
+  min-width: 36px;
+  aspect-ratio: 5 / 4;
+  border: max(2px, calc(0.35 * var(--kit-u, 8px))) dashed var(--yellow);
+  background: rgba(247, 181, 0, 0.1);
+}
+
+.rowLabel {
+  display: inline-block;
+  padding: 0.15em 0.55em 0.2em;
+  background: rgba(7, 7, 22, 0.88);
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(10px, calc(1.6 * var(--kit-u, 8px)));
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  box-shadow: 0 0 0 2px var(--panel-border);
+}
+
+.rowLabelMissing {
+  color: var(--yellow);
+  box-shadow: 0 0 0 2px var(--yellow);
+}
+
+.rowLabelRight {
+  box-shadow: 0 0 0 2px var(--green);
+}
+
+.tray {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: max(6px, calc(2.4 * var(--kit-u, 8px)));
+  padding: max(6px, calc(1.2 * var(--kit-u, 8px))) max(10px, calc(2.4 * var(--kit-u, 8px)));
+  background: rgba(13, 11, 43, 0.9);
+  box-shadow:
+    0 -4px 0 0 var(--panel-border),
+    0 4px 0 0 var(--panel-border),
+    -4px 0 0 0 var(--panel-border),
+    4px 0 0 0 var(--panel-border),
+    6px 6px 0 0 rgba(0, 0, 0, 0.4);
+}
+
+.tray .option {
+  min-width: 44px;
+  padding: max(4px, calc(0.6 * var(--kit-u, 8px)));
+}
+
+@container (max-width: 560px) {
+  .stripIcon {
+    display: none;
+  }
+
+  .stripItem {
+    padding: 0.25em 0.45em;
+  }
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.35);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes beckon {
+  50% {
+    filter: brightness(1.3) drop-shadow(0 0 calc(1.2 * var(--kit-u, 8px)) rgba(247, 181, 0, 0.75));
+  }
+}
+
+@keyframes flash {
+  0% {
+    filter: brightness(1.9) drop-shadow(0 0 calc(1.6 * var(--kit-u, 8px)) rgba(247, 181, 0, 0.95));
+  }
+  100% {
+    filter: none;
+  }
+}
+
+@keyframes wave {
+  0% {
+    transform: scale(0.12);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.45;
+  }
+}

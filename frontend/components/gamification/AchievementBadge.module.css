@@ -1,0 +1,115 @@
+.badge {
+  --rarity: var(--cyan);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: var(--px);
+  padding: 18px 14px 16px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--rarity) 14%, transparent), transparent 60%),
+    var(--panel-bg);
+  text-align: center;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 color-mix(in srgb, var(--rarity) 70%, var(--panel-border)),
+    0 var(--px) 0 0 color-mix(in srgb, var(--rarity) 70%, var(--panel-border)),
+    calc(var(--px) * -1) 0 0 0 color-mix(in srgb, var(--rarity) 70%, var(--panel-border)),
+    var(--px) 0 0 0 color-mix(in srgb, var(--rarity) 70%, var(--panel-border)),
+    var(--pixel-bevel);
+  transition: transform 120ms steps(2);
+}
+
+.badge:hover {
+  transform: translateY(-3px);
+}
+
+.rara {
+  --rarity: var(--bonzi);
+}
+
+.lenda {
+  --rarity: var(--yellow);
+}
+
+.art {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+}
+
+.halo {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, color-mix(in srgb, var(--rarity) 45%, transparent), transparent 68%);
+}
+
+.sprite {
+  position: relative;
+  filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.5));
+}
+
+.lenda:not(.locked) .halo {
+  animation: shine 2.4s ease-in-out infinite;
+}
+
+.rarity {
+  padding: 3px 8px 2px;
+  background: color-mix(in srgb, var(--rarity) 22%, var(--space-950));
+  color: var(--rarity);
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+}
+
+.rara .rarity {
+  color: color-mix(in srgb, var(--bonzi) 60%, white);
+}
+
+.name {
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.description {
+  color: var(--text-dim);
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+.locked .sprite {
+  filter: brightness(0) opacity(0.55);
+}
+
+.locked .halo {
+  opacity: 0.25;
+}
+
+.locked .name {
+  color: var(--text-dim);
+  letter-spacing: 0.2em;
+}
+
+.lock {
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+  height: auto;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.6));
+}
+
+@keyframes shine {
+  0%,
+  100% {
+    opacity: 0.7;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}

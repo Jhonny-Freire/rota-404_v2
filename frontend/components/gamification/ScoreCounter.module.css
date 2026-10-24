@@ -1,0 +1,63 @@
+.score {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.star {
+  filter: drop-shadow(0 0 6px rgba(247, 181, 0, 0.5));
+  animation: twinkle 2.8s ease-in-out infinite;
+}
+
+.text {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.value {
+  color: var(--yellow);
+  font-family: var(--font-display), "Courier New", monospace;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.6);
+}
+
+.label {
+  margin-top: 4px;
+  color: var(--text-dim);
+  font-size: 16px;
+}
+
+.sm .value {
+  font-size: 11px;
+}
+
+.md .value {
+  font-size: 16px;
+}
+
+.lg .value {
+  font-size: clamp(20px, 2.4vw, 28px);
+}
+
+.lg .label {
+  font-size: 18px;
+}
+
+.empty .star {
+  filter: grayscale(1) brightness(0.7);
+  animation: none;
+}
+
+.empty .value {
+  color: var(--text-dim);
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    transform: scale(1) rotate(0);
+  }
+  50% {
+    transform: scale(1.12) rotate(8deg);
+  }
+}

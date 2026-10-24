@@ -1,0 +1,257 @@
+.hero {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(24px, 4vw, 56px);
+  padding: clamp(12px, 2vw, 24px) 0;
+}
+
+.portrait {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 280px;
+  height: 280px;
+}
+
+.orbit {
+  position: absolute;
+  inset: 6%;
+  border: 2px dashed rgba(58, 214, 255, 0.35);
+  border-radius: 50%;
+  animation: spin 40s linear infinite;
+}
+
+.pad {
+  position: absolute;
+  left: 50%;
+  bottom: 6%;
+  width: 70%;
+  height: 16%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(58, 214, 255, 0.45), rgba(138, 92, 214, 0.2) 55%, transparent 72%);
+}
+
+.avatar {
+  position: relative;
+  animation: float 4s ease-in-out infinite;
+}
+
+.identity {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+.eyebrow {
+  color: var(--cyan);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.name {
+  color: var(--yellow);
+  text-shadow: 4px 4px 0 rgba(0, 0, 0, 0.6);
+  overflow-wrap: anywhere;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 440px;
+}
+
+.fieldLabel {
+  color: var(--text-dim);
+  font-size: 16px;
+}
+
+.input {
+  width: calc(100% - 2 * var(--px));
+  margin: var(--px);
+  padding: 12px 14px;
+  border: 0;
+  background: var(--space-950);
+  color: var(--text);
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: 14px;
+  box-shadow: var(--pixel-border), inset 0 var(--px) 0 0 rgba(0, 0, 0, 0.4);
+}
+
+.input:focus-visible {
+  outline: none;
+  box-shadow: var(--pixel-border-yellow), inset 0 var(--px) 0 0 rgba(0, 0, 0, 0.4);
+}
+
+.input:disabled {
+  opacity: 0.6;
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 20px;
+}
+
+.fact {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 10px;
+  margin: var(--px);
+  padding: 14px 18px;
+  background: rgba(7, 7, 22, 0.65);
+  box-shadow: var(--pixel-border);
+}
+
+.factLabel {
+  color: var(--text-dim);
+  font-size: 16px;
+}
+
+.factValue {
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 28px;
+}
+
+.galaxies {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  list-style: none;
+}
+
+.galaxy {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.galaxySprite {
+  height: auto;
+  filter: drop-shadow(0 0 10px rgba(58, 214, 255, 0.35));
+  animation: spin 50s linear infinite;
+}
+
+.galaxyLocked .galaxySprite {
+  filter: grayscale(1) brightness(0.55);
+  animation: none;
+}
+
+.galaxyInfo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.galaxyHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+
+.galaxyName {
+  font-size: 12px;
+}
+
+.galaxyRange {
+  color: var(--text-dim);
+  font-size: 16px;
+}
+
+.badges {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  list-style: none;
+}
+
+.badges > li {
+  display: flex;
+}
+
+.badges > li > * {
+  flex: 1;
+}
+
+.more {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1023px) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    text-align: center;
+  }
+
+  .portrait {
+    width: 220px;
+    height: 220px;
+  }
+
+  .identity {
+    align-items: center;
+    width: 100%;
+  }
+
+  .field {
+    width: 100%;
+    text-align: left;
+  }
+
+  .facts {
+    justify-content: center;
+  }
+
+  .fact {
+    align-items: center;
+  }
+
+  .more {
+    justify-content: center;
+  }
+}

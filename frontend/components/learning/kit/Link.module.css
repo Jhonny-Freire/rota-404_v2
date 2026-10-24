@@ -1,0 +1,110 @@
+.link {
+  --u: var(--kit-u, 1cqw);
+  --thick: max(4px, calc(var(--t) * var(--u)));
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: var(--z, 1);
+  width: calc(var(--len) * var(--u));
+  height: var(--thick);
+  transform-origin: 0 0;
+  transform: translate(calc(var(--x) * var(--u)), calc(var(--y) * var(--kit-vu, 0.5625cqw))) rotate(var(--angle))
+    translateY(-50%);
+  pointer-events: none;
+}
+
+.line {
+  position: absolute;
+  inset: 0;
+  transition:
+    background-color 200ms,
+    opacity 200ms;
+}
+
+.idle .line {
+  background: #6a5cc4;
+  box-shadow:
+    0 2px 0 0 rgba(0, 0, 0, 0.45),
+    inset 0 2px 0 0 rgba(255, 255, 255, 0.12);
+}
+
+.active .line {
+  background: var(--cyan);
+  box-shadow:
+    0 2px 0 0 rgba(0, 0, 0, 0.45),
+    0 0 10px rgba(58, 214, 255, 0.55);
+}
+
+.broken .line {
+  background: repeating-linear-gradient(90deg, var(--red) 0 10px, transparent 10px 16px);
+  mask-image: linear-gradient(90deg, #000 0 40%, transparent 40% 60%, #000 60%);
+  -webkit-mask-image: linear-gradient(90deg, #000 0 40%, transparent 40% 60%, #000 60%);
+}
+
+.off .line {
+  background: repeating-linear-gradient(90deg, #77748f 0 6px, transparent 6px 12px);
+  opacity: 0.5;
+}
+
+.dot {
+  position: absolute;
+  left: calc(var(--pos) * 100%);
+  top: 50%;
+  width: calc(var(--thick) * 1.8);
+  height: calc(var(--thick) * 1.8);
+  background: var(--yellow);
+  box-shadow:
+    0 0 0 2px var(--space-950),
+    0 0 8px rgba(247, 181, 0, 0.75);
+  transform: translate(-50%, -50%);
+}
+
+.flowing {
+  left: 0;
+  animation: kit-flow var(--speed) linear infinite;
+  animation-delay: calc(var(--speed) * var(--i) / var(--n) * -1);
+}
+
+.reverse .flowing {
+  animation-direction: reverse;
+}
+
+.mark,
+.label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: var(--z, 2);
+  transform: translate(calc(var(--x) * var(--kit-u, 1cqw)), calc(var(--y) * var(--kit-vu, 0.5625cqw)))
+    translate(-50%, -50%);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.mark {
+  pointer-events: none;
+}
+
+.mark img {
+  display: block;
+  width: max(18px, calc(3.2 * var(--kit-u, 1cqw)));
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.6));
+  animation: kit-blink 1s steps(2) infinite;
+}
+
+@keyframes kit-flow {
+  from {
+    transform: translate(-50%, -50%) translateX(0);
+  }
+  to {
+    transform: translate(-50%, -50%) translateX(calc(var(--len) * var(--u)));
+  }
+}
+
+@keyframes kit-blink {
+  50% {
+    opacity: 0.45;
+  }
+}

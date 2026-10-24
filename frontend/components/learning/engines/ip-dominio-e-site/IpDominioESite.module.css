@@ -1,0 +1,442 @@
+.canvas {
+  --u: var(--kit-u, 1cqw);
+  background:
+    radial-gradient(ellipse 70% 45% at 50% 92%, rgba(107, 63, 160, 0.22), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 50% 18%, rgba(58, 214, 255, 0.06), transparent 70%);
+}
+
+.starfield {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-repeat: repeat;
+  background-size: 512px 512px;
+  image-rendering: pixelated;
+  opacity: 0.45;
+}
+
+.holder {
+  display: inline-flex;
+}
+
+.enter {
+  display: inline-flex;
+  animation: ipd-pop 380ms steps(5) both;
+}
+
+.ghost {
+  visibility: hidden;
+}
+
+.fadeIn {
+  animation: ipd-fade 400ms steps(4) both;
+}
+
+/* seta do trecho que o pacote está fazendo (Cena 5); some quando o trecho termina */
+.nudge {
+  animation: ipd-nudge 900ms steps(3) infinite;
+}
+
+/* Cores dos conceitos */
+
+.toneIp {
+  --c: var(--cyan);
+  --glow: rgba(58, 214, 255, 0.7);
+}
+
+.toneDomain {
+  --c: var(--yellow);
+  --glow: rgba(247, 181, 0, 0.7);
+}
+
+.tonePage {
+  --c: var(--green);
+  --glow: rgba(60, 207, 110, 0.7);
+}
+
+/* Seta-sprite */
+
+.arrow {
+  display: block;
+  width: calc(var(--s, 4.5) * var(--u));
+  min-width: 18px;
+  max-width: none;
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.5));
+  transition: opacity 250ms;
+}
+
+.arrowDown {
+  transform: rotate(90deg);
+}
+
+.arrowOff {
+  opacity: 0.25;
+  filter: grayscale(1);
+}
+
+/* Cartões (cenas 1 a 4) */
+
+.card {
+  --tone: var(--panel-border);
+  --k: 1;
+  --f: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(1 * var(--u));
+  width: calc(26 * var(--u));
+  min-width: max-content;
+  padding: calc(1.8 * var(--u)) calc(1.4 * var(--u)) calc(1.5 * var(--u));
+  background: linear-gradient(180deg, var(--space-700), var(--space-900));
+  box-shadow:
+    0 -4px 0 0 var(--tone),
+    0 4px 0 0 var(--tone),
+    -4px 0 0 0 var(--tone),
+    4px 0 0 0 var(--tone),
+    inset -4px -4px 0 0 rgba(0, 0, 0, 0.3),
+    inset 4px 4px 0 0 rgba(255, 255, 255, 0.06),
+    8px 8px 0 0 rgba(0, 0, 0, 0.4);
+  transform: scale(calc(var(--k) * var(--f)));
+  /* só transform/opacity: o cartão muda de escala enquanto a fileira desliza (nada de filter a cada quadro) */
+  transition:
+    transform 600ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 300ms;
+}
+
+.compact {
+  --k: 0.78;
+}
+
+.focus,
+.revealed {
+  --tone: var(--c);
+}
+
+/*
+ * Brilho do cartão em foco: box-shadow (o cartão é retangular), pintado uma vez. Antes era filter: drop-shadow
+ * com blur, reaplicado a cada quadro enquanto o cartão muda de escala e a fileira desliza.
+ */
+.focus {
+  --f: 1.1;
+  box-shadow:
+    0 -4px 0 0 var(--tone),
+    0 4px 0 0 var(--tone),
+    -4px 0 0 0 var(--tone),
+    4px 0 0 0 var(--tone),
+    inset -4px -4px 0 0 rgba(0, 0, 0, 0.3),
+    inset 4px 4px 0 0 rgba(255, 255, 255, 0.06),
+    8px 8px 0 0 rgba(0, 0, 0, 0.4),
+    0 0 calc(1.4 * var(--u)) 4px var(--glow);
+}
+
+.dimmed {
+  opacity: 0.45;
+  filter: grayscale(0.6);
+}
+
+.ribbon {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  padding: 0.4em 0.75em 0.35em;
+  background: var(--c);
+  color: var(--space-950);
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: max(8px, calc(1.35 * var(--u)));
+  line-height: 1.2;
+  white-space: nowrap;
+  transform: translate(-50%, -62%);
+  box-shadow:
+    0 -3px 0 0 var(--space-950),
+    0 3px 0 0 var(--space-950),
+    -3px 0 0 0 var(--space-950),
+    3px 0 0 0 var(--space-950);
+  animation: ipd-ribbon 360ms steps(4) both;
+}
+
+.slot {
+  display: grid;
+  place-items: center;
+  width: calc(11 * var(--u));
+  height: calc(8.5 * var(--u));
+  min-width: 34px;
+  min-height: 28px;
+  background: rgba(7, 7, 22, 0.65);
+  box-shadow: inset 0 0 0 3px rgba(138, 92, 214, 0.35);
+}
+
+.revealed .slot {
+  background: rgba(7, 7, 22, 0.8);
+  box-shadow: inset 0 0 0 3px var(--c);
+}
+
+.slotImg {
+  display: block;
+  width: calc(var(--s, 7) * var(--u));
+  min-width: 18px;
+  max-width: none;
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(calc(0.3 * var(--u)) calc(0.3 * var(--u)) 0 rgba(0, 0, 0, 0.5));
+}
+
+.popIn {
+  animation: ipd-reveal 420ms steps(5) both;
+}
+
+/* o "?" balança algumas vezes e para: o cartão não é tocável (só pulsa o que é o próximo toque) */
+.bob {
+  animation: ipd-bob 1s steps(2) 3;
+}
+
+.value {
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(11px, calc(2.4 * var(--u)));
+  font-weight: 700;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.mono {
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: max(8px, calc(1.75 * var(--u)));
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+/* Cena 3 — nome fácil de lembrar */
+
+.balloonText {
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: max(8px, calc(1.5 * var(--u)));
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(0.9 * var(--u));
+}
+
+/* Cena 4 — a página na tela */
+
+.screen {
+  display: block;
+  width: 100%;
+}
+
+.screenFit {
+  width: 100%;
+}
+
+.pageRow {
+  display: flex;
+  align-items: center;
+  gap: max(8px, calc(1.6 * var(--u)));
+}
+
+.pageCol {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: max(4px, calc(0.8 * var(--u)));
+  min-width: 0;
+}
+
+.blockIn {
+  animation: ipd-pop 320ms steps(4) both;
+}
+
+/* Cena 6 — classificação */
+
+.pool {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: calc(2 * var(--u));
+  min-height: calc(9 * var(--u));
+}
+
+.poolSlot {
+  display: inline-flex;
+}
+
+/* cartão do monte pulsa até ir para uma caixa; com um cartão selecionado (ele já balança pelo kit) o próximo passo é a caixa: o monte para (classe ligada pelo estado em SceneSort) */
+.cue {
+  animation: ipd-cue 1.3s ease-in-out infinite;
+}
+
+.face {
+  padding: calc(0.5 * var(--u)) calc(0.8 * var(--u));
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(12px, calc(2.4 * var(--u)));
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.faceMono {
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: max(8px, calc(1.75 * var(--u)));
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.boxPlace .box {
+  min-height: calc(22 * var(--u));
+}
+
+.boxHead {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(0.8 * var(--u));
+  padding: calc(0.7 * var(--u)) calc(1 * var(--u));
+  background: var(--c);
+  color: var(--space-950);
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: max(9px, calc(1.6 * var(--u)));
+  line-height: 1.2;
+  white-space: nowrap;
+  box-shadow: inset -3px -3px 0 0 rgba(0, 0, 0, 0.25);
+}
+
+.boxIcon {
+  display: block;
+  width: calc(3.6 * var(--u));
+  min-width: 16px;
+  max-width: none;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.boxHint {
+  margin: auto;
+  color: var(--text-dim);
+  font-size: max(12px, calc(1.5 * var(--u)));
+  font-weight: 600;
+  text-align: center;
+}
+
+.boxPlace .boxHead,
+.boxPlace .boxHint {
+  pointer-events: none;
+}
+
+.boxPlace .piece {
+  align-self: center;
+}
+
+@container (max-width: 560px) {
+  .value,
+  .face {
+    font-size: 10px;
+  }
+
+  .mono,
+  .faceMono,
+  .balloonText {
+    font-size: 7px;
+  }
+
+  .pool {
+    gap: 4px;
+  }
+
+  .pool .piece {
+    padding: 4px;
+  }
+
+  .boxHead {
+    gap: 3px;
+    padding: 3px 4px;
+    font-size: 8px;
+  }
+
+  .boxHint {
+    font-size: 10px;
+  }
+}
+
+@container (max-width: 420px) {
+  .screenFit {
+    width: 128%;
+    margin-left: -14%;
+    transform: scale(0.78);
+    transform-origin: 50% 0;
+  }
+}
+
+@keyframes ipd-pop {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-2 * var(--u, 8px))) scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ipd-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ipd-reveal {
+  from {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ipd-ribbon {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -62%);
+  }
+}
+
+@keyframes ipd-bob {
+  50% {
+    transform: translateY(calc(-0.6 * var(--u, 8px)));
+  }
+}
+
+@keyframes ipd-cue {
+  50% {
+    transform: scale(1.07);
+  }
+}
+
+@keyframes ipd-nudge {
+  50% {
+    transform: translateX(calc(0.6 * var(--u, 8px)));
+  }
+}

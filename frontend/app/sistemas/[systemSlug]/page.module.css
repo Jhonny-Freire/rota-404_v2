@@ -1,0 +1,501 @@
+/* Cabeçalho: nome do sistema à esquerda, HUD de progresso à direita (empilha em telas estreitas) */
+
+.header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 20px 40px;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.tag {
+  padding: 3px 10px;
+  background: var(--nebula);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
+}
+
+.title {
+  /* fonte pixel larga: uma palavra comprida não pode invadir o HUD de progresso ao lado (~900–1000px) */
+  overflow-wrap: anywhere;
+  text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
+}
+
+.description {
+  max-width: 60ch;
+  color: var(--text-dim);
+  font-size: 19px;
+  line-height: 1.35;
+}
+
+/* HUD de progresso: estrela com os pontos + "coleção" com os planetas do sistema, numa linha só */
+.hud {
+  --edge: var(--panel-border);
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: calc(100% - var(--px) * 2);
+  margin: var(--px);
+  padding: 14px 18px;
+  background: var(--panel-bg);
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--edge),
+    0 var(--px) 0 0 var(--edge),
+    calc(var(--px) * -1) 0 0 0 var(--edge),
+    var(--px) 0 0 0 var(--edge),
+    var(--pixel-bevel);
+}
+
+/* sistema completo: moldura dourada com um brilho suave */
+.hudComplete {
+  --edge: var(--yellow);
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--edge),
+    0 var(--px) 0 0 var(--edge),
+    calc(var(--px) * -1) 0 0 0 var(--edge),
+    var(--px) 0 0 0 var(--edge),
+    var(--pixel-bevel),
+    0 0 28px rgba(247, 181, 0, 0.22);
+}
+
+/* número grande (fonte pixel) com o rótulo embaixo: o mesmo estilo para pontos e planetas */
+.statText {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.statValue {
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: 20px;
+  line-height: 1;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.6);
+}
+
+.statLabel {
+  color: var(--text-dim);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.points {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+}
+
+.pointsStar {
+  filter: drop-shadow(0 0 6px rgba(247, 181, 0, 0.5));
+  animation: twinkle 2.8s ease-in-out infinite;
+}
+
+.pointsValue {
+  color: var(--yellow);
+}
+
+/* antes de carregar o progresso: estrela apagada e "—" */
+.pointsEmpty .pointsStar {
+  filter: grayscale(1) brightness(0.7);
+  animation: none;
+}
+
+.pointsEmpty .pointsValue {
+  color: var(--text-dim);
+}
+
+/* divisória pontilhada (não encosta na moldura: o painel não parece uma tabela) */
+.divider {
+  flex: none;
+  align-self: stretch;
+  width: var(--px);
+  margin: 0 16px;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--panel-border) 0 var(--px),
+    transparent var(--px) calc(var(--px) * 2)
+  );
+}
+
+/* coleção: um encaixe por planeta; vazio = contorno tracejado, concluído = planeta colorido com selo ✓ */
+.shelf {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+}
+
+.slot {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  background: rgba(7, 7, 22, 0.6);
+  outline: 2px dashed rgba(185, 179, 217, 0.32);
+  outline-offset: -2px;
+}
+
+/* os planetas têm 34px de altura na arte: 1 pixel da arte por pixel da tela.
+   Ainda não coletado = "fantasma" cinza claro (clarear antes evita que planetas escuros sumam) */
+.slotSprite {
+  display: block;
+  width: auto;
+  height: 34px;
+  max-width: 46px;
+  object-fit: contain;
+  filter: grayscale(1) brightness(1.35) contrast(0.85);
+  opacity: 0.42;
+}
+
+.slotLocked .slotSprite {
+  opacity: 0.3;
+}
+
+.slotInProgress .slotSprite {
+  filter: grayscale(0.5) brightness(0.85);
+  opacity: 0.9;
+}
+
+.slotCompleted {
+  outline: none;
+  background:
+    radial-gradient(circle at center, rgba(58, 214, 255, 0.24), transparent 70%),
+    rgba(7, 7, 22, 0.6);
+  box-shadow: inset 0 0 0 2px rgba(60, 207, 110, 0.75);
+}
+
+.slotCompleted .slotSprite {
+  filter: drop-shadow(0 0 5px rgba(58, 214, 255, 0.45));
+  opacity: 1;
+}
+
+/* coleção completa: todos os encaixes ficam dourados */
+.hudComplete .slotCompleted {
+  background:
+    radial-gradient(circle at center, rgba(247, 181, 0, 0.26), transparent 70%),
+    rgba(7, 7, 22, 0.6);
+  box-shadow: inset 0 0 0 2px rgba(247, 181, 0, 0.85);
+}
+
+/* selo de estado no canto de baixo à direita (✓, cadeado ou ampulheta) */
+.slotBadge {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  z-index: 1;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.6));
+}
+
+.count {
+  flex: none;
+  margin-left: 14px;
+}
+
+.countValue {
+  color: var(--cyan);
+}
+
+.countTotal {
+  color: var(--text-dim);
+}
+
+.hudComplete .countValue {
+  color: var(--green);
+}
+
+/* fita "Sistema completo!" presa na borda de cima (não aumenta a altura do painel) */
+.ribbon {
+  position: absolute;
+  top: 0;
+  right: 18px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 6px;
+  background: var(--yellow);
+  color: var(--space-950);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
+  transform: translateY(-62%);
+  animation: ribbonIn 480ms steps(4) both;
+}
+
+.orbit {
+  --lift: 62px;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2.15;
+  min-height: 620px;
+  /* os rótulos dos planetas de baixo passam um pouco da órbita */
+  margin-bottom: 56px;
+}
+
+.outerRing {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--orbit-rx) * 2);
+  height: calc(var(--orbit-ry) * 2);
+  border: 2px dashed rgba(185, 179, 217, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 40px rgba(107, 63, 160, 0.18) inset;
+  pointer-events: none;
+}
+
+.core {
+  --core: clamp(150px, 16vw, 220px);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: var(--core);
+  height: var(--core);
+  transform: translate(-50%, -50%);
+}
+
+.core::before {
+  content: "";
+  position: absolute;
+  inset: -18%;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, rgba(247, 181, 0, 0.22), rgba(138, 92, 214, 0.14) 45%, transparent 70%);
+}
+
+.coreSprite {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 18px rgba(58, 214, 255, 0.4));
+  animation: float 5s ease-in-out infinite;
+}
+
+.innerRing {
+  position: absolute;
+  inset: -30%;
+  border: 2px dashed rgba(58, 214, 255, 0.35);
+  border-radius: 50%;
+  animation: spin 28s linear infinite;
+  pointer-events: none;
+}
+
+.rocketSlot {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  z-index: 2;
+  line-height: 0;
+  transform: translate(-50%, -50%);
+}
+
+.planets {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  list-style: none;
+}
+
+.planet {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  transform: translate(-50%, calc(var(--lift) * -1));
+}
+
+/* rótulos mais largos: nomes longos de planeta quebram em menos linhas e não invadem o vizinho */
+.planet > a,
+.planet > button,
+.planet > div {
+  max-width: 250px;
+}
+
+.planet:hover,
+.planet:focus-within {
+  z-index: 3;
+}
+
+.travel {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px 18px;
+}
+
+.travel .nextButton {
+  flex-direction: row-reverse;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    transform: scale(1) rotate(0);
+  }
+  50% {
+    transform: scale(1.12) rotate(8deg);
+  }
+}
+
+@keyframes ribbonIn {
+  from {
+    opacity: 0;
+    transform: translateY(-62%) scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-62%) scale(1);
+  }
+}
+
+@media (max-width: 1279px) {
+  .orbit {
+    --lift: 54px;
+  }
+}
+
+/* cabeçalho empilhado: o HUD fica embaixo do título, alinhado à esquerda com ele */
+@media (max-width: 1023px) {
+  .header {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hud {
+    justify-self: start;
+  }
+
+  .orbit {
+    --lift: 46px;
+  }
+}
+
+/* celular: pontos e contagem na primeira linha, a coleção de planetas ocupa a largura toda embaixo */
+@media (max-width: 599px) {
+  .hud {
+    display: grid;
+    grid-template-columns: auto auto;
+    justify-content: space-between;
+    justify-self: stretch;
+    padding: 14px 16px 16px;
+  }
+
+  .points {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .count {
+    grid-column: 2;
+    grid-row: 1;
+    align-items: flex-end;
+    margin-left: 12px;
+    text-align: right;
+  }
+
+  .divider {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: auto;
+    height: var(--px);
+    margin: 14px 0;
+    background: repeating-linear-gradient(
+      to right,
+      var(--panel-border) 0 var(--px),
+      transparent var(--px) calc(var(--px) * 2)
+    );
+  }
+
+  .shelf {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    justify-content: space-between;
+  }
+
+  .ribbon {
+    right: 16px;
+  }
+}
+
+@media (max-width: 767px) {
+  .orbit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 64px;
+    aspect-ratio: auto;
+    min-height: 0;
+    margin-bottom: 0;
+    padding-top: 56px;
+  }
+
+  .outerRing {
+    display: none;
+  }
+
+  .core {
+    --core: 140px;
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+  }
+
+  .planets {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px 12px;
+    width: 100%;
+  }
+
+  .planet {
+    position: static;
+    transform: none;
+  }
+}
+
+/* telas bem estreitas (320–359px): o rótulo de cada planeta (selo "Em andamento", etiqueta "Laboratório")
+   não cabe em meia coluna e invadiria o vizinho, então os planetas ficam um embaixo do outro */
+@media (max-width: 359px) {
+  .planets {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

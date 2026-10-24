@@ -1,0 +1,109 @@
+.lost {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  min-height: 60vh;
+  text-align: center;
+}
+
+.door {
+  position: relative;
+  display: grid;
+  place-items: end center;
+  margin-bottom: 12px;
+}
+
+.door::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 8%;
+  width: 260px;
+  height: 260px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at center, rgba(214, 32, 42, 0.28), rgba(107, 63, 160, 0.16) 45%, transparent 70%);
+}
+
+.door::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -14px;
+  width: 200px;
+  height: 18px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(58, 214, 255, 0.3), transparent 70%);
+}
+
+.doorSprite {
+  position: relative;
+  z-index: 1;
+  width: 144px;
+  height: auto;
+  filter: drop-shadow(6px 6px 0 rgba(0, 0, 0, 0.5));
+  animation: drift 4s ease-in-out infinite;
+}
+
+.title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.code {
+  color: #ff5a63;
+  font-size: clamp(26px, 4.4vw, 52px);
+  text-shadow:
+    4px 4px 0 #6b0f15,
+    8px 8px 0 rgba(0, 0, 0, 0.45);
+}
+
+.subtitle {
+  color: var(--text);
+  font-size: clamp(12px, 1.5vw, 18px);
+  text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
+}
+
+.message {
+  color: var(--text-dim);
+  font-size: 20px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(3deg);
+  }
+}
+
+@media (max-width: 767px) {
+  .doorSprite {
+    width: 108px;
+  }
+
+  .door::before {
+    width: 200px;
+    height: 200px;
+  }
+
+  .message {
+    font-size: 18px;
+  }
+}

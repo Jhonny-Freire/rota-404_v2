@@ -1,0 +1,13 @@
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lesson {
+  color: var(--cyan);
+}
+
+.lab {
+  color: var(--green);
+}

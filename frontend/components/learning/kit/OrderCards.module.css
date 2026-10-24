@@ -1,0 +1,224 @@
+.root {
+  --u: var(--kit-u, 8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: max(10px, calc(1.4 * var(--u)));
+  width: 100%;
+}
+
+.list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: max(8px, calc(1.2 * var(--u)));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.column .list {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: stretch;
+}
+
+.slot {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  padding: 4px;
+  transition: background-color 120ms;
+}
+
+.column .slot {
+  flex-direction: row;
+}
+
+.target {
+  background: rgba(58, 214, 255, 0.16);
+  box-shadow: inset 0 0 0 3px var(--cyan);
+}
+
+.card {
+  --edge: var(--panel-border);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(0.6 * var(--u));
+  flex: 1;
+  min-width: max(96px, calc(12 * var(--u)));
+  min-height: 48px;
+  margin: 4px;
+  padding: max(8px, calc(1 * var(--u))) max(10px, calc(1.2 * var(--u)));
+  border: 0;
+  background: var(--space-800);
+  color: var(--text);
+  font: inherit;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  box-shadow:
+    0 -4px 0 0 var(--edge),
+    0 4px 0 0 var(--edge),
+    -4px 0 0 0 var(--edge),
+    4px 0 0 0 var(--edge),
+    inset -4px -4px 0 0 rgba(0, 0, 0, 0.3);
+  transition:
+    background-color 120ms,
+    opacity 120ms;
+}
+
+.column .card {
+  flex: 1;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.card:hover,
+.card:focus-visible {
+  background: var(--space-700);
+  --edge: var(--cyan);
+}
+
+.card:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 6px;
+}
+
+.number {
+  position: absolute;
+  top: -12px;
+  left: -12px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  background: var(--space-950);
+  color: var(--yellow);
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: 10px;
+  box-shadow: 0 0 0 3px var(--panel-border);
+}
+
+.img {
+  display: block;
+  width: calc(var(--s, 7) * var(--u));
+  min-width: 24px;
+  height: auto;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+.label {
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(14px, calc(1.5 * var(--u)));
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+  pointer-events: none;
+}
+
+.mark {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 22px;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.selected {
+  --edge: var(--yellow);
+  background: var(--space-700);
+}
+
+.wrong {
+  --edge: var(--red);
+  background: #3a1220;
+  animation: kit-order-shake 480ms steps(6) 1;
+}
+
+.correct {
+  --edge: var(--green);
+  background: #123524;
+  cursor: default;
+}
+
+.dragging {
+  z-index: 10;
+  opacity: 0.9;
+  cursor: grabbing;
+  /* camada própria enquanto segue o dedo: a sombra é pintada uma vez */
+  will-change: transform;
+  box-shadow:
+    0 -4px 0 0 var(--cyan),
+    0 4px 0 0 var(--cyan),
+    -4px 0 0 0 var(--cyan),
+    4px 0 0 0 var(--cyan),
+    0 12px 24px rgba(0, 0, 0, 0.5);
+}
+
+.moves {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.column .moves {
+  flex-direction: column;
+}
+
+.move {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  background: var(--space-900);
+  cursor: pointer;
+  box-shadow: 0 0 0 3px var(--panel-border);
+}
+
+.move img {
+  width: 22px;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.column .move img {
+  transform: rotate(90deg);
+}
+
+.move:hover:not(:disabled),
+.move:focus-visible {
+  background: var(--space-700);
+  box-shadow: 0 0 0 3px var(--cyan);
+}
+
+.move:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 4px;
+}
+
+.move:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+@keyframes kit-order-shake {
+  0%,
+  100% {
+    translate: 0;
+  }
+  25% {
+    translate: -6px 0;
+  }
+  75% {
+    translate: 6px 0;
+  }
+}

@@ -1,0 +1,72 @@
+.background {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--space-950);
+}
+
+.nebula {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 45% at 12% 18%, rgba(107, 63, 160, 0.38), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 88% 78%, rgba(31, 107, 255, 0.24), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 70% 12%, rgba(138, 92, 214, 0.18), transparent 70%),
+    linear-gradient(180deg, var(--space-950) 0%, var(--space-900) 55%, var(--space-950) 100%);
+}
+
+/*
+ * Desempenho (notebook fraco da feira): a deriva anda em passos de 1 px inteiro (steps(512) = 512 px), na mesma
+ * velocidade de antes. Com interpolação linear a camada mudava de posição por frações de pixel a cada quadro e o
+ * compositor recompunha a tela inteira 60x/s (e tudo o que é translúcido por cima: HUD, painéis, cartões).
+ * Agora ela só muda ~2x/s (far) e ~4x/s (near). A camada tem a viewport + 512 px: cobre a tela em todo o trajeto
+ * (0 a 512 px para baixo) com menos área para compor.
+ */
+.layer {
+  position: absolute;
+  top: -512px;
+  left: 0;
+  width: 100%;
+  height: calc(100% + 512px);
+  background-repeat: repeat;
+  background-size: 512px 512px;
+  image-rendering: pixelated;
+  will-change: transform;
+}
+
+.far {
+  opacity: 0.7;
+  animation: drift 240s steps(512) infinite;
+}
+
+.near {
+  animation:
+    drift 120s steps(512) infinite,
+    twinkle 6s steps(3) infinite alternate;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 85% 75% at 50% 45%, transparent 55%, rgba(4, 4, 14, 0.75) 100%);
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(0, 512px, 0);
+  }
+}
+
+@keyframes twinkle {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.72;
+  }
+}

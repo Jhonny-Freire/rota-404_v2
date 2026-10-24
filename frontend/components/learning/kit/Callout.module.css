@@ -1,0 +1,176 @@
+.callout,
+.balloon {
+  --u: var(--kit-u, 8px);
+  position: relative;
+  max-width: max(150px, calc(var(--mw, 34) * var(--u)));
+  margin: 4px;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  animation: kit-pop 220ms steps(4) both;
+}
+
+.sm {
+  font-size: max(10px, calc(1.35 * var(--u)));
+}
+
+.md {
+  font-size: max(11px, calc(1.7 * var(--u)));
+}
+
+.lg {
+  font-size: max(13px, calc(2.2 * var(--u)));
+}
+
+.callout {
+  --edge: var(--panel-border);
+  padding: 0.5em 0.8em 0.55em;
+  background: rgba(13, 11, 43, 0.94);
+  color: var(--text);
+  box-shadow:
+    0 -4px 0 0 var(--edge),
+    0 4px 0 0 var(--edge),
+    -4px 0 0 0 var(--edge),
+    4px 0 0 0 var(--edge),
+    6px 6px 0 0 rgba(0, 0, 0, 0.4);
+}
+
+.info {
+  --edge: var(--cyan);
+}
+
+.success {
+  --edge: var(--green);
+}
+
+.danger {
+  --edge: var(--red);
+}
+
+.warning {
+  --edge: var(--yellow);
+}
+
+.muted {
+  --edge: #3d3a5c;
+  color: var(--text-dim);
+}
+
+.tail::after {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: var(--edge);
+}
+
+.tail-down::after {
+  left: calc(50% - 6px);
+  bottom: -16px;
+  clip-path: polygon(0 0, 100% 0, 100% 34%, 67% 34%, 67% 67%, 34% 67%, 34% 34%, 0 34%);
+}
+
+.tail-up::after {
+  left: calc(50% - 6px);
+  top: -16px;
+  clip-path: polygon(34% 34%, 67% 34%, 67% 67%, 100% 67%, 100% 100%, 0 100%, 0 67%, 34% 67%);
+}
+
+.tail-left::after {
+  top: calc(50% - 6px);
+  left: -16px;
+  clip-path: polygon(34% 34%, 67% 34%, 67% 0, 100% 0, 100% 100%, 67% 100%, 67% 67%, 34% 67%);
+}
+
+.tail-right::after {
+  top: calc(50% - 6px);
+  right: -16px;
+  clip-path: polygon(0 0, 34% 0, 34% 34%, 67% 34%, 67% 67%, 34% 67%, 34% 100%, 0 100%);
+}
+
+.balloon {
+  --edge: #3a2f7a;
+  --fill: #f4f1ff;
+  padding: 0.55em 0.85em 0.6em;
+  background: var(--fill);
+  color: var(--space-900);
+  box-shadow:
+    0 -4px 0 0 var(--edge),
+    0 4px 0 0 var(--edge),
+    -4px 0 0 0 var(--edge),
+    4px 0 0 0 var(--edge),
+    inset 0 -4px 0 0 #d9d2f5,
+    6px 6px 0 0 rgba(0, 0, 0, 0.35);
+}
+
+.b-danger {
+  --edge: var(--red);
+  --fill: #ffe3e5;
+}
+
+.b-success {
+  --edge: #1e8a46;
+  --fill: #dcf8e6;
+}
+
+.btail::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: var(--edge);
+  clip-path: polygon(0 0, 25% 0, 25% 25%, 50% 25%, 50% 50%, 75% 50%, 75% 75%, 100% 75%, 100% 100%, 0 100%);
+}
+
+.b-bottom-left::after {
+  left: 14px;
+  bottom: -20px;
+  transform: scaleY(-1) scaleX(-1);
+}
+
+.b-bottom-right::after {
+  right: 14px;
+  bottom: -20px;
+  transform: scaleY(-1);
+}
+
+.b-top-left::after {
+  left: 14px;
+  top: -20px;
+  transform: scaleX(-1);
+}
+
+.b-top-right::after {
+  right: 14px;
+  top: -20px;
+}
+
+.b-left::after {
+  left: -20px;
+  top: calc(50% - 8px);
+  transform: scaleX(-1);
+}
+
+.b-right::after {
+  right: -20px;
+  top: calc(50% - 8px);
+}
+
+.thought::after {
+  width: 10px;
+  height: 10px;
+  clip-path: none;
+  box-shadow: 10px 12px 0 -2px var(--edge);
+}
+
+@keyframes kit-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

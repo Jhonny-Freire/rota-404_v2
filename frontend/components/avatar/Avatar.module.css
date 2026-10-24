@@ -1,0 +1,25 @@
+.avatar {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+/* tamanho explícito em escala inteira (Avatar.tsx); pode passar alguns px da caixa sem distorcer */
+.sprite {
+  max-width: none;
+  object-fit: contain;
+}
+
+.framed {
+  background:
+    radial-gradient(circle at 50% 35%, rgba(58, 214, 255, 0.28), transparent 65%),
+    linear-gradient(180deg, var(--space-700), var(--space-900));
+  box-shadow: var(--pixel-border), var(--pixel-bevel);
+}
+
+.framed .sprite {
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.5));
+}

@@ -1,0 +1,54 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.frame {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 20px var(--gutter) 48px;
+}
+
+.main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 28px;
+  min-width: 0;
+}
+
+.main:focus {
+  outline: none;
+}
+
+.withBonzi {
+  padding-bottom: 150px;
+}
+
+.immersive .frame {
+  max-width: none;
+  padding: 0;
+}
+
+@media (max-width: 767px) {
+  .frame {
+    gap: 14px;
+    padding-top: 14px;
+    padding-bottom: 32px;
+  }
+
+  .main {
+    gap: 20px;
+  }
+
+  .withBonzi {
+    padding-bottom: 170px;
+  }
+}

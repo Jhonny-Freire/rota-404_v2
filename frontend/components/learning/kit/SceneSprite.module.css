@@ -1,0 +1,186 @@
+.root {
+  --u: var(--kit-u, 8px);
+  --ring: transparent;
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(0.6 * var(--u));
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  line-height: 1.2;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.clickable {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.clickable:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 6px;
+}
+
+.frame {
+  position: relative;
+  display: inline-flex;
+  line-height: 0;
+  transition:
+    transform 160ms steps(3),
+    filter 160ms,
+    opacity 220ms;
+}
+
+.frame::after {
+  content: "";
+  position: absolute;
+  inset: calc(-0.7 * var(--u));
+  pointer-events: none;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--ring),
+    0 var(--px) 0 0 var(--ring),
+    calc(var(--px) * -1) 0 0 0 var(--ring),
+    var(--px) 0 0 0 var(--ring);
+}
+
+.img {
+  display: block;
+  width: calc(var(--s, 10) * var(--u));
+  min-width: 16px;
+  max-width: none;
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(calc(0.35 * var(--u)) calc(0.35 * var(--u)) 0 rgba(0, 0, 0, 0.45));
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.flip .img {
+  transform: scaleX(-1);
+}
+
+.mark {
+  position: absolute;
+  top: calc(-0.9 * var(--u));
+  right: calc(-0.9 * var(--u));
+  width: max(14px, calc(var(--s, 10) * 0.32 * var(--u)));
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.6));
+}
+
+.overlay {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  margin-bottom: calc(0.6 * var(--u));
+  transform: translateX(-50%);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.label {
+  /* piso de 88px: no palco de celular (~320px) "Computador" e "exemplo.com" (~73px a 10px) quebravam no meio da palavra */
+  max-width: max(88px, calc(max(var(--s, 10), 14) * 1.6 * var(--u)));
+  padding: 0.15em 0.55em 0.2em;
+  background: rgba(7, 7, 22, 0.85);
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(10px, calc(1.45 * var(--u)));
+  font-weight: 600;
+  text-align: center;
+  overflow-wrap: anywhere;
+  box-shadow: 0 0 0 2px var(--panel-border);
+}
+
+.clickable:hover:not(:disabled) .frame,
+.clickable:focus-visible .frame {
+  transform: translateY(-3px) scale(1.04);
+  filter: brightness(1.12);
+}
+
+.highlighted .frame {
+  transform: scale(1.06);
+  filter: drop-shadow(0 0 calc(1.2 * var(--u)) rgba(58, 214, 255, 0.85)) brightness(1.12);
+}
+
+.highlighted .label {
+  box-shadow: 0 0 0 2px var(--cyan);
+  color: var(--cyan);
+}
+
+.dimmed {
+  opacity: 0.35;
+  filter: grayscale(0.85);
+}
+
+.selected {
+  --ring: var(--yellow);
+}
+
+.selected .label {
+  background: var(--yellow);
+  color: var(--space-950);
+  box-shadow: 0 0 0 2px #8a5a00;
+}
+
+.correct {
+  --ring: var(--green);
+}
+
+.correct .label {
+  box-shadow: 0 0 0 2px var(--green);
+}
+
+.wrong {
+  --ring: var(--red);
+}
+
+.wrong .frame {
+  animation: kit-shake 520ms steps(6) 1;
+}
+
+.wrong .label {
+  box-shadow: 0 0 0 2px var(--red);
+}
+
+.pulse .frame {
+  animation: kit-pulse 1.3s ease-in-out infinite;
+}
+
+.disabled {
+  cursor: default;
+}
+
+@keyframes kit-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes kit-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6%);
+  }
+  40% {
+    transform: translateX(6%);
+  }
+  60% {
+    transform: translateX(-4%);
+  }
+  80% {
+    transform: translateX(4%);
+  }
+}

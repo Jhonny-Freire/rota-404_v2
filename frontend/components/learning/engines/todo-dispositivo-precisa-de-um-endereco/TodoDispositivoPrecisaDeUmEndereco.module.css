@@ -1,0 +1,509 @@
+/*
+ * Aula 2.1 — Todo dispositivo precisa de um endereço.
+ * Desempenho: toda animação aqui é de transform/opacity (compositor). Brilhos piscando ficam num pseudo-elemento
+ * estático e só a opacity dele anima; bordas e brilhos fixos são box-shadow estático (pintado uma vez).
+ * Nenhum filter com blur nos dispositivos (o SceneSprite já tem o drop-shadow).
+ * Entradas ("pop") usam fill-mode backwards: no fim a animação solta o elemento e estados como .dim valem.
+ */
+
+.canvas {
+  --u: var(--kit-u, 1cqw);
+  background:
+    radial-gradient(ellipse 70% 45% at 50% 92%, rgba(107, 63, 160, 0.22), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 50% 20%, rgba(58, 214, 255, 0.06), transparent 70%);
+}
+
+.starfield {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-repeat: repeat;
+  background-size: 512px 512px;
+  image-rendering: pixelated;
+  opacity: 0.45;
+}
+
+/* ───────────── Dispositivo + etiqueta de endereço (DeviceNode) ───────────── */
+
+.node {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* o mesmo respiro de NODE_PAD em parts.tsx: o centro do sprite cai em `at.y` */
+  padding-top: calc(1.1 * var(--u));
+  transition: opacity 300ms;
+}
+
+/*
+ * O anel do SceneSprite (destaque, acerto, erro) fica ~0,75u + 4px fora do sprite, e o destaque ainda amplia o sprite
+ * 6%: sem este respiro a linha do anel riscava a legenda ("Endereço", cena 3) e o IP da etiqueta (cenas 2, 4 e 5).
+ */
+.node > :first-child {
+  margin-bottom: calc(var(--u) + 4px);
+}
+
+.pop {
+  animation: addr-pop 360ms steps(4) backwards;
+}
+
+/* destino indicado no microteste: moldura verde fixa em volta do aparelho e do IP (sem animação) */
+.target::after {
+  content: "";
+  position: absolute;
+  inset: calc(-0.2 * var(--u)) calc(-1.1 * var(--u)) calc(-1 * var(--u));
+  z-index: -1;
+  pointer-events: none;
+  background: rgba(60, 207, 110, 0.12);
+  box-shadow:
+    0 -4px 0 0 var(--green),
+    0 4px 0 0 var(--green),
+    -4px 0 0 0 var(--green),
+    4px 0 0 0 var(--green),
+    6px 6px 0 0 rgba(0, 0, 0, 0.4),
+    0 0 14px rgba(60, 207, 110, 0.35);
+}
+
+.dim {
+  opacity: 0.4;
+  filter: grayscale(0.8);
+}
+
+/* cena 1: os dois computadores piscam (fases alternadas via --delay); só a opacity do brilho anima */
+.blink::before {
+  content: "";
+  position: absolute;
+  inset: calc(-0.6 * var(--u)) calc(-2.2 * var(--u)) calc(-1.4 * var(--u));
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(closest-side, rgba(58, 214, 255, 0.6), rgba(58, 214, 255, 0.22) 62%, transparent);
+  opacity: 0;
+  animation: addr-blink 0.9s steps(1, end) infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.caption {
+  margin-top: calc(0.7 * var(--u));
+  color: var(--text-dim);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(10px, calc(1.5 * var(--u)));
+  font-weight: 700;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.tagIn {
+  display: flex;
+  justify-content: center;
+  margin-top: calc(0.5 * var(--u));
+  animation: addr-tag-in 420ms steps(5) backwards;
+}
+
+.node .ip {
+  font-size: max(9px, calc(1.45 * var(--u)));
+}
+
+/* ───────────── Mensagem (Letter) ───────────── */
+
+.wrap {
+  display: inline-flex;
+}
+
+.sway {
+  transform-origin: 50% 85%;
+  animation: addr-sway 1.2s steps(4) infinite;
+}
+
+.wrap .address {
+  font-size: max(8px, calc(1.15 * var(--u)));
+}
+
+.question {
+  display: block;
+  width: calc(3.4 * var(--u));
+  min-width: 14px;
+  max-width: none;
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.6));
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* ───────────── Ponto de encontro dos cabos (Hub) ───────────── */
+
+.hub {
+  display: block;
+  width: max(10px, calc(2.6 * var(--u)));
+  height: max(10px, calc(2.6 * var(--u)));
+  background: #4a3f9c;
+  box-shadow:
+    0 -3px 0 0 #6a5cc4,
+    0 3px 0 0 #6a5cc4,
+    -3px 0 0 0 #6a5cc4,
+    3px 0 0 0 #6a5cc4,
+    inset -3px -3px 0 0 rgba(0, 0, 0, 0.35);
+  transition: background-color 200ms;
+}
+
+.hubOn {
+  background: var(--cyan);
+  box-shadow:
+    0 -3px 0 0 #bff3ff,
+    0 3px 0 0 #bff3ff,
+    -3px 0 0 0 #bff3ff,
+    3px 0 0 0 #bff3ff,
+    inset -3px -3px 0 0 rgba(0, 0, 0, 0.25),
+    0 0 14px rgba(58, 214, 255, 0.6);
+}
+
+/* ───────────── Cena 3 — Comparação ───────────── */
+
+.divider {
+  position: absolute;
+  left: calc(50% - 2px);
+  top: 19%;
+  bottom: 8%;
+  z-index: 0;
+  width: 4px;
+  pointer-events: none;
+  background: repeating-linear-gradient(180deg, rgba(138, 92, 214, 0.55) 0 10px, transparent 10px 20px);
+}
+
+.pin {
+  display: inline-flex;
+  animation: addr-pin 520ms steps(6) backwards;
+}
+
+/* ───────────── Cena 5 — Campo "Para:" (AddressForm) ───────────── */
+
+.form {
+  --edge: var(--panel-border);
+  display: flex;
+  flex-direction: column;
+  gap: max(4px, calc(0.6 * var(--u)));
+  margin: 4px;
+  padding: max(6px, calc(1 * var(--u))) max(8px, calc(1.4 * var(--u)));
+  background: linear-gradient(180deg, rgba(36, 27, 92, 0.94), rgba(13, 11, 43, 0.96));
+  box-shadow:
+    0 -4px 0 0 var(--edge),
+    0 4px 0 0 var(--edge),
+    -4px 0 0 0 var(--edge),
+    4px 0 0 0 var(--edge),
+    6px 6px 0 0 rgba(0, 0, 0, 0.4);
+}
+
+.formLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7em;
+  align-self: flex-start;
+  color: var(--yellow);
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: max(9px, calc(1.3 * var(--u)));
+  line-height: 1.3;
+  letter-spacing: 0.03em;
+}
+
+.formLabel img {
+  display: block;
+  width: max(16px, calc(3 * var(--u)));
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.formRow {
+  display: flex;
+  align-items: center;
+  gap: max(6px, calc(1.2 * var(--u)));
+}
+
+.field {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.input {
+  --field: #5b4bb8;
+  width: 100%;
+  min-width: 0;
+  min-height: max(42px, calc(5.4 * var(--u)));
+  margin: 4px;
+  padding: 0 max(34px, calc(4.4 * var(--u))) 0 max(10px, calc(1.2 * var(--u)));
+  border: 0;
+  border-radius: 0;
+  background: var(--space-950);
+  color: var(--text);
+  /* 16px no mínimo: o Safari do iPad/iPhone não dá zoom ao tocar no campo */
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: max(16px, calc(1.8 * var(--u)));
+  letter-spacing: 0.02em;
+  box-shadow:
+    0 -4px 0 0 var(--field),
+    0 4px 0 0 var(--field),
+    -4px 0 0 0 var(--field),
+    4px 0 0 0 var(--field);
+}
+
+.input::placeholder {
+  color: #8d88b5;
+  opacity: 1;
+}
+
+.input:focus-visible {
+  --field: var(--cyan);
+  outline: 3px solid var(--focus);
+  outline-offset: 7px;
+}
+
+.input[readonly] {
+  cursor: default;
+}
+
+.mark {
+  position: absolute;
+  top: 50%;
+  right: max(10px, calc(1.2 * var(--u)));
+  width: max(18px, calc(2.8 * var(--u)));
+  height: auto;
+  pointer-events: none;
+  image-rendering: pixelated;
+  transform: translateY(-50%);
+}
+
+.send {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+  min-height: max(42px, calc(5.4 * var(--u)));
+  margin: 4px;
+  padding: 0 max(12px, calc(1.6 * var(--u)));
+  border: 0;
+  border-radius: 0;
+  background: var(--yellow);
+  color: var(--space-950);
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: max(11px, calc(1.35 * var(--u)));
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow:
+    0 -4px 0 0 #8a5a00,
+    0 4px 0 0 #8a5a00,
+    -4px 0 0 0 #8a5a00,
+    4px 0 0 0 #8a5a00,
+    inset -4px -4px 0 0 #c78a00,
+    inset 4px 4px 0 0 #ffe08a;
+  transition: transform 120ms steps(2);
+}
+
+.send img {
+  display: block;
+  width: max(18px, calc(2.6 * var(--u)));
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.send:hover:not([aria-disabled="true"]),
+.send:focus-visible:not([aria-disabled="true"]) {
+  background: #ffc933;
+  transform: translateY(-2px);
+}
+
+.send:active:not([aria-disabled="true"]) {
+  transform: translateY(1px);
+}
+
+.send:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 8px;
+}
+
+/* inativo (campo vazio ou mensagem a caminho): continua focável; o toque só lembra o que fazer */
+.send[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.sendText {
+  display: inline-block;
+}
+
+.formWrong {
+  --edge: var(--red);
+}
+
+.formWrong .input {
+  --field: var(--red);
+}
+
+.formWrong .field {
+  animation: addr-shake 480ms steps(6) 1;
+}
+
+.formRight {
+  --edge: var(--green);
+}
+
+.formRight .input {
+  --field: var(--green);
+}
+
+/* palco estreito (tablet em retrato, celular): fonte do campo mais estreita e botão mais compacto */
+@container (max-width: 640px) {
+  .form {
+    gap: 3px;
+    padding: 4px 6px;
+  }
+
+  .formLabel {
+    font-size: 8px;
+  }
+
+  .formLabel img {
+    width: 14px;
+  }
+
+  .input {
+    min-height: 34px;
+    margin: 3px;
+    padding: 0 26px 0 8px;
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.04em;
+  }
+
+  .mark {
+    right: 7px;
+    width: 16px;
+  }
+
+  .send {
+    min-height: 34px;
+    margin: 3px;
+    padding: 0 8px;
+    font-size: 9px;
+  }
+
+  .send img {
+    width: 16px;
+  }
+}
+
+/* celular: só o ícone fica visível; o texto "Enviar" continua como nome acessível */
+@container (max-width: 480px) {
+  .sendText {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* ───────────── Movimento reduzido ───────────── */
+
+.reduced .pop,
+.reduced .tagIn,
+.reduced .pin,
+.reduced .sway,
+.reduced .blink::before,
+.reduced .formWrong .field {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pop,
+  .tagIn,
+  .pin,
+  .sway,
+  .blink::before,
+  .formWrong .field {
+    animation: none;
+  }
+}
+
+/* ───────────── Keyframes ───────────── */
+
+@keyframes addr-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes addr-blink {
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes addr-tag-in {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-1.5 * var(--u, 8px))) scale(0.4);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes addr-sway {
+  0%,
+  100% {
+    transform: translateX(calc(-0.8 * var(--u, 8px))) rotate(-6deg);
+  }
+  50% {
+    transform: translateX(calc(0.8 * var(--u, 8px))) rotate(6deg);
+  }
+}
+
+@keyframes addr-pin {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-4 * var(--u, 8px)));
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(calc(0.5 * var(--u, 8px)));
+  }
+  80% {
+    transform: translateY(calc(-0.4 * var(--u, 8px)));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes addr-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-6px);
+  }
+  75% {
+    transform: translateX(6px);
+  }
+}

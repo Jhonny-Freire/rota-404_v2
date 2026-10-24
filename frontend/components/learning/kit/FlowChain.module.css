@@ -1,0 +1,118 @@
+.chain {
+  --u: var(--kit-u, 8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(0.8 * var(--u));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.wrap {
+  flex-wrap: wrap;
+  row-gap: calc(1.4 * var(--u));
+}
+
+.item {
+  display: flex;
+  transition:
+    opacity 220ms,
+    filter 220ms;
+}
+
+.static,
+.button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(0.5 * var(--u));
+  padding: calc(0.6 * var(--u));
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.button {
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 120ms steps(2);
+}
+
+.button:hover,
+.button:focus-visible {
+  transform: translateY(-2px);
+}
+
+.button:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(var(--s, 7) * 0.6 * var(--u));
+}
+
+.img {
+  display: block;
+  width: calc(var(--s, 7) * var(--u));
+  min-width: 18px;
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.45));
+}
+
+.label {
+  padding: 0.15em 0.5em;
+  background: rgba(7, 7, 22, 0.85);
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: max(12px, calc(1.4 * var(--u)));
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 0 0 2px var(--panel-border);
+}
+
+.current .label {
+  background: var(--yellow);
+  color: var(--space-950);
+  box-shadow: 0 0 0 2px #8a5a00;
+}
+
+.current .img {
+  filter: drop-shadow(0 0 calc(1 * var(--u)) rgba(247, 181, 0, 0.8)) drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.45));
+}
+
+.missing .static,
+.missing .button {
+  outline: 3px dashed rgba(247, 181, 0, 0.7);
+  outline-offset: -3px;
+}
+
+.unlit {
+  opacity: 0.38;
+  filter: grayscale(0.8);
+}
+
+.arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: max(16px, calc(3 * var(--u)));
+  transition: opacity 220ms;
+}
+
+.arrow img {
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.gap {
+  height: 4px;
+  background: repeating-linear-gradient(90deg, rgba(214, 32, 42, 0.8) 0 4px, transparent 4px 8px);
+}

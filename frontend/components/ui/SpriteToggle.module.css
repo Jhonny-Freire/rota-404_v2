@@ -1,0 +1,77 @@
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  width: 100%;
+  padding: 14px 18px;
+  border: 0;
+  background: rgba(23, 18, 63, 0.7);
+  color: var(--text);
+  text-align: left;
+  box-shadow: var(--pixel-border), var(--pixel-bevel);
+  transition: background-color 120ms;
+}
+
+.toggle:hover {
+  background: var(--space-700);
+}
+
+.toggle:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 7px;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.label {
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: 0.03em;
+}
+
+.description {
+  color: var(--text-dim);
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.control {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.sprite {
+  transition: transform 120ms steps(2);
+}
+
+.toggle:active .sprite {
+  transform: scale(0.94);
+}
+
+.state {
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
+.on .state {
+  color: var(--green);
+}
+
+@media (max-width: 767px) {
+  .toggle {
+    padding: 12px 14px;
+    gap: 12px;
+  }
+}

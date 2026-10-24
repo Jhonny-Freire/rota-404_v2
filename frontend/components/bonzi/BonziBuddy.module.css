@@ -1,0 +1,418 @@
+.bonzi {
+  --bonzi-render: var(--bonzi-size);
+  --accent: var(--bonzi);
+  --bubble-bg: #f4f1ff;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  z-index: 45;
+  pointer-events: none;
+}
+
+.bonzi > * {
+  pointer-events: auto;
+}
+
+.state-happy {
+  --accent: #c98a00;
+}
+
+.state-warning {
+  --accent: var(--red);
+}
+
+.state-help {
+  --accent: #1592bf;
+}
+
+.state-thinking {
+  --accent: var(--nebula);
+}
+
+.bottom-right {
+  position: fixed;
+  right: 16px;
+  bottom: 12px;
+  flex-direction: row;
+}
+
+.bottom-left {
+  position: fixed;
+  left: 16px;
+  bottom: 12px;
+  flex-direction: row-reverse;
+}
+
+.top-right {
+  position: fixed;
+  right: 16px;
+  top: calc(var(--hud-height) + 16px);
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+.inline {
+  position: relative;
+  flex-direction: row-reverse;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.bubbleSlot {
+  display: flex;
+  min-width: 0;
+  max-width: min(300px, calc(100vw - var(--bonzi-render) - 56px));
+}
+
+.top-right .bubbleSlot {
+  margin-top: calc(var(--bonzi-render) * 0.18);
+}
+
+.inline .bubbleSlot {
+  max-width: min(520px, 100%);
+}
+
+.bubble {
+  position: relative;
+  min-width: 180px;
+  margin: var(--px);
+  padding: 10px 14px 12px;
+  background: var(--bubble-bg);
+  color: var(--space-900);
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--accent),
+    0 var(--px) 0 0 var(--accent),
+    calc(var(--px) * -1) 0 0 0 var(--accent),
+    var(--px) 0 0 0 var(--accent),
+    inset 0 calc(var(--px) * -1) 0 0 #d9d2f5,
+    10px 10px 0 0 rgba(0, 0, 0, 0.35);
+  animation: pop 220ms steps(4) both;
+  transform-origin: 100% 100%;
+}
+
+.bubble::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: var(--accent);
+  clip-path: polygon(0 0, 25% 0, 25% 25%, 50% 25%, 50% 50%, 75% 50%, 75% 75%, 100% 75%, 100% 100%, 0 100%);
+}
+
+.bottom-right .bubble::after {
+  right: -20px;
+  bottom: calc(var(--bonzi-render) * 0.5);
+}
+
+.bottom-left .bubble {
+  transform-origin: 0 100%;
+}
+
+.bottom-left .bubble::after {
+  left: -20px;
+  bottom: calc(var(--bonzi-render) * 0.5);
+  transform: scaleX(-1);
+}
+
+.top-right .bubble {
+  transform-origin: 100% 0;
+}
+
+.top-right .bubble::after {
+  right: -20px;
+  top: 12px;
+  transform: scaleY(-1);
+}
+
+.inline .bubble {
+  transform-origin: 0 50%;
+}
+
+.inline .bubble::after {
+  left: -20px;
+  top: calc(50% - 8px);
+  transform: scaleX(-1);
+}
+
+.thought::after {
+  width: 10px;
+  height: 10px;
+  clip-path: none;
+  box-shadow: 12px 10px 0 -2px var(--accent);
+}
+
+.bubbleHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: -10px -14px 8px;
+  padding: 3px 4px 3px 12px;
+  background: var(--accent);
+}
+
+.speaker {
+  color: #fff;
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.45);
+}
+
+.state-happy .speaker,
+.state-help .speaker {
+  color: var(--space-950);
+  text-shadow: none;
+}
+
+.close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  transition: background-color 120ms;
+}
+
+.close:hover,
+.close:focus-visible {
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.close:focus-visible {
+  outline-offset: 1px;
+}
+
+.text {
+  position: relative;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.ghost {
+  visibility: hidden;
+}
+
+.typed {
+  position: absolute;
+  inset: 0;
+}
+
+.figureButton {
+  position: relative;
+  display: block;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  line-height: 0;
+}
+
+button.figureButton {
+  cursor: pointer;
+}
+
+button.figureButton:hover .figure,
+button.figureButton:focus-visible .figure {
+  filter: brightness(1.12);
+}
+
+.figure {
+  display: block;
+  transform-origin: 50% 100%;
+}
+
+.sprite {
+  width: var(--bonzi-render);
+  height: auto;
+  filter: drop-shadow(0 0 10px rgba(138, 92, 214, 0.45));
+}
+
+.ping {
+  position: absolute;
+  top: 6%;
+  right: 14%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow:
+    0 0 0 3px var(--space-950),
+    0 0 10px var(--accent);
+}
+
+.ping::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border: 3px solid var(--accent);
+  border-radius: 50%;
+  animation: ping 1.8s ease-out infinite;
+}
+
+.shadow {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 56%;
+  height: 10%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(58, 214, 255, 0.38), transparent 70%);
+}
+
+.state-idle .figure {
+  animation: float 3.2s ease-in-out infinite;
+}
+
+.state-speaking .figure {
+  animation: talk 0.5s steps(2) infinite;
+}
+
+.state-happy .figure {
+  animation: jump 0.9s cubic-bezier(0.3, 0.7, 0.4, 1) infinite;
+}
+
+.state-thinking .figure {
+  animation: sway 2.6s ease-in-out infinite;
+}
+
+.state-warning .figure {
+  animation: shake 1.6s linear infinite;
+}
+
+.state-help .figure {
+  animation: bob 1.4s ease-in-out infinite;
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ping {
+  from {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.6);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes talk {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes jump {
+  0%,
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+  15% {
+    transform: translateY(0) scale(1.06, 0.94);
+  }
+  45% {
+    transform: translateY(-18px) scale(0.97, 1.04);
+  }
+  75% {
+    transform: translateY(0) scale(1.04, 0.96);
+  }
+}
+
+@keyframes sway {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+@keyframes shake {
+  0%,
+  50%,
+  100% {
+    transform: translateX(0);
+  }
+  55% {
+    transform: translateX(-5px);
+  }
+  62% {
+    transform: translateX(5px);
+  }
+  69% {
+    transform: translateX(-4px);
+  }
+  76% {
+    transform: translateX(4px);
+  }
+  83% {
+    transform: translateX(-2px);
+  }
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+  30% {
+    transform: translateY(-5px) rotate(-2deg);
+  }
+  60% {
+    transform: translateY(0) rotate(2deg);
+  }
+}
+
+@media (max-width: 767px) {
+  .bonzi {
+    --bonzi-render: min(var(--bonzi-size), 72px);
+  }
+
+  .bubbleSlot {
+    max-width: calc(100vw - 130px);
+  }
+
+  .inline .bubbleSlot {
+    max-width: calc(100% - var(--bonzi-render) - 26px);
+  }
+
+  .bubble {
+    min-width: 0;
+  }
+
+  .ping {
+    width: 10px;
+    height: 10px;
+  }
+}

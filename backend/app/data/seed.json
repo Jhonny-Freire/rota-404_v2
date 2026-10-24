@@ -1,0 +1,552 @@
+{
+  "age_ranges": [
+    {
+      "id": "0c856487-b78e-405e-8b27-94a2d5dc8b09",
+      "name": "13 anos ou menos",
+      "min_age": 0,
+      "max_age": 13,
+      "slug": "13-ou-menos",
+      "description": "Universo de aprendizagem para exploradores de até 13 anos.",
+      "created_at": "2026-10-08T23:26:10.643562+00:00",
+      "updated_at": "2026-10-08T23:26:10.643562+00:00"
+    },
+    {
+      "id": "a09f8844-a733-444c-929c-c8a3a7ca161f",
+      "name": "14 anos ou mais",
+      "min_age": 14,
+      "max_age": null,
+      "slug": "14-ou-mais",
+      "description": "Universo de aprendizagem para exploradores a partir de 14 anos.",
+      "created_at": "2026-10-08T23:26:10.643562+00:00",
+      "updated_at": "2026-10-08T23:26:10.643562+00:00"
+    }
+  ],
+  "galaxies": [
+    {
+      "id": "87bdb573-d9fa-44fb-b5f0-ff6deb5096dd",
+      "age_range_id": "0c856487-b78e-405e-8b27-94a2d5dc8b09",
+      "name": "Internet e Web",
+      "slug": "internet-e-web",
+      "description": "Descubra como a Internet conecta o mundo.",
+      "order_index": 1,
+      "sprite_key": "galaxy-internet-e-web",
+      "created_at": "2026-10-08T23:26:10.643562+00:00",
+      "updated_at": "2026-10-08T23:26:10.643562+00:00"
+    },
+    {
+      "id": "c21c7bb8-1bdb-4541-8518-e83cfd054744",
+      "age_range_id": "a09f8844-a733-444c-929c-c8a3a7ca161f",
+      "name": "API REST",
+      "slug": "api-rest",
+      "description": "Explore como sistemas conversam entre si.",
+      "order_index": 1,
+      "sprite_key": "galaxy-api-rest",
+      "created_at": "2026-10-08T23:26:10.643562+00:00",
+      "updated_at": "2026-10-08T23:26:10.643562+00:00"
+    }
+  ],
+  "planetary_systems": [
+    {
+      "id": "8476d0aa-b1fd-44b3-8c18-0b2eba3db184",
+      "galaxy_id": "87bdb573-d9fa-44fb-b5f0-ff6deb5096dd",
+      "name": "Dispositivos e conexão",
+      "slug": "dispositivos-e-conexao",
+      "description": null,
+      "order_index": 1,
+      "sprite_key": "star-1",
+      "created_at": "2026-10-08T23:26:10.643562+00:00",
+      "updated_at": "2026-10-08T23:26:10.643562+00:00"
+    },
+    {
+      "id": "f8fb02b1-2fde-41e3-9906-af4bfadde841",
+      "galaxy_id": "87bdb573-d9fa-44fb-b5f0-ff6deb5096dd",
+      "name": "Endereços e sites",
+      "slug": "enderecos-e-sites",
+      "description": null,
+      "order_index": 2,
+      "sprite_key": "star-2",
+      "created_at": "2026-10-08T23:26:10.643562+00:00",
+      "updated_at": "2026-10-08T23:26:10.643562+00:00"
+    },
+    {
+      "id": "e529d3ff-c674-4bfb-8aae-d85876868b5b",
+      "galaxy_id": "87bdb573-d9fa-44fb-b5f0-ff6deb5096dd",
+      "name": "Navegador e páginas Web",
+      "slug": "navegador-e-paginas-web",
+      "description": null,
+      "order_index": 3,
+      "sprite_key": "star-3",
+      "created_at": "2026-10-08T23:26:10.643562+00:00",
+      "updated_at": "2026-10-08T23:26:10.643562+00:00"
+    },
+    {
+      "id": "3c9f5340-e271-46a4-8870-0bffaebc5743",
+      "galaxy_id": "87bdb573-d9fa-44fb-b5f0-ff6deb5096dd",
+      "name": "Comunicação e segurança",
+      "slug": "comunicacao-e-seguranca",
+      "description": null,
+      "order_index": 4,
+      "sprite_key": "star-4",
+      "created_at": "2026-10-08T23:26:10.643562+00:00",
+      "updated_at": "2026-10-08T23:26:10.643562+00:00"
+    },
+    {
+      "id": "3aed5f0e-b2e0-428a-8f57-4aaf50901071",
+      "galaxy_id": "c21c7bb8-1bdb-4541-8518-e83cfd054744",
+      "name": "Conhecendo uma API",
+      "slug": "conhecendo-uma-api",
+      "description": null,
+      "order_index": 1,
+      "sprite_key": "star-1",
+      "created_at": "2026-10-08T23:26:10.643562+00:00",
+      "updated_at": "2026-10-08T23:26:10.643562+00:00"
+    },
+    {
+      "id": "79a05b84-f077-42e0-8d0d-15e5b054db40",
+      "galaxy_id": "c21c7bb8-1bdb-4541-8518-e83cfd054744",
+      "name": "Requisições HTTP",
+      "slug": "requisicoes-http",
+      "description": null,
+      "order_index": 2,
+      "sprite_key": "star-2",
+      "created_at": "2026-10-08T23:26:10.643562+00:00",
+      "updated_at": "2026-10-08T23:26:10.643562+00:00"
+    },
+    {
+      "id": "6fc855ce-43ab-4861-9023-bdb09be46be1",
+      "galaxy_id": "c21c7bb8-1bdb-4541-8518-e83cfd054744",
+      "name": "Entendendo os dados",
+      "slug": "entendendo-os-dados",
+      "description": null,
+      "order_index": 3,
+      "sprite_key": "star-3",
+      "created_at": "2026-10-08T23:26:10.643562+00:00",
+      "updated_at": "2026-10-08T23:26:10.643562+00:00"
+    },
+    {
+      "id": "60bbf8fb-fa63-414f-a62e-984e37f76100",
+      "galaxy_id": "c21c7bb8-1bdb-4541-8518-e83cfd054744",
+      "name": "API em situações reais",
+      "slug": "api-em-situacoes-reais",
+      "description": null,
+      "order_index": 4,
+      "sprite_key": "star-4",
+      "created_at": "2026-10-08T23:26:10.643562+00:00",
+      "updated_at": "2026-10-08T23:26:10.643562+00:00"
+    }
+  ],
+  "planets": [
+    {
+      "id": "332fa3b7-b277-472a-a7c5-d1ddda87daee",
+      "planetary_system_id": "8476d0aa-b1fd-44b3-8c18-0b2eba3db184",
+      "name": "1.1 O que é uma rede?",
+      "slug": "o-que-e-uma-rede",
+      "kind": "lesson",
+      "order_index": 1,
+      "sprite_key": "planet-api",
+      "created_at": "2026-10-09T12:31:10.963314+00:00",
+      "updated_at": "2026-10-09T12:31:10.963314+00:00"
+    },
+    {
+      "id": "a99ac3e4-ac58-4d29-a608-d79cb47bec23",
+      "planetary_system_id": "8476d0aa-b1fd-44b3-8c18-0b2eba3db184",
+      "name": "1.2 Como meu dispositivo chega à internet?",
+      "slug": "como-meu-dispositivo-chega-a-internet",
+      "kind": "lesson",
+      "order_index": 2,
+      "sprite_key": "planet-https",
+      "created_at": "2026-10-09T12:31:10.963314+00:00",
+      "updated_at": "2026-10-09T12:31:10.963314+00:00"
+    },
+    {
+      "id": "d8a76f7c-f8a8-4485-a562-a1f56f66eaa9",
+      "planetary_system_id": "8476d0aa-b1fd-44b3-8c18-0b2eba3db184",
+      "name": "1.3 Conectando uma rede",
+      "slug": "conectando-uma-rede",
+      "kind": "lab",
+      "order_index": 3,
+      "sprite_key": "planet-deploy",
+      "created_at": "2026-10-09T12:31:10.963314+00:00",
+      "updated_at": "2026-10-09T12:31:10.963314+00:00"
+    },
+    {
+      "id": "be15cbee-f1e7-4e8a-8cdb-325e44765692",
+      "planetary_system_id": "8476d0aa-b1fd-44b3-8c18-0b2eba3db184",
+      "name": "1.4 Missão: recuperar a conexão",
+      "slug": "missao-recuperar-a-conexao",
+      "kind": "lab",
+      "order_index": 4,
+      "sprite_key": "planet-erro404",
+      "created_at": "2026-10-09T12:31:10.963314+00:00",
+      "updated_at": "2026-10-09T12:31:10.963314+00:00"
+    },
+    {
+      "id": "1eb5b228-70c6-4ebc-8b1c-6d0d7bfa01da",
+      "planetary_system_id": "f8fb02b1-2fde-41e3-9906-af4bfadde841",
+      "name": "2.1 Todo dispositivo precisa de um endereço",
+      "slug": "todo-dispositivo-precisa-de-um-endereco",
+      "kind": "lesson",
+      "order_index": 1,
+      "sprite_key": "planet-hashing",
+      "created_at": "2026-10-11T01:35:03.40028+00:00",
+      "updated_at": "2026-10-11T01:35:03.40028+00:00"
+    },
+    {
+      "id": "39233cf4-36b9-4517-a9c8-b14bada25ac1",
+      "planetary_system_id": "f8fb02b1-2fde-41e3-9906-af4bfadde841",
+      "name": "2.2 IP, domínio e site",
+      "slug": "ip-dominio-e-site",
+      "kind": "lesson",
+      "order_index": 2,
+      "sprite_key": "planet-dns",
+      "created_at": "2026-10-11T01:35:03.40028+00:00",
+      "updated_at": "2026-10-11T01:35:03.40028+00:00"
+    },
+    {
+      "id": "95af5ac6-f9eb-4bd2-84e9-3535f30a72f0",
+      "planetary_system_id": "f8fb02b1-2fde-41e3-9906-af4bfadde841",
+      "name": "2.3 Encontrando o destino",
+      "slug": "encontrando-o-destino",
+      "kind": "lab",
+      "order_index": 3,
+      "sprite_key": "planet-deploy",
+      "created_at": "2026-10-11T01:35:03.40028+00:00",
+      "updated_at": "2026-10-11T01:35:03.40028+00:00"
+    },
+    {
+      "id": "fff18e03-8baf-470d-b136-7c03075c4548",
+      "planetary_system_id": "f8fb02b1-2fde-41e3-9906-af4bfadde841",
+      "name": "2.4 Missão: encontrar o servidor",
+      "slug": "missao-encontrar-o-servidor",
+      "kind": "lab",
+      "order_index": 4,
+      "sprite_key": "planet-erro404",
+      "created_at": "2026-10-11T01:35:03.40028+00:00",
+      "updated_at": "2026-10-11T01:35:03.40028+00:00"
+    },
+    {
+      "id": "28178e76-38a1-445f-afb3-4e61ec61fbb9",
+      "planetary_system_id": "e529d3ff-c674-4bfb-8aae-d85876868b5b",
+      "name": "3.1 O que acontece quando acesso um site?",
+      "slug": "o-que-acontece-quando-acesso-um-site",
+      "kind": "lesson",
+      "order_index": 1,
+      "sprite_key": "planet-api",
+      "created_at": "2026-10-13T12:02:54.066822+00:00",
+      "updated_at": "2026-10-13T12:02:54.066822+00:00"
+    },
+    {
+      "id": "69517683-7e23-432e-8b30-ce1198715810",
+      "planetary_system_id": "e529d3ff-c674-4bfb-8aae-d85876868b5b",
+      "name": "3.2 HTML: os blocos de uma página",
+      "slug": "html-os-blocos-de-uma-pagina",
+      "kind": "lesson",
+      "order_index": 2,
+      "sprite_key": "planet-hashing",
+      "created_at": "2026-10-13T12:02:54.066822+00:00",
+      "updated_at": "2026-10-13T12:02:54.066822+00:00"
+    },
+    {
+      "id": "34d5ed89-e884-4f4e-921c-f6813d9eab21",
+      "planetary_system_id": "e529d3ff-c674-4bfb-8aae-d85876868b5b",
+      "name": "3.3 Monte sua página",
+      "slug": "monte-sua-pagina",
+      "kind": "lab",
+      "order_index": 3,
+      "sprite_key": "planet-deploy",
+      "created_at": "2026-10-13T12:02:54.066822+00:00",
+      "updated_at": "2026-10-13T12:02:54.066822+00:00"
+    },
+    {
+      "id": "dc2289ef-4b9b-424d-b351-f4115bd95639",
+      "planetary_system_id": "e529d3ff-c674-4bfb-8aae-d85876868b5b",
+      "name": "3.4 Conserte a página",
+      "slug": "conserte-a-pagina",
+      "kind": "lab",
+      "order_index": 4,
+      "sprite_key": "planet-erro404",
+      "created_at": "2026-10-13T12:02:54.066822+00:00",
+      "updated_at": "2026-10-13T12:02:54.066822+00:00"
+    },
+    {
+      "id": "0bc02c66-205e-4351-87cd-e4129dcd98e1",
+      "planetary_system_id": "3c9f5340-e271-46a4-8870-0bffaebc5743",
+      "name": "4.1 Como as informações viajam?",
+      "slug": "como-as-informacoes-viajam",
+      "kind": "lesson",
+      "order_index": 1,
+      "sprite_key": "planet-dns",
+      "created_at": "2026-10-13T12:41:08.098548+00:00",
+      "updated_at": "2026-10-13T12:41:08.098548+00:00"
+    },
+    {
+      "id": "c97af471-eb71-4239-8687-1a8288e2b8c5",
+      "planetary_system_id": "3c9f5340-e271-46a4-8870-0bffaebc5743",
+      "name": "4.2 HTTP e HTTPS",
+      "slug": "http-e-https",
+      "kind": "lesson",
+      "order_index": 2,
+      "sprite_key": "planet-https",
+      "created_at": "2026-10-13T12:41:08.989903+00:00",
+      "updated_at": "2026-10-13T12:41:08.989903+00:00"
+    },
+    {
+      "id": "002ca2f6-5188-4a95-aa6a-4466e12a5f6a",
+      "planetary_system_id": "3c9f5340-e271-46a4-8870-0bffaebc5743",
+      "name": "4.3 Detetive digital",
+      "slug": "detetive-digital",
+      "kind": "lab",
+      "order_index": 3,
+      "sprite_key": "planet-hashing",
+      "created_at": "2026-10-13T12:41:09.565167+00:00",
+      "updated_at": "2026-10-13T12:41:09.565167+00:00"
+    },
+    {
+      "id": "3a21810a-44f3-4ecd-ad77-a60bff685c83",
+      "planetary_system_id": "3c9f5340-e271-46a4-8870-0bffaebc5743",
+      "name": "4.4 Missão: navegação segura",
+      "slug": "missao-navegacao-segura",
+      "kind": "lab",
+      "order_index": 4,
+      "sprite_key": "planet-erro404",
+      "created_at": "2026-10-13T12:41:10.113312+00:00",
+      "updated_at": "2026-10-13T12:41:10.113312+00:00"
+    }
+  ],
+  "lessons": [
+    {
+      "id": "95a3636d-25e3-4d45-b604-5bba2bce0897",
+      "planet_id": "332fa3b7-b277-472a-a7c5-d1ddda87daee",
+      "title": "O que é uma rede?",
+      "slug": "o-que-e-uma-rede",
+      "order_index": 1,
+      "content": {
+        "code": "1.1",
+        "engine": "o-que-e-uma-rede",
+        "central_idea": "Dispositivos conectados conseguem conversar e trocar informações."
+      },
+      "created_at": "2026-10-09T12:31:10.963314+00:00",
+      "updated_at": "2026-10-09T12:31:10.963314+00:00"
+    },
+    {
+      "id": "4f05fd01-e9a7-4ffe-9869-8e1b97478f89",
+      "planet_id": "a99ac3e4-ac58-4d29-a608-d79cb47bec23",
+      "title": "Como meu dispositivo chega à internet?",
+      "slug": "como-meu-dispositivo-chega-a-internet",
+      "order_index": 2,
+      "content": {
+        "code": "1.2",
+        "engine": "como-meu-dispositivo-chega-a-internet",
+        "central_idea": "Meu dispositivo não conversa diretamente com a internet de forma mágica: existe uma conexão no caminho."
+      },
+      "created_at": "2026-10-09T12:31:10.963314+00:00",
+      "updated_at": "2026-10-09T12:31:10.963314+00:00"
+    },
+    {
+      "id": "ea94207c-1b82-4dc3-929f-fc2e789f0c17",
+      "planet_id": "1eb5b228-70c6-4ebc-8b1c-6d0d7bfa01da",
+      "title": "Todo dispositivo precisa de um endereço",
+      "slug": "todo-dispositivo-precisa-de-um-endereco",
+      "order_index": 1,
+      "content": {
+        "code": "2.1",
+        "engine": "todo-dispositivo-precisa-de-um-endereco",
+        "central_idea": "Um endereço ajuda a identificar para onde os dados devem ir."
+      },
+      "created_at": "2026-10-11T01:35:03.40028+00:00",
+      "updated_at": "2026-10-11T01:35:03.40028+00:00"
+    },
+    {
+      "id": "5448c6a4-a313-4b4d-9042-87e52669e489",
+      "planet_id": "39233cf4-36b9-4517-a9c8-b14bada25ac1",
+      "title": "IP, domínio e site",
+      "slug": "ip-dominio-e-site",
+      "order_index": 2,
+      "content": {
+        "code": "2.2",
+        "engine": "ip-dominio-e-site",
+        "central_idea": "IP, domínio e página são coisas diferentes que participam do acesso a um site."
+      },
+      "created_at": "2026-10-13T11:40:52.421669+00:00",
+      "updated_at": "2026-10-13T11:40:52.421669+00:00"
+    },
+    {
+      "id": "94ed3509-c3d9-4a09-b6d5-d03d56cbee5c",
+      "planet_id": "28178e76-38a1-445f-afb3-4e61ec61fbb9",
+      "title": "O que acontece quando acesso um site?",
+      "slug": "o-que-acontece-quando-acesso-um-site",
+      "order_index": 1,
+      "content": {
+        "code": "3.1",
+        "engine": "o-que-acontece-quando-acesso-um-site",
+        "central_idea": "O navegador pede; o servidor responde; o navegador mostra a página."
+      },
+      "created_at": "2026-10-13T12:02:54.066822+00:00",
+      "updated_at": "2026-10-13T12:02:54.066822+00:00"
+    },
+    {
+      "id": "770916bf-a9de-4822-a9c9-a97f8b5fd5c6",
+      "planet_id": "69517683-7e23-432e-8b30-ce1198715810",
+      "title": "HTML: os blocos de uma página",
+      "slug": "html-os-blocos-de-uma-pagina",
+      "order_index": 2,
+      "content": {
+        "code": "3.2",
+        "engine": "html-os-blocos-de-uma-pagina",
+        "central_idea": "Uma página pode ser construída com blocos de conteúdo."
+      },
+      "created_at": "2026-10-13T12:30:26.268608+00:00",
+      "updated_at": "2026-10-13T12:30:26.268608+00:00"
+    },
+    {
+      "id": "6aeba376-bd0d-486e-9408-2a1d327fb5a6",
+      "planet_id": "0bc02c66-205e-4351-87cd-e4129dcd98e1",
+      "title": "Como as informações viajam?",
+      "slug": "como-as-informacoes-viajam",
+      "order_index": 1,
+      "content": {
+        "code": "4.1",
+        "engine": "como-as-informacoes-viajam",
+        "central_idea": "O navegador envia uma requisição, o servidor processa o pedido e envia uma resposta."
+      },
+      "created_at": "2026-10-13T12:41:11.02847+00:00",
+      "updated_at": "2026-10-13T12:41:11.02847+00:00"
+    },
+    {
+      "id": "cb980cd8-409e-4656-9295-04870e720eab",
+      "planet_id": "c97af471-eb71-4239-8687-1a8288e2b8c5",
+      "title": "HTTP e HTTPS",
+      "slug": "http-e-https",
+      "order_index": 2,
+      "content": {
+        "code": "4.2",
+        "engine": "http-e-https",
+        "central_idea": "HTTP permite a comunicação. HTTPS protege essa comunicação com criptografia."
+      },
+      "created_at": "2026-10-13T12:47:18.993513+00:00",
+      "updated_at": "2026-10-13T12:47:18.993513+00:00"
+    }
+  ],
+  "labs": [
+    {
+      "id": "d0039508-5774-4eae-ac41-f38a9e9a7e2b",
+      "planet_id": "d8a76f7c-f8a8-4485-a562-a1f56f66eaa9",
+      "title": "Conectando uma rede",
+      "slug": "conectando-uma-rede",
+      "order_index": 3,
+      "max_score": 100,
+      "config": {
+        "code": "1.3",
+        "type": "montagem",
+        "engine": "conectando-uma-rede"
+      },
+      "created_at": "2026-10-09T12:56:05.372271+00:00",
+      "updated_at": "2026-10-09T12:56:05.372271+00:00"
+    },
+    {
+      "id": "b5f4bd4e-89d0-4985-aaab-0ac1684d34f1",
+      "planet_id": "be15cbee-f1e7-4e8a-8cdb-325e44765692",
+      "title": "Missão: recuperar a conexão",
+      "slug": "missao-recuperar-a-conexao",
+      "order_index": 4,
+      "max_score": 100,
+      "config": {
+        "code": "1.4",
+        "type": "diagnostico",
+        "engine": "missao-recuperar-a-conexao"
+      },
+      "created_at": "2026-10-09T12:56:05.372271+00:00",
+      "updated_at": "2026-10-09T12:56:05.372271+00:00"
+    },
+    {
+      "id": "7b5d0d70-70d9-4ab5-83db-dcd68f5cea36",
+      "planet_id": "95af5ac6-f9eb-4bd2-84e9-3535f30a72f0",
+      "title": "Encontrando o destino",
+      "slug": "encontrando-o-destino",
+      "order_index": 3,
+      "max_score": 100,
+      "config": {
+        "code": "2.3",
+        "type": "associacao",
+        "engine": "encontrando-o-destino"
+      },
+      "created_at": "2026-10-13T11:47:51.804322+00:00",
+      "updated_at": "2026-10-13T11:47:51.804322+00:00"
+    },
+    {
+      "id": "d7c2d425-f705-4905-98c5-150318371ee5",
+      "planet_id": "fff18e03-8baf-470d-b136-7c03075c4548",
+      "title": "Missão: encontrar o servidor",
+      "slug": "missao-encontrar-o-servidor",
+      "order_index": 4,
+      "max_score": 100,
+      "config": {
+        "code": "2.4",
+        "type": "labirinto",
+        "engine": "missao-encontrar-o-servidor"
+      },
+      "created_at": "2026-10-13T11:53:49.018951+00:00",
+      "updated_at": "2026-10-13T11:53:49.018951+00:00"
+    },
+    {
+      "id": "c82aed05-0f90-4b0c-b00e-25b8a917e2c0",
+      "planet_id": "34d5ed89-e884-4f4e-921c-f6813d9eab21",
+      "title": "Monte sua página",
+      "slug": "monte-sua-pagina",
+      "order_index": 3,
+      "max_score": 100,
+      "config": {
+        "code": "3.3",
+        "type": "construtor",
+        "engine": "monte-sua-pagina"
+      },
+      "created_at": "2026-10-13T12:36:37.249627+00:00",
+      "updated_at": "2026-10-13T12:36:37.249627+00:00"
+    },
+    {
+      "id": "574e3fc6-9785-41b4-86ac-d032926b23a6",
+      "planet_id": "dc2289ef-4b9b-424d-b351-f4115bd95639",
+      "title": "Conserte a página",
+      "slug": "conserte-a-pagina",
+      "order_index": 4,
+      "max_score": 100,
+      "config": {
+        "code": "3.4",
+        "type": "correcao",
+        "engine": "conserte-a-pagina"
+      },
+      "created_at": "2026-10-13T12:36:38.834649+00:00",
+      "updated_at": "2026-10-13T12:36:38.834649+00:00"
+    },
+    {
+      "id": "598300f5-5888-4d5b-a32d-79c36acc9a17",
+      "planet_id": "002ca2f6-5188-4a95-aa6a-4466e12a5f6a",
+      "title": "Detetive digital",
+      "slug": "detetive-digital",
+      "order_index": 3,
+      "max_score": 100,
+      "config": {
+        "code": "4.3",
+        "type": "investigacao",
+        "engine": "detetive-digital"
+      },
+      "created_at": "2026-10-13T12:58:27.469318+00:00",
+      "updated_at": "2026-10-13T12:58:27.469318+00:00"
+    },
+    {
+      "id": "93cfc827-9e4d-4d3f-b922-40114bb77d80",
+      "planet_id": "3a21810a-44f3-4ecd-ad77-a60bff685c83",
+      "title": "Missão: navegação segura",
+      "slug": "missao-navegacao-segura",
+      "order_index": 4,
+      "max_score": 100,
+      "config": {
+        "code": "4.4",
+        "type": "decisoes",
+        "engine": "missao-navegacao-segura"
+      },
+      "created_at": "2026-10-13T13:02:02.570824+00:00",
+      "updated_at": "2026-10-13T13:02:02.570824+00:00"
+    }
+  ]
+}

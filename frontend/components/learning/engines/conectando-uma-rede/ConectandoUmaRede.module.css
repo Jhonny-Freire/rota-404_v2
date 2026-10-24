@@ -1,0 +1,409 @@
+/* ---------- palco ---------- */
+
+.net {
+  --net-u: var(--kit-u, 1cqw);
+  position: absolute;
+  inset: 0;
+}
+
+.fill {
+  height: 100%;
+}
+
+.poolBox,
+.areaBox,
+.slot {
+  position: absolute;
+}
+
+/* caixas abaixo da faixa de instrução (StageBanner no alto do palco, até ~16% em 2 linhas) */
+.poolBox {
+  z-index: 2;
+  left: 1.5%;
+  top: 17%;
+  width: 25%;
+  height: 80%;
+}
+
+.areaBox {
+  z-index: 0;
+  left: 28.5%;
+  top: 17%;
+  width: 70%;
+  height: 80%;
+}
+
+.slot {
+  z-index: 2;
+  width: 12.5%;
+  height: 27%;
+  transform: translate(-50%, -50%);
+}
+
+/* bandeja: uma célula fixa por peça (as outras não pulam quando uma sai), sempre com o nome */
+
+.net .poolZone {
+  min-height: 0;
+  padding: max(6px, calc(0.9 * var(--net-u)));
+  background: linear-gradient(180deg, rgba(36, 27, 92, 0.78), rgba(13, 11, 43, 0.86));
+}
+
+.net .poolZone > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: repeat(var(--cells, 5), minmax(0, 1fr));
+  align-items: stretch;
+  align-content: stretch;
+  gap: max(3px, calc(0.5 * var(--net-u)));
+  min-height: 0;
+}
+
+.trayCell {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+}
+
+.net .trayPiece {
+  flex: 1;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: max(6px, calc(0.8 * var(--net-u)));
+  min-width: 0;
+  min-height: 0;
+  margin: 3px;
+  padding: 2px max(6px, calc(0.8 * var(--net-u)));
+}
+
+/* altura fixa e largura de caixa: sprites altos (celular) e largos (roteador) ocupam o mesmo lugar */
+.net .trayPiece img {
+  width: calc(5 * var(--net-u));
+  min-width: 20px;
+  height: calc(4.5 * var(--net-u));
+  min-height: 18px;
+  object-fit: contain;
+}
+
+.net .trayPiece span {
+  font-size: max(12px, calc(1.45 * var(--net-u)));
+  text-align: left;
+}
+
+/* a próxima peça a arrastar pulsa */
+.net .trayNext img {
+  animation: net-pulse 1.3s ease-in-out infinite;
+}
+
+/* lugar da peça que já foi para a área */
+.trayGap {
+  flex: 1;
+  margin: 3px;
+  background: rgba(7, 7, 22, 0.3);
+  outline: 2px dashed rgba(138, 92, 214, 0.45);
+  outline-offset: -2px;
+}
+
+.net .areaZone {
+  min-height: 0;
+  background:
+    repeating-linear-gradient(90deg, rgba(138, 92, 214, 0.1) 0 2px, transparent 2px 5%),
+    repeating-linear-gradient(0deg, rgba(138, 92, 214, 0.1) 0 2px, transparent 2px 8%),
+    radial-gradient(ellipse 60% 55% at 50% 52%, rgba(58, 214, 255, 0.08), transparent 75%),
+    rgba(13, 11, 43, 0.45);
+}
+
+.net .slotZone {
+  min-height: 0;
+  padding: 2px;
+  background: rgba(7, 7, 22, 0.35);
+}
+
+.net .slotZone > div {
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+}
+
+/* espaço ocupado: sem moldura, só um brilho embaixo da peça */
+.net .slotFilled .slotZone {
+  outline-color: transparent;
+  background: radial-gradient(ellipse 48% 22% at 50% 70%, rgba(58, 214, 255, 0.2), transparent 75%);
+}
+
+/* fase de ligar: a bandeja some e a área vira a rede */
+.connecting .areaZone {
+  --edge: rgba(58, 214, 255, 0.35);
+  outline-style: solid;
+}
+
+.node {
+  display: flex;
+  justify-content: center;
+  touch-action: none;
+}
+
+/* enquanto arrasta, a peça colocada deixa o toque passar para o espaço (soltar outra peça perto dela) */
+.placing .node {
+  pointer-events: none;
+}
+
+.linking .node {
+  cursor: crosshair;
+}
+
+.internet img:first-child {
+  filter: drop-shadow(0 0 calc(1 * var(--net-u)) rgba(58, 214, 255, 0.55))
+    drop-shadow(calc(0.35 * var(--net-u)) calc(0.35 * var(--net-u)) 0 rgba(0, 0, 0, 0.45));
+}
+
+/* linhas */
+
+.wireless > span:first-child {
+  background: repeating-linear-gradient(90deg, #8fe3ff 0 8px, transparent 8px 14px);
+  box-shadow: 0 0 8px rgba(58, 214, 255, 0.35);
+}
+
+.preview > span:first-child {
+  background: repeating-linear-gradient(90deg, var(--yellow) 0 10px, transparent 10px 16px);
+  box-shadow: 0 0 8px rgba(247, 181, 0, 0.5);
+}
+
+.previewEnd {
+  display: block;
+  width: max(8px, calc(1.1 * var(--net-u)));
+  aspect-ratio: 1;
+  background: var(--yellow);
+  box-shadow:
+    0 0 0 2px var(--space-950),
+    0 0 10px rgba(247, 181, 0, 0.7);
+}
+
+/* X no meio de cada ligação: apaga a ligação (área de toque de pelo menos 32px) */
+.linkX {
+  display: grid;
+  place-items: center;
+  width: max(32px, calc(3.6 * var(--net-u)));
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.linkXFace {
+  display: grid;
+  place-items: center;
+  width: max(18px, calc(2.2 * var(--net-u)));
+  aspect-ratio: 1;
+  background: var(--space-900);
+  box-shadow:
+    0 0 0 2px var(--panel-border),
+    3px 3px 0 1px rgba(0, 0, 0, 0.45);
+  transition: transform 120ms steps(2);
+}
+
+.linkXFace img {
+  display: block;
+  width: 64%;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.linkX:hover .linkXFace,
+.linkX:focus-visible .linkXFace {
+  transform: scale(1.15);
+  box-shadow:
+    0 0 0 2px var(--red),
+    3px 3px 0 1px rgba(0, 0, 0, 0.45);
+}
+
+.linkX:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ligação do ponto destacado: o X vermelho pisca (e continua apagando a ligação) */
+.linkXFault .linkXFace {
+  width: max(22px, calc(3.2 * var(--net-u)));
+  background: transparent;
+  box-shadow: none;
+}
+
+.linkXFault .linkXFace img {
+  width: 100%;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.6));
+  animation: net-blink 1s steps(2) infinite;
+}
+
+.passive {
+  pointer-events: none;
+}
+
+@keyframes net-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes net-blink {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+/* palco abaixo de ~800px: o título "Monte a rede" quebra em duas linhas para não entrar no espaço de cima à esquerda */
+@container (max-width: 799px) {
+  .net .areaZone > span {
+    max-width: calc(14.5 * var(--net-u));
+  }
+}
+
+/* palco estreito: bandeja mais compacta, mas o nome das peças continua visível */
+@container (max-width: 480px) {
+  .net .poolZone {
+    padding: 3px;
+  }
+
+  .net .poolZone > div {
+    gap: 2px;
+  }
+
+  .net .trayPiece {
+    gap: 4px;
+    margin: 2px;
+    padding: 1px 4px;
+  }
+
+  .net .trayPiece img {
+    min-width: 16px;
+    min-height: 14px;
+  }
+
+  .net .trayPiece span {
+    font-size: 10px;
+  }
+
+  .trayGap {
+    margin: 2px;
+  }
+}
+
+/* ---------- área de interação ---------- */
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.blockTitle {
+  color: var(--yellow);
+  font-size: 11px;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.6);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.empty {
+  color: var(--text-dim);
+  font-size: 15px;
+}
+
+.linkList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+}
+
+.linkItem {
+  --edge: var(--panel-border);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  margin: 3px;
+  padding: 6px 8px;
+  border: 0;
+  background: var(--space-800);
+  color: var(--text);
+  cursor: pointer;
+  touch-action: manipulation;
+  box-shadow:
+    0 -3px 0 0 var(--edge),
+    0 3px 0 0 var(--edge),
+    -3px 0 0 0 var(--edge),
+    3px 0 0 0 var(--edge);
+  transition: transform 120ms steps(2);
+}
+
+.linkItem:hover:not(:disabled),
+.linkItem:focus-visible {
+  --edge: var(--cyan);
+  transform: translateY(-2px);
+}
+
+.linkItem:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 5px;
+}
+
+.linkItem:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.linkFault {
+  --edge: var(--red);
+  background: #2a0d14;
+}
+
+.linkSprite {
+  width: auto;
+  height: 26px;
+  image-rendering: pixelated;
+}
+
+.linkCable {
+  width: 16px;
+  height: 4px;
+  background: #6a5cc4;
+}
+
+.linkWireless {
+  background: repeating-linear-gradient(90deg, #8fe3ff 0 4px, transparent 4px 7px);
+}
+
+.linkRemove {
+  width: 16px;
+  height: auto;
+  margin-left: 2px;
+}
+
+.successTag {
+  align-self: flex-start;
+}
+
+/* cabe no painel lateral: fonte menor, quebra de linha e respiro em vez de encostar na borda */
+.block .successTag {
+  max-width: calc(100% - 6px);
+  margin: 3px 3px 8px;
+  font-size: 12px;
+  white-space: normal;
+}
+
+.route {
+  justify-content: flex-start;
+}

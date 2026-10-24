@@ -1,0 +1,53 @@
+.badge {
+  --badge-color: var(--text-dim);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 6px;
+  background: rgba(7, 7, 22, 0.72);
+  color: var(--badge-color);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--badge-color) 55%, transparent);
+}
+
+.iconOnly {
+  padding: 3px;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sprite {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.label {
+  padding-top: 0;
+}
+
+.locked {
+  --badge-color: #a49fc4;
+}
+
+.available {
+  --badge-color: var(--cyan);
+}
+
+.in_progress {
+  --badge-color: var(--orange);
+}
+
+.completed {
+  --badge-color: var(--green);
+}

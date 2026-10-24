@@ -1,0 +1,296 @@
+.node {
+  --node-scale: 1;
+  --art: calc(var(--node-size) * var(--node-scale));
+  --glow: rgba(58, 214, 255, 0.3);
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  max-width: max(180px, calc(var(--art) + 48px));
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: center;
+  text-decoration: none;
+}
+
+.node:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 6px;
+}
+
+.art {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--art);
+  height: var(--art);
+  transition: transform 180ms steps(3);
+}
+
+.spriteWrap {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  animation: float 4.4s ease-in-out infinite;
+  animation-delay: var(--node-delay);
+}
+
+.galaxy .spriteWrap {
+  animation: spin 60s linear infinite;
+}
+
+.sprite {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px var(--glow));
+  transition: filter 180ms;
+}
+
+.glow {
+  position: absolute;
+  inset: 10%;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, var(--glow), transparent 70%);
+  opacity: 0.55;
+  transition:
+    opacity 180ms,
+    transform 180ms;
+}
+
+.orbit {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 150%;
+  height: 50%;
+  border: 2px dashed rgba(185, 179, 217, 0.32);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) rotate(-14deg);
+  pointer-events: none;
+}
+
+.caption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  margin: var(--px);
+  padding: 8px 12px 10px;
+  background: rgba(7, 7, 22, 0.74);
+  box-shadow: var(--pixel-border);
+  transition: box-shadow 120ms;
+}
+
+.eyebrow {
+  color: var(--yellow);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.name {
+  color: var(--text);
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.15;
+  text-wrap: balance;
+  transition: color 120ms;
+}
+
+.galaxy .caption {
+  position: relative;
+  z-index: 1;
+  margin-top: calc(var(--art) * -0.14);
+}
+
+.galaxy .name {
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.footer {
+  display: block;
+  width: min(100%, max(140px, var(--art)));
+}
+
+.interactive {
+  cursor: pointer;
+}
+
+.interactive:hover .art,
+.interactive:focus-visible .art {
+  transform: scale(1.08);
+}
+
+.interactive:hover .glow,
+.interactive:focus-visible .glow {
+  opacity: 1;
+  transform: scale(1.3);
+}
+
+.interactive:hover .sprite,
+.interactive:focus-visible .sprite {
+  filter: drop-shadow(0 0 16px rgba(58, 214, 255, 0.7)) brightness(1.08);
+}
+
+.interactive:hover .caption,
+.interactive:focus-visible .caption {
+  box-shadow: var(--pixel-border-cyan);
+}
+
+.interactive:hover .name,
+.interactive:focus-visible .name {
+  color: var(--yellow);
+}
+
+.interactive:active .art {
+  transform: scale(1.02);
+}
+
+.locked .spriteWrap {
+  animation: none;
+}
+
+.locked .sprite {
+  filter: grayscale(1) brightness(0.5) contrast(0.9);
+}
+
+.locked .glow,
+.locked .orbit {
+  opacity: 0.15;
+}
+
+.lock {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  top: 50%;
+  width: 24%;
+  min-width: 22px;
+  height: auto;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.6));
+}
+
+.locked .name {
+  color: var(--text-dim);
+}
+
+.locked.interactive {
+  cursor: help;
+}
+
+.locked.interactive:hover .art,
+.locked.interactive:focus-visible .art {
+  transform: none;
+  animation: nope 0.4s linear;
+}
+
+.locked.interactive:hover .sprite,
+.locked.interactive:focus-visible .sprite {
+  filter: grayscale(1) brightness(0.6) contrast(0.9);
+}
+
+.locked.interactive:hover .caption,
+.locked.interactive:focus-visible .caption {
+  box-shadow: var(--pixel-border);
+}
+
+.locked.interactive:hover .name,
+.locked.interactive:focus-visible .name {
+  color: var(--text);
+}
+
+.preview .glow {
+  inset: -2%;
+  background: none;
+  border: 2px dashed rgba(138, 92, 214, 0.65);
+  opacity: 0.8;
+}
+
+.previewTag {
+  position: absolute;
+  z-index: 2;
+  top: 2%;
+  right: -10%;
+  padding: 4px 6px 3px;
+  background: var(--bonzi);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
+  transform: rotate(6deg);
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes nope {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+@media (max-width: 1279px) {
+  .node {
+    --node-scale: 0.86;
+  }
+}
+
+@media (max-width: 1023px) {
+  .node {
+    --node-scale: 0.72;
+  }
+
+  .name {
+    font-size: 17px;
+  }
+
+  .galaxy .name {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 767px) {
+  .node {
+    --node-scale: 0.8;
+  }
+}

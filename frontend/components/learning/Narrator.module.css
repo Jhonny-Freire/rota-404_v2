@@ -1,0 +1,177 @@
+.bonzi {
+  min-width: 0;
+  min-height: 96px;
+}
+
+.text {
+  min-height: 48px;
+  margin: var(--px);
+  padding: 12px 16px;
+  background: #f4f1ff;
+  color: var(--space-900);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--bonzi),
+    0 var(--px) 0 0 var(--bonzi),
+    calc(var(--px) * -1) 0 0 0 var(--bonzi),
+    var(--px) 0 0 0 var(--bonzi);
+}
+
+.text:empty {
+  display: none;
+}
+
+/* ───────── retrato: Bonzi pequeno + fala em texto (a moldura é do cartão do shell) ───────── */
+
+.portrait {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.figure {
+  display: block;
+  flex: none;
+  margin-top: 2px;
+  line-height: 0;
+  transform-origin: 50% 100%;
+  filter: drop-shadow(0 0 8px rgba(138, 92, 214, 0.5));
+}
+
+.figureSprite {
+  height: auto;
+}
+
+.talking .figure {
+  animation: narrator-talk 0.5s steps(2) infinite;
+}
+
+.happy .figure {
+  animation: narrator-hop 0.9s steps(4) 2;
+}
+
+.warning .figure {
+  animation: narrator-shake 0.5s steps(4) 2;
+}
+
+.thinking .figure {
+  animation: narrator-sway 2.6s steps(4) infinite;
+}
+
+.help .figure {
+  animation: narrator-bob 1.4s steps(4) infinite;
+}
+
+.speech {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* nome de quem fala, como nas caixas de diálogo dos jogos */
+.speaker {
+  color: #cbb6ff;
+  font-family: var(--font-display), "Courier New", monospace;
+  font-size: 9px;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.line {
+  min-height: 2.6em;
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+/* o texto inteiro (invisível) reserva o espaço; o digitado fica por cima: nada pula enquanto o Bonzi "escreve" */
+.lineInner {
+  position: relative;
+  display: block;
+}
+
+.ghost {
+  visibility: hidden;
+}
+
+.typed {
+  position: absolute;
+  inset: 0;
+}
+
+/* espera do retrato: três quadradinhos de 4 px (como o .dot do ShellHeader), estáticos */
+.waiting {
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  margin: 0 18px 0 2px;
+  vertical-align: middle;
+  background: var(--text-dim);
+  box-shadow:
+    8px 0 0 0 var(--text-dim),
+    16px 0 0 0 var(--text-dim);
+}
+
+@keyframes narrator-talk {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes narrator-hop {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-8px);
+  }
+  70% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes narrator-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  75% {
+    transform: translateX(3px);
+  }
+}
+
+@keyframes narrator-sway {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+@keyframes narrator-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}

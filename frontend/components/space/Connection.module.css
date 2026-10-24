@@ -1,0 +1,49 @@
+/*
+ * Trilha de pontos "marchando" entre dois nós do mapa.
+ * Desempenho: os pontos ficam num ::before 32 px mais largo que anda por transform (compositor), em vez de animar
+ * background-position (estilo + pintura na thread principal a cada quadro). O brilho de cada ponto é um gradiente
+ * na mesma camada (pintado uma vez), no lugar do filter: drop-shadow, que era refeito a cada quadro.
+ */
+.connection {
+  position: absolute;
+  display: block;
+  height: 16px;
+  overflow: hidden;
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+
+.connection::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -32px;
+  right: 0;
+  background:
+    var(--trail) 0 50% / 32px 16px repeat-x,
+    radial-gradient(10px 8px at 16px 8px, rgba(58, 214, 255, 0.55), rgba(58, 214, 255, 0) 100%) 0 0 / 32px 16px repeat-x;
+  image-rendering: pixelated;
+  animation: march 1.2s linear infinite;
+  will-change: transform;
+}
+
+.locked {
+  opacity: 0.28;
+  filter: grayscale(1);
+}
+
+.locked::before {
+  background: var(--trail) 0 50% / 32px 16px repeat-x;
+  animation: none;
+  will-change: auto;
+}
+
+@keyframes march {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(32px);
+  }
+}

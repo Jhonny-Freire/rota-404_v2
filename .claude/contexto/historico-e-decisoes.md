@@ -697,7 +697,8 @@ novos; quantidade de conquistas no ranking.
   Regra: animação infinita perto da borda não deve crescer para fora (transform conta na área de rolagem).
 
 ## Versão online no Render (24/10/2026)
-Pedido: publicar o Rota no Render (grátis) e, depois, trocar a versão online por esta pasta (`C:otas_fdss`).
+Pedido: publicar o Rota no Render (grátis) e, depois, trocar a versão online por esta pasta (`C:
+otas_fdss`).
 - **No ar:** site https://rota404.onrender.com (estático, CDN, não dorme) + API https://rota404-api.onrender.com
   (serviço web grátis: dorme após 15 min, ~1 min para acordar). Blueprint `rota404` no Render, a partir do GitHub
   `Jhonny-Freire/rota-404_v2` (público, sem `.env`); cada push na `main` republica.
@@ -713,6 +714,8 @@ Pedido: publicar o Rota no Render (grátis) e, depois, trocar a versão online p
   `run.py`). 1 processo também mantém o bloqueio de login (memória) consistente. No Windows continue com `run.py`.
 - **Testado:** typecheck, build estático e normal, 140 testes, gunicorn no WSL (Python 3.12.3, cache 44/44), site
   estático local com API local (cadastro, volta para a página pedida, aula 1.1, ranking, nenhum arquivo faltando).
-- **Pendente:** rodar `supabase/migrations/20261024000000_achievements.sql` no SQL Editor (a tabela `achievements`
-  está vazia no Supabase); monitor (UptimeRobot) nas horas da feira.
+- **Conquistas no Supabase:** as 19 linhas da migration `20261024000000_achievements.sql` (mesmos dados do
+  `seed.json`) foram gravadas pela API REST com a chave do backend (upsert por id); API do Render reiniciada para
+  limpar o cache. Conteúdo novo no Supabase só aparece no Render depois de reiniciar a `rota404-api`.
+- **Pendente:** monitor (UptimeRobot) em `/api/health` nas horas da feira.
 
